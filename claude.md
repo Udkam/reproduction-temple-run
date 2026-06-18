@@ -109,7 +109,7 @@ scripts/      verify-levels.ts —— 对全部关卡跑求解器的自测脚本
 - [x] **阶段 3**：规则引擎 + 6 关数据 + A\* 求解器 + 自测脚本（`npm run verify` 全绿）。
 - [x] **阶段 4**：前端渲染与交互（DOM+CSS 网格、冰滑/沉坑动画、撤销/重开、关卡选择、HUD、过关浮层、键鼠/滑动/方向键输入）。
 - [x] **阶段 5**：后端（Fastify 5 + `node:sqlite`，托管静态 + 关卡目录 / 排行 / **服务端权威校验**）。
-- [ ] **阶段 6**：部署文档（systemd/nginx，已产出）、最终 README/claude.md、收尾 push。
+- [x] **阶段 6**：部署文档（systemd/nginx）、最终 README/claude.md、三层 + 真实端口 + 视觉四类自测、收尾 push。
 
 ### 阶段 4–5 决策记录
 
@@ -155,5 +155,11 @@ scripts/      verify-levels.ts —— 对全部关卡跑求解器的自测脚本
 ### 4.4 真实本地服务器 HTTP 自测（端口 8799，已关闭）
 `node dist-server/index.js` 实跑：✓ `GET /api/health`→`{ok,levels:6}`；✓ `GET /api/levels`（含 par）；✓ `GET /` 返回 index.html；✓ 哈希资产 200；✓ 伪造 `POST /api/scores`→400；✓ SPA 回退→200。
 **端口关闭确认**：自测后用 `Get-NetTCPConnection -LocalPort 8799` 定位 OwningProcess 并 `Stop-Process`，复查 `PORT 8799 CLOSED OK`。（首次用 shell `$!` 误杀了 MSYS 壳 PID 而非 node 真 PID，已改为按端口杀进程。）
+
+### 4.5 真实浏览器视觉自测（Playwright 截图，端口 8801，已关闭）
+用 Playwright（Chromium headless）实跑构建产物并截图菜单 + 全部六关，逐张人眼审查。
+- **抓到并修复一个真实视觉 bug**：箱子渲染成「小点」而非木箱。根因——`.crate` 用了 `padding: 11%`，但 `.piece` 是绝对定位元素，**百分比 padding 是相对「包含块（整块棋盘）」而非自身**解析的，于是 padding≈一整格把 body 压没了。玩家方块没事是因为它用绝对定位的 `inset`（相对 piece 解析）。改为给 `.crate .body` 用 `position:absolute; inset:11%`。
+- 复测：菜单、L1–L6 均渲染正确——木箱有倒角与重量感、压力板/闸门同组配色、深坑内凹可辨、彩色箱与同色目标环清晰、最宽的 L3（12 格）自适应不溢出。
+- 截图脚本通过 `child_process.spawn` 持有 node 真句柄，结束 `child.kill()`；复查 `PORT 8801 CLOSED OK`。Playwright 以 `--no-save` 安装，不进 `package.json`，保持部署依赖精简。
 
 > 已知良性现象：`node:sqlite` 启动有一行 ExperimentalWarning；不影响功能。

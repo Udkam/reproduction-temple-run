@@ -448,18 +448,16 @@ button:disabled {
   pointer-events: none;
 }
 
-.crate {
-  padding: 11%;
-}
+/* Size the body with absolute inset (resolves against the piece). Percentage
+   padding on an absolutely-positioned .piece would resolve against the board. */
 .crate .body {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 11%;
   border-radius: 9px;
   background: var(--c, var(--crate));
   box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.16),
     inset 0 -6px 10px rgba(0, 0, 0, 0.14), inset 0 6px 8px rgba(255, 255, 255, 0.28),
     0 3px 8px var(--shadow);
-  position: relative;
   transition: transform 0.18s ease, opacity 0.18s ease;
 }
 .crate .body::after {
