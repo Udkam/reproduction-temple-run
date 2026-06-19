@@ -10,6 +10,7 @@ import {
   recordClear,
   isUnlocked,
   submitScore,
+  chapterStats,
   type Progress,
 } from './progress.js';
 
@@ -42,6 +43,46 @@ const KEY_DIR: Record<string, Dir> = {
   D: 'right',
 };
 
+// Mechanic codex. Each entry unlocks once its anchor level (the level that first
+// introduces the mechanic) becomes reachable — rule + typical use, never a
+// per-level solution.
+interface CodexEntry {
+  icon: string;
+  name: string;
+  rule: string;
+  use: string;
+  anchor: string;
+}
+const CODEX: CodexEntry[] = [
+  { icon: 'ic-crate', name: '推箱 / 目标点', anchor: 'l1',
+    rule: '把每个箱子推到目标点（○）即过关。只能推、不能拉。',
+    use: '箱子推进死角就再也拉不回——先想好落点，撤销（Z）随时反悔。' },
+  { icon: 'ic-ice', name: '冰面', anchor: 'l5',
+    rule: '箱子推上冰面会一直滑行，直到撞墙或滑出冰面；你穿防滑靴，不受影响。',
+    use: '用墙或目标点当“刹车”，一次推动就锁定一整条轨迹。' },
+  { icon: 'ic-pit', name: '深坑', anchor: 'l8',
+    rule: '你无法踏入深坑（视作墙）；把箱子推进坑会将其填平，坑变成可通行地面。',
+    use: '箱子是稀缺资源：哪些去填坑搭路、哪些去达标，是取舍。' },
+  { icon: 'ic-plate', name: '压力板 / 闸门', anchor: 'l11',
+    rule: '闸门默认关闭挡路；同组压力板被重物（你或箱子）压住时开启，松开即关。',
+    use: '停一个箱子在板上长期顶门，再用别的箱子穿门。' },
+  { icon: 'ic-color', name: '颜色匹配', anchor: 'l14',
+    rule: '彩色箱子必须推到同色目标点；中性目标点接受任意箱子。',
+    use: '狭窄通道里谁去哪个目标点不能乱来——这是指派问题。' },
+  { icon: 'ic-portal', name: '折跃门', anchor: 'l17',
+    rule: '踩上折跃门会瞬移到同色的另一扇；箱子无法进入折跃门。',
+    use: '当你够不到箱子的可推一侧时，借门绕到另一边。' },
+  { icon: 'ic-arrow', name: '单向格', anchor: 'l21',
+    rule: '单向格只能顺着箭头方向进入，逆向进不去；你和箱子都受限。',
+    use: '箭头制造不可逆的单向选择，走错就回不来。' },
+  { icon: 'ic-cracked', name: '脆地', anchor: 'l22',
+    rule: '你一旦离开脆地，它就塌成深坑，只能走一次；箱子压着它不会塌。',
+    use: '通往某处的脆地是一次性的——确认顺序再迈步。' },
+  { icon: 'ic-key', name: '钥匙 / 锁', anchor: 'l23',
+    rule: '走到钥匙上即可拾取，同色的锁随之打开（变成可通行）。',
+    use: '先取钥匙再开锁，规划取钥与推箱的先后。' },
+];
+
 export class App {
   private root: HTMLElement;
   private levels: Level[];
@@ -68,19 +109,35 @@ export class App {
 
   // ---------------- menu ----------------
 
-  private levelCard(lvl: Level, i: number): HTMLElement {
+  private levelCard(lvl: Level, i: number, current: boolean): HTMLElement {
     const unlocked = isUnlocked(this.order, lvl.id, this.progress);
     const done = !!this.progress.completed[lvl.id];
     const best = this.progress.best[lvl.id];
+    const push = this.progress.bestPush[lvl.id];
+    const bestText =
+      best !== undefined
+        ? `最佳 ${best} 步${push !== undefined ? ` · ${push} 推` : ''}`
+        : unlocked
+          ? current
+            ? '从这里继续'
+            : '未通关'
+          : '';
+    const cls = `level-card${unlocked ? '' : ' locked'}${current ? ' current' : ''}`;
     const card = h(
       'div',
-      { class: `level-card${unlocked ? '' : ' locked'}` },
+      { class: cls },
       h('div', { class: 'idx' }, String(i + 1).padStart(2, '0')),
       h('div', { class: 'name wordmark' }, unlocked ? lvl.name : '· · ·'),
       h('div', { class: 'sub' }, unlocked ? lvl.subtitle : 'locked'),
-      h('div', { class: 'best' }, best !== undefined ? `最佳 ${best} 步` : unlocked ? '未通关' : ''),
+      h('div', { class: 'best' }, bestText),
     );
-    if (done) card.append(h('div', { class: 'seal', title: '已通关' }));
+    if (done) {
+      const medals = h('div', { class: 'medals' });
+      if (this.progress.parHit[lvl.id]) medals.append(h('span', { class: 'medal par', title: '达到参考最优' }, '✦'));
+      if (this.progress.clean[lvl.id]) medals.append(h('span', { class: 'medal clean', title: '零撤销通关' }, '⟳'));
+      if (medals.childElementCount) card.append(medals);
+      card.append(h('div', { class: 'seal', title: '已通关' }));
+    }
     if (unlocked) card.onclick = () => this.playLevel(lvl.id);
     return card;
   }
@@ -88,26 +145,44 @@ export class App {
   private showMenu(): void {
     const help = h('button', { class: 'ghost help-link' }, '玩法 / 图例');
     help.onclick = () => this.showHelp();
+    const codex = h('button', { class: 'ghost help-link' }, '机制图鉴');
+    codex.onclick = () => this.showCodex();
+
+    const total = this.levels.length;
+    const cleared = this.levels.filter((l) => this.progress.completed[l.id]).length;
 
     const menu = h(
       'div',
       { class: 'menu' },
       h('h1', {}, '推移'),
       h('div', { class: 'tagline' }, 'Driftbox'),
-      h('p', { class: 'lede' }, '五十一关，九类机制层层叠加。多数关卡没有提示——自己读懂这张棋盘。'),
-      help,
+      h('p', { class: 'lede' }, '六十关，九类机制层层叠加，十一章渐次加难。多数关卡没有提示——自己读懂这张棋盘。'),
+      h('p', { class: 'overall' }, `已通关 ${cleared} / ${total}`),
+      h('div', { class: 'menu-actions' }, help, codex),
     );
 
+    // The recommended level: the first unlocked-but-uncleared level in order.
+    const currentId =
+      this.levels.find((l) => isUnlocked(this.order, l.id, this.progress) && !this.progress.completed[l.id])?.id ?? '';
+
+    const stats = chapterStats(this.order, CHAPTER_OF, this.progress);
     const chapters: string[] = [];
     for (const l of this.levels) {
       const c = CHAPTER_OF[l.id] ?? '';
       if (!chapters.includes(c)) chapters.push(c);
     }
     for (const ch of chapters) {
-      menu.append(h('h2', { class: 'chapter' }, ch));
+      const s = stats[ch];
+      const head = h('div', { class: 'chapter-head' }, h('h2', { class: 'chapter' }, ch));
+      if (s) {
+        head.append(h('span', { class: 'ch-progress' }, `${s.cleared}/${s.total}`));
+        if (s.perfect) head.append(h('span', { class: 'ch-badge perfect', title: '全章达到参考最优' }, '✦ 大师'));
+        else if (s.complete) head.append(h('span', { class: 'ch-badge done', title: '本章全部通关' }, '✓ 通章'));
+      }
+      menu.append(head);
       const grid = h('div', { class: 'level-grid' });
       this.levels.forEach((lvl, i) => {
-        if ((CHAPTER_OF[lvl.id] ?? '') === ch) grid.append(this.levelCard(lvl, i));
+        if ((CHAPTER_OF[lvl.id] ?? '') === ch) grid.append(this.levelCard(lvl, i, lvl.id === currentId));
       });
       menu.append(grid);
     }
@@ -136,15 +211,63 @@ export class App {
         row(sw('ic-key'), '钥匙 / 锁', '拾取钥匙打开同色的锁。'),
       ),
       h('p', { class: 'result' }, 'Z 撤销 · R 重开 · Esc 返回。可无限撤销，没有死亡惩罚。'),
+      h('div', { class: 'actions' },
+        (() => {
+          const c = h('button', {}, '机制图鉴 →');
+          c.onclick = () => {
+            overlay.remove();
+            this.showCodex();
+          };
+          return c;
+        })(),
+        (() => {
+          const b = h('button', { class: 'primary' }, '明白了');
+          b.onclick = () => overlay.remove();
+          return b;
+        })(),
+      ),
+    );
+    const overlay = h('div', { class: 'overlay' }, card);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+    this.root.append(overlay);
+  }
+
+  private showCodex(): void {
+    const list = h('div', { class: 'codex' });
+    for (const e of CODEX) {
+      const unlocked = isUnlocked(this.order, e.anchor, this.progress);
+      const entry = h(
+        'div',
+        { class: `codex-row${unlocked ? '' : ' locked'}` },
+        h('span', { class: `legend-ic ${e.icon}` }),
+        unlocked
+          ? h('div', { class: 'codex-body' },
+              h('b', {}, e.name),
+              h('span', { class: 'codex-rule' }, e.rule),
+              h('span', { class: 'codex-use' }, e.use))
+          : h('div', { class: 'codex-body' },
+              h('b', {}, '未解锁'),
+              h('span', { class: 'codex-rule' }, '在后续章节首次遇到该机制后解锁。')),
+      );
+      list.append(entry);
+    }
+    const card = h(
+      'div',
+      { class: 'card help' },
+      h('h2', { class: 'wordmark' }, '机制图鉴'),
+      h('p', { class: 'result' }, '每种机制在首次遇到后解锁，这里只讲规则与典型用法，不剧透关卡解法。'),
+      list,
       h('div', { class: 'actions' }, (() => {
-        const b = h('button', { class: 'primary' }, '明白了');
+        const b = h('button', { class: 'primary' }, '返回');
         b.onclick = () => overlay.remove();
         return b;
       })()),
     );
     const overlay = h('div', { class: 'overlay' }, card);
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.remove();
+    overlay.addEventListener('click', (ev) => {
+      if (ev.target === overlay) overlay.remove();
     });
     this.root.append(overlay);
   }
@@ -332,18 +455,32 @@ export class App {
   // ---------------- win ----------------
 
   private win(level: Level, game: Game): void {
-    const fresh = recordClear(this.progress, level.id, game.moves);
+    const par = level.par ?? Infinity;
+    const outcome = recordClear(this.progress, level.id, {
+      moves: game.moves,
+      pushes: game.pushes,
+      par,
+      usedUndo: game.usedUndo,
+    });
     void submitScore(level.id, game.moves, game.pushes, game.log);
 
-    const par = level.par ?? Infinity;
-    const beatPar = game.moves <= par;
     const idx = this.order.indexOf(level.id);
     const nextId = this.order[idx + 1];
 
     const badge =
-      beatPar
+      outcome.parHit
         ? h('div', { class: 'badge' }, '达到参考最优 ✦')
         : h('div', { class: 'badge' }, `参考 ${level.par} 步`);
+
+    // Challenge medals: par (≤ par moves) and clean (no undo). Newly earned ones
+    // get a highlight; these never gate progress — just replay value.
+    const medals = h('div', { class: 'win-medals' });
+    medals.append(
+      h('span', { class: `chip${outcome.parHit ? ' on' : ''}${outcome.firstParHit ? ' fresh' : ''}` },
+        `达标 ✦ ${outcome.parHit ? '已达成' : '未达成'}`),
+      h('span', { class: `chip${outcome.clean ? ' on' : ''}${outcome.firstClean ? ' fresh' : ''}` },
+        `零撤销 ⟳ ${outcome.clean ? '已达成' : '本局有撤销'}`),
+    );
 
     const actions = h('div', { class: 'actions' });
     const menuBtn = h('button', {}, '关卡列表');
@@ -382,9 +519,11 @@ export class App {
           h('span', {}, ' 步、'),
           h('b', {}, String(game.pushes)),
           h('span', {}, ' 次推动完成。'),
-          ...(fresh ? [h('br'), h('span', {}, '刷新了你的最佳记录。')] : []),
+          ...(outcome.fresh ? [h('br'), h('span', {}, '刷新了你的最佳记录。')] : []),
+          ...(outcome.newPush && !outcome.fresh ? [h('br'), h('span', {}, '刷新了最少推动数。')] : []),
         ],
       ),
+      medals,
       actions,
     );
     const overlay = h('div', { class: 'overlay' }, card);

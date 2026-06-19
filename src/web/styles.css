@@ -946,6 +946,155 @@ button:disabled {
   justify-content: center;
 }
 
+/* ---------- linkage: mastery, medals, codex ---------- */
+.menu-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: -0.4rem 0 1.6rem;
+}
+.menu .overall {
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  margin: -1.8rem auto 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.chapter-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  margin: 2rem 0 0.9rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--floor-line);
+}
+.chapter-head:first-of-type {
+  margin-top: 0.6rem;
+}
+.chapter-head .chapter {
+  margin: 0;
+  padding: 0;
+  border: none;
+  flex: 1;
+}
+.ch-progress {
+  color: var(--faint);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+.ch-badge {
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.ch-badge.done {
+  background: rgba(47, 93, 87, 0.14);
+  color: var(--player);
+}
+.ch-badge.perfect {
+  background: rgba(176, 103, 75, 0.16);
+  color: var(--accent-deep);
+}
+
+.level-card.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 6px 18px var(--shadow);
+}
+.level-card.current .best {
+  color: var(--accent-deep);
+}
+.level-card .medals {
+  position: absolute;
+  bottom: 0.7rem;
+  right: 0.9rem;
+  display: flex;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.level-card .medal.par {
+  color: var(--accent);
+}
+.level-card .medal.clean {
+  color: var(--player);
+}
+
+.win-medals {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 0 1.3rem;
+}
+.win-medals .chip {
+  font-size: 0.76rem;
+  letter-spacing: 0.03em;
+  padding: 0.25em 0.7em;
+  border-radius: 999px;
+  background: var(--floor);
+  color: var(--faint);
+  box-shadow: inset 0 0 0 1px var(--floor-line);
+}
+.win-medals .chip.on {
+  background: rgba(47, 93, 87, 0.14);
+  color: var(--player);
+  box-shadow: none;
+}
+.win-medals .chip.fresh {
+  animation: chip-pop 0.5s ease;
+}
+@keyframes chip-pop {
+  0% {
+    transform: scale(0.8);
+    background: rgba(176, 103, 75, 0.3);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+}
+
+.codex {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin: 1.1rem 0 0.4rem;
+  max-height: 56vh;
+  overflow-y: auto;
+}
+.codex-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+.codex-row.locked {
+  opacity: 0.5;
+  filter: saturate(0.3);
+}
+.codex-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.codex-body b {
+  font-size: 0.95rem;
+}
+.codex-rule {
+  color: var(--ink);
+  opacity: 0.82;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+.codex-use {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

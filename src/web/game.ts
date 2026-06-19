@@ -10,6 +10,7 @@ export class Game {
   state: GameState;
   solved: boolean;
   private undoStack: GameState[] = [];
+  private undos = 0; // count of undo presses this run (for the "clean run" challenge)
   /** Effective move directions taken (kept in sync with undo). For server replay. */
   readonly log: Dir[] = [];
 
@@ -36,6 +37,7 @@ export class Game {
     if (!prev) return false;
     this.state = prev;
     this.log.pop();
+    this.undos++;
     this.solved = false;
     return true;
   }
@@ -43,12 +45,17 @@ export class Game {
   restart(): void {
     this.undoStack = [];
     this.log.length = 0;
+    this.undos = 0;
     this.state = initialState(this.level);
     this.solved = false;
   }
 
   get canUndo(): boolean {
     return this.undoStack.length > 0;
+  }
+  /** True if any undo was used since the last restart — for the clean-run medal. */
+  get usedUndo(): boolean {
+    return this.undos > 0;
   }
   get moves(): number {
     return this.state.moves;
