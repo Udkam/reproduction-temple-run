@@ -8,6 +8,7 @@
     "dev": "vite",
     "dev:server": "tsx watch server/index.ts",
     "verify": "tsx scripts/verify-levels.ts",
+    "gen": "tsx scripts/gen.ts",
     "smoke:ui": "tsx scripts/smoke-ui.ts",
     "smoke:api": "tsx scripts/smoke-api.ts",
     "typecheck": "tsc --noEmit",

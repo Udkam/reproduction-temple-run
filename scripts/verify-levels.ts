@@ -18,7 +18,21 @@ const maxStates = Number(process.env.VERIFY_MAX ?? 2_000_000);
 
 for (const level of LEVELS) {
   const start = Date.now();
-  const res = solve(level, { maxStates });
+  // Generated levels carry a pre-verified optimal solution — replay it instead of
+  // re-running the (potentially slow) solver.
+  const res = level.solution
+    ? (() => {
+        const chk = replay(level, level.solution!);
+        return {
+          solvable: chk.solved,
+          moves: chk.state.moves,
+          pushes: chk.state.pushes,
+          solution: level.solution!,
+          explored: 0,
+          truncated: false,
+        };
+      })()
+    : solve(level, { maxStates });
   const ms = Date.now() - start;
 
   const trivial = isSolved(level, initialState(level));

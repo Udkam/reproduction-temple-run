@@ -69,6 +69,8 @@ export interface Level {
   portalPartner: number[];
   /** Optimal push count, filled in by the solver / cached. */
   par?: number;
+  /** A pre-verified solution (generated levels carry one so tests need not re-solve). */
+  solution?: Dir[];
 }
 
 /** Mutable game state. Kept deliberately small so undo snapshots are cheap. */

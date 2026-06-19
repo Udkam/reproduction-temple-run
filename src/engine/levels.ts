@@ -11,13 +11,15 @@
 // to read off the board.
 
 import type { LevelDef } from './level.js';
+import type { Dir } from './types.js';
 import { parseLevel } from './level.js';
+import { GENERATED } from './generated.js';
 
 interface Chaptered extends LevelDef {
   chapter: string;
 }
 
-export const LEVEL_DEFS: Chaptered[] = [
+const HAND_DEFS: Chaptered[] = [
   // ───────────── Chapter I · 基础 Foundations ─────────────
   {
     id: 'l1',
@@ -423,6 +425,21 @@ export const LEVEL_DEFS: Chaptered[] = [
     ],
   },
 ];
+
+// Generated classic levels (reverse-pull, solver-optimal par + verified solution).
+// Keep two distinct puzzles per shape (variants a/b) for variety without fatigue.
+const GEN_DEFS: Chaptered[] = GENERATED.filter((g) => /[ab]$/.test(g.id)).map((g) => ({
+  id: g.id,
+  name: g.name,
+  subtitle: g.subtitle,
+  chapter: g.chapter,
+  par: g.par,
+  intro: '',
+  map: g.map,
+  solution: g.solution as Dir[],
+}));
+
+export const LEVEL_DEFS: Chaptered[] = [...HAND_DEFS, ...GEN_DEFS];
 
 export const LEVELS = LEVEL_DEFS.map(parseLevel);
 export const CHAPTER_OF: Record<string, string> = Object.fromEntries(

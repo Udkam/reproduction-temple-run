@@ -47,7 +47,7 @@ console.log('─'.repeat(60));
 
 for (let i = 0; i < LEVELS.length; i++) {
   const level = LEVELS[i]!;
-  const sol = solve(level);
+  const sol = level.solution ? { solvable: true, solution: level.solution } : solve(level);
   if (!sol.solvable) {
     console.log(`✗  ${level.id}  no solution to drive`);
     failures++;

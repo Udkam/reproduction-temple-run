@@ -35,6 +35,8 @@ export interface LevelDef {
   /** Override gate thresholds, e.g. { '1': 1 } to make group 1 an OR gate. */
   gateThreshold?: Record<string, number>;
   par?: number;
+  /** A pre-verified solution (used by generated levels). */
+  solution?: Dir[];
 }
 
 const CRATE_COLOR: Record<string, Color> = { R: 'rose', G: 'sage', B: 'slate', Y: 'amber' };
@@ -159,6 +161,7 @@ export function parseLevel(def: LevelDef): Level {
     gateThreshold,
     portalPartner,
     par: def.par,
+    solution: def.solution,
   };
 }
 
