@@ -550,11 +550,13 @@ button:disabled {
 .cell.plate,
 .cell.gate {
   background: var(--floor);
-  box-shadow: inset 0 0 0 1px var(--floor-line);
+  box-shadow: inset 0 0 0 1px var(--floor-line),
+    inset 0 4px 7px rgba(255, 255, 255, 0.22), inset 0 -3px 6px rgba(0, 0, 0, 0.045);
 }
 .cell.wall {
-  background: var(--wall);
-  box-shadow: inset 0 2px 0 var(--wall-edge), inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(180deg, var(--wall-edge), var(--wall) 70%);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--wall-edge) 65%, white),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.18);
 }
 .cell.ice {
   background: linear-gradient(135deg, var(--ice-sheen), var(--ice));
@@ -855,28 +857,37 @@ button:disabled {
    padding on an absolutely-positioned .piece would resolve against the board. */
 .crate .body {
   position: absolute;
-  inset: 11%;
-  border-radius: 9px;
-  background: var(--c, var(--crate));
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.16),
-    inset 0 -6px 10px rgba(0, 0, 0, 0.14), inset 0 6px 8px rgba(255, 255, 255, 0.28),
-    0 3px 8px var(--shadow);
+  inset: 10%;
+  border-radius: 8px;
+  background: linear-gradient(158deg,
+      color-mix(in srgb, var(--c, var(--crate)) 88%, white),
+      var(--c, var(--crate)) 52%,
+      color-mix(in srgb, var(--c, var(--crate)) 82%, #241a12));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c, var(--crate)) 52%, #1a120c),
+    inset 0 -5px 9px rgba(0, 0, 0, 0.2), inset 0 5px 7px rgba(255, 255, 255, 0.24),
+    0 4px 9px var(--shadow);
   transition: transform 0.18s ease, opacity 0.18s ease;
 }
-.crate .body::after {
-  content: '';
-  position: absolute;
-  inset: 22%;
-  border-radius: 4px;
-  border: 2px solid rgba(0, 0, 0, 0.12);
-}
-/* clean wooden box: a soft top sheen only (no cross-brace) */
+/* plank seams + a top sheen — reads as a slatted wooden box */
 .crate .body::before {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 9px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 32%);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 26%),
+    repeating-linear-gradient(180deg, transparent 0 31%,
+      color-mix(in srgb, var(--c, var(--crate)) 58%, #1a120c) 31% 32.5%, transparent 32.5% 62%);
+  opacity: 0.85;
+}
+/* inner slat frame */
+.crate .body::after {
+  content: '';
+  position: absolute;
+  inset: 15%;
+  border-radius: 4px;
+  border: 2px solid color-mix(in srgb, var(--c, var(--crate)) 55%, #1a120c);
+  opacity: 0.45;
 }
 .crate.color-rose {
   --c: var(--rose);
@@ -941,7 +952,7 @@ button:disabled {
    "looks where it goes". */
 .player .body {
   position: absolute;
-  inset: 8%;
+  inset: 6%;
   transform: translate(var(--lx, 0), var(--ly, 0));
   transition: transform 0.14s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -956,15 +967,15 @@ button:disabled {
   stroke: color-mix(in srgb, var(--player) 55%, black);
   stroke-width: 1.4;
 }
-.player .av-belt { fill: color-mix(in srgb, var(--player) 62%, black); opacity: 0.5; }
 .player .av-head {
-  fill: color-mix(in srgb, var(--player) 80%, white);
+  fill: color-mix(in srgb, var(--player) 82%, white);
   stroke: color-mix(in srgb, var(--player) 55%, black);
   stroke-width: 1.4;
 }
 .player .av-foot { fill: color-mix(in srgb, var(--player) 55%, black); }
-.player .av-visor { fill: #1c2b29; }
-.player .av-eye { fill: #d8efe9; }
+.player .av-eye { fill: #1c2b29; }
+.player .av-glint { fill: #f4faf8; }
+.player .av-cheek { fill: var(--accent); opacity: 0.4; }
 .player .av-antenna { fill: color-mix(in srgb, var(--player) 60%, black); }
 .player .av-tip { fill: var(--accent); }
 .player .av-shadow { fill: var(--shadow); opacity: 0.5; }
