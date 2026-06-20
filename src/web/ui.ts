@@ -4,6 +4,8 @@ import type { Dir, Level, MoveToken } from '../engine/types.js';
 import { CHAPTER_OF } from '../engine/levels.js';
 import { Game, DiptychGame } from './game.js';
 import { BoardRenderer } from './render.js';
+import { IsoRenderer } from './iso.js';
+import { makeDemoLevel } from './demo.js';
 import {
   loadProgress,
   recordClear,
@@ -233,6 +235,9 @@ export class App {
       });
       menu.append(grid);
     }
+    const dev = h('button', { class: 'ghost dev-link' }, '▦ 立体演示 (dev)');
+    dev.onclick = () => this.playLevel('demo');
+    menu.append(dev);
     this.swap(menu);
   }
 
@@ -272,14 +277,17 @@ export class App {
   // ---------------- game ----------------
 
   private playLevel(id: string, resumeLog?: MoveToken[]): void {
-    const level = this.levels.find((l) => l.id === id)!;
+    const level = this.levels.find((l) => l.id === id) ?? (id === 'demo' ? makeDemoLevel() : undefined);
+    if (!level) return;
     if (level.twin) {
       this.playDiptych(level, resumeLog);
       return;
     }
     const game = new Game(level);
     if (resumeLog && resumeLog.length) game.loadTokens(resumeLog);
-    const saveVisit = () => setLastPlayed(this.progress, { id, at: Date.now(), log: [...game.log], won: game.solved });
+    const saveVisit = () => {
+      if (id !== 'demo') setLastPlayed(this.progress, { id, at: Date.now(), log: [...game.log], won: game.solved });
+    };
     saveVisit();
 
     const title = h(
@@ -307,8 +315,10 @@ export class App {
       h('span', { class: 'stat' }, bestVal !== undefined ? `最佳 ${bestVal}` : ''),
     );
 
-    const boardWrap = h('div', { class: 'board-wrap' });
-    const renderer = new BoardRenderer(boardWrap);
+    const boardWrap = h('div', { class: `board-wrap${level.is3D ? ' iso' : ''}` });
+    const renderer: BoardRenderer | IsoRenderer = level.is3D
+      ? new IsoRenderer(boardWrap)
+      : new BoardRenderer(boardWrap);
     renderer.mount(level);
     renderer.update(game.state);
 
@@ -580,7 +590,7 @@ export class App {
     void submitScore(level.id, game.moves, game.pushes, game.log);
 
     const idx = this.order.indexOf(level.id);
-    const nextId = this.order[idx + 1];
+    const nextId = idx >= 0 ? this.order[idx + 1] : undefined;
 
     const badge =
       outcome.parHit

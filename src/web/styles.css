@@ -1002,6 +1002,217 @@ button:disabled {
   100% { transform: translate(var(--lx, 0), var(--ly, 0)) scale(1); }
 }
 
+.dev-link {
+  display: block;
+  margin: 2.4rem auto 0;
+  opacity: 0.45;
+  font-size: 0.78rem;
+}
+.dev-link:hover { opacity: 0.9; }
+
+/* the iso board needs room; don't clip its raised tiles */
+.board-wrap.iso {
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+  padding: 4px;
+}
+
+/* ---------- isometric (2.5D) renderer ---------- */
+.iso-board {
+  position: relative;
+  margin: 0 auto;
+  transform-origin: top left;
+}
+.iso-scene {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--bw);
+  height: var(--bh);
+  transform: scale(var(--iso-scale, 1));
+  transform-origin: top left;
+}
+.iso-cell,
+.iso-piece,
+.iso-ghost {
+  position: absolute;
+  left: calc(var(--ox) + var(--sx));
+  top: calc(var(--oy) + var(--sy));
+  width: 0;
+  height: 0;
+}
+.iso-cell .iso-face {
+  position: absolute;
+}
+.iso-face.top {
+  left: -32px;
+  top: -16px;
+  width: 64px;
+  height: 32px;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  background: var(--iso-top, var(--floor));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.iso-face.left {
+  left: -32px;
+  top: 0;
+  width: 32px;
+  height: var(--ext);
+  transform-origin: top left;
+  transform: skewY(26.565deg);
+  background: var(--iso-left, color-mix(in srgb, var(--floor) 64%, #2a2018));
+}
+.iso-face.right {
+  left: 0;
+  top: 16px;
+  width: 32px;
+  height: var(--ext);
+  transform-origin: top left;
+  transform: skewY(-26.565deg);
+  background: var(--iso-right, color-mix(in srgb, var(--floor) 80%, #2a2018));
+}
+
+/* tile terrains */
+.iso-cell.t-floor { --iso-top: var(--floor); }
+.iso-cell.t-wall {
+  --iso-top: color-mix(in srgb, var(--wall-edge) 80%, white);
+  --iso-left: color-mix(in srgb, var(--wall) 80%, black);
+  --iso-right: var(--wall);
+}
+.iso-cell.t-ice {
+  --iso-top: var(--ice-sheen);
+  --iso-left: color-mix(in srgb, var(--ice) 70%, #2a3540);
+  --iso-right: var(--ice);
+}
+.iso-cell.t-pit .iso-face.top {
+  background: radial-gradient(120% 120% at 50% 40%, #3a352c, var(--pit));
+}
+.iso-cell.t-pit.filled .iso-face.top {
+  background: repeating-linear-gradient(45deg,
+      color-mix(in srgb, var(--floor) 80%, var(--crate)) 0 6px,
+      color-mix(in srgb, var(--floor) 70%, var(--crate)) 6px 12px);
+}
+/* goal ring on the top face */
+.iso-cell.t-goal .iso-face.top::after {
+  content: '';
+  position: absolute;
+  inset: 28%;
+  border-radius: 50%;
+  border: 2px solid var(--goal-color, rgba(50, 46, 40, 0.4));
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.iso-cell.t-goal.satisfied .iso-face.top::after {
+  background: color-mix(in srgb, var(--goal-color, #5b6b56) 30%, transparent);
+}
+.iso-cell.t-goal.iso-c-rose { --goal-color: var(--rose); }
+.iso-cell.t-goal.iso-c-sage { --goal-color: var(--sage); }
+.iso-cell.t-goal.iso-c-slate { --goal-color: var(--slate); }
+.iso-cell.t-goal.iso-c-amber { --goal-color: var(--amber); }
+/* portal rings on the top face */
+.iso-cell.t-portal .iso-face.top::after {
+  content: '';
+  position: absolute;
+  inset: 30%;
+  border-radius: 50%;
+  border: 2px solid var(--portal-color, #6f5b86);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--portal-color, #6f5b86) 22%, transparent);
+  animation: portalPulse 2.6s ease-in-out infinite;
+}
+.iso-cell.t-portal.p-o { --portal-color: #6f5b86; }
+.iso-cell.t-portal.p-p { --portal-color: #4f8a86; }
+.iso-cell.t-portal.p-q { --portal-color: #b07a3e; }
+.iso-cell.t-cracked .iso-face.top {
+  background: var(--floor);
+  background-image: repeating-linear-gradient(60deg, transparent 0 7px, rgba(0, 0, 0, 0.12) 7px 8px);
+}
+.iso-cell.t-cracked.collapsed .iso-face.top {
+  background: radial-gradient(120% 120% at 50% 40%, #3a352c, var(--pit));
+}
+.iso-cell.t-mirror .iso-face.top {
+  background: linear-gradient(120deg, color-mix(in srgb, var(--slate) 26%, var(--floor)), var(--floor));
+}
+
+/* pieces */
+.iso-piece {
+  transition: left 0.16s cubic-bezier(0.22, 0.61, 0.36, 1), top 0.16s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.iso-piece.player .iso-av {
+  position: absolute;
+  left: -26px;
+  top: -64px;
+  width: 52px;
+  height: 80px;
+  overflow: visible;
+  filter: drop-shadow(0 4px 3px var(--shadow));
+}
+.player .av-sh { fill: var(--shadow); opacity: 0.5; }
+.player .av-body { fill: var(--player); stroke: color-mix(in srgb, var(--player) 55%, black); stroke-width: 1.4; }
+.player .av-head { fill: color-mix(in srgb, var(--player) 82%, white); stroke: color-mix(in srgb, var(--player) 55%, black); stroke-width: 1.4; }
+.player .av-foot { fill: color-mix(in srgb, var(--player) 55%, black); }
+.player .av-eye { fill: #1c2b29; }
+.player .av-glint { fill: #f4faf8; }
+.player .av-cheek { fill: var(--accent); opacity: 0.4; }
+.player .av-ant { fill: color-mix(in srgb, var(--player) 60%, black); }
+.player .av-tip { fill: var(--accent); }
+.iso-piece.player .av-face { transition: transform 0.12s ease, opacity 0.12s ease; transform-box: fill-box; transform-origin: center; }
+.iso-piece.player.face-left .av-face { transform: translateX(-3px); }
+.iso-piece.player.face-right .av-face { transform: translateX(3px); }
+.iso-piece.player.face-up .av-face { opacity: 0; }
+.iso-piece.player.stepping .iso-av { animation: iso-step 0.16s ease; }
+.iso-piece.player.pushing .iso-av { animation: iso-step 0.18s ease; }
+@keyframes iso-step { 0% { transform: translateY(-2px) scaleY(0.94); } 100% {} }
+.iso-piece.player.warp .iso-av { animation: warp 0.32s ease; }
+
+/* crate as a small iso cube */
+.iso-piece.crate { --cw: 44px; --ch: 22px; --cc: var(--crate); }
+.iso-piece.crate.iso-c-rose { --cc: var(--rose); }
+.iso-piece.crate.iso-c-sage { --cc: var(--sage); }
+.iso-piece.crate.iso-c-slate { --cc: var(--slate); }
+.iso-piece.crate.iso-c-amber { --cc: var(--amber); }
+.crate .cr-face { position: absolute; }
+.crate .cr-face.top {
+  left: -22px; top: calc(-11px - var(--ch)); width: 44px; height: 22px;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  background: color-mix(in srgb, var(--cc) 90%, white);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cc) 55%, black);
+}
+.crate .cr-face.left {
+  left: -22px; top: calc(0px - var(--ch)); width: 22px; height: var(--ch);
+  transform-origin: top left; transform: skewY(26.565deg);
+  background: color-mix(in srgb, var(--cc) 62%, black);
+}
+.crate .cr-face.right {
+  left: 0; top: calc(11px - var(--ch)); width: 22px; height: var(--ch);
+  transform-origin: top left; transform: skewY(-26.565deg);
+  background: color-mix(in srgb, var(--cc) 80%, black);
+}
+.iso-piece.crate.seated .cr-face.top { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cc) 55%, black), 0 0 8px 2px color-mix(in srgb, var(--seat-c, #5b8c5e) 55%, transparent); }
+.iso-piece.crate.sinking { transform: scale(0.4); opacity: 0; transition: transform 0.26s ease, opacity 0.26s ease; }
+
+/* occlusion hint: outline silhouette when the player is hidden */
+.iso-ghost {
+  display: none;
+  pointer-events: none;
+}
+.iso-ghost.show {
+  display: block;
+}
+.iso-ghost.show::after {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: -50px;
+  width: 32px;
+  height: 46px;
+  border-radius: 50% 50% 45% 45%;
+  border: 2px dashed var(--accent);
+  opacity: 0.85;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+/* when occluded, the player shows through the geometry, half-faded */
+.iso-piece.player.occluded .iso-av { opacity: 0.5; }
+
 /* ---------- controls ---------- */
 
 .controls {

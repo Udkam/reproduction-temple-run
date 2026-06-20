@@ -91,6 +91,9 @@ export interface Level {
   twin?: Level;
   /** When true, the twin receives mirrored (left/right-flipped) input. */
   mirrorTwin?: boolean;
+  /** True if any cell has height > 0 — the UI renders these with the isometric
+   *  renderer; flat levels keep the classic 2D grid. */
+  is3D?: boolean;
 }
 
 /** Mutable game state. Kept deliberately small so undo snapshots are cheap. */

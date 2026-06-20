@@ -182,6 +182,7 @@ export function parseLevel(def: LevelDef): Level {
       ? parseLevel({ id: `${def.id}#twin`, name: def.name, subtitle: def.subtitle, intro: '', map: def.twin })
       : undefined,
     mirrorTwin: def.mirrorTwin,
+    is3D: cells.some((c) => c.height > 0),
   };
 }
 
