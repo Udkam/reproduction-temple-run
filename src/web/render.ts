@@ -151,7 +151,8 @@ export class BoardRenderer {
   /** Render a state. Pass `effect` to animate a single move; omit for instant. */
   update(state: GameState, effect?: MoveEffect): void {
     const instant = !effect;
-    const stepDur = instant ? 0 : STEP_MS;
+    // A board tilt slides many pieces several cells at once — glide it a touch slower.
+    const stepDur = instant ? 0 : effect.tilted ? 240 : STEP_MS;
 
     // Face the move direction (only on a real move; not on warp/undo snap-backs).
     if (effect && !effect.teleported) {

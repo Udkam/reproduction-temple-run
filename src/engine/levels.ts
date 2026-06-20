@@ -387,14 +387,14 @@ const CRUCIBLE_DEFS: Chaptered[] = [
 
 // ───────────── Chapter · 悖论 Paradox ─────────────
 // Levels that overturn a core rule. Each new "heresy" mechanic gets one intro
-// level; depth comes later from combining them. The A* solver doesn't model
-// these, so every level carries a hand-authored, replay-verified solution.
+// level; depth comes later from combining them. Levels carry a verified solution
+// so tests replay rather than re-solve.
 const PARADOX_DEFS: Chaptered[] = [
   {
     // Pull / grab: the crate sits in a top niche — its only free side is below
     // and the push side is a wall, so it can ONLY be pulled out.
     id: 'pull1', name: '回拉', subtitle: 'Grab', chapter: '悖论', par: 4,
-    intro: '按住 Shift + 方向（或先点「抓」）可以拉动身后的箱子——有些箱子贴着墙，只能拉、不能推。',
+    intro: '按住 Shift + 方向，可以拉动身后的箱子——有些箱子贴着墙，只能拉、不能推。',
     map: [
       '#######',
       '###$###',
@@ -404,6 +404,21 @@ const PARADOX_DEFS: Chaptered[] = [
       '#######',
     ],
     solution: ['up', 'up', '@down', '@down'] as MoveToken[],
+  },
+  {
+    // Gravity / tilt: no walking — each move tilts the whole board and every
+    // crate (and you) slides to the far wall. A spiral tilt-maze.
+    id: 'grav1', name: '倾覆', subtitle: 'Tilt', chapter: '悖论', par: 9, gravity: true,
+    intro: '倾斜关：没有行走——每按一个方向，整个盘面朝那边倾倒，所有箱子和你一起滑到底、撞墙才停。',
+    map: [
+      '#######',
+      '#    ##',
+      '#    .#',
+      '# @$ ##',
+      '#   # #',
+      '#######',
+    ],
+    solution: ['right', 'down', 'left', 'up', 'right', 'down', 'left', 'up', 'right'] as MoveToken[],
   },
 ];
 

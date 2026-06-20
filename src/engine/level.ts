@@ -37,6 +37,8 @@ export interface LevelDef {
   par?: number;
   /** A pre-verified solution (used by generated levels; tokens so pull levels fit). */
   solution?: MoveToken[];
+  /** Gravity level: every move tilts the whole board (see Level.gravity). */
+  gravity?: boolean;
 }
 
 const CRATE_COLOR: Record<string, Color> = { R: 'rose', G: 'sage', B: 'slate', Y: 'amber' };
@@ -162,6 +164,7 @@ export function parseLevel(def: LevelDef): Level {
     portalPartner,
     par: def.par,
     solution: def.solution,
+    gravity: def.gravity,
   };
 }
 

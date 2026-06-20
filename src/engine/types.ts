@@ -78,6 +78,9 @@ export interface Level {
   /** A pre-verified solution (generated levels carry one so tests need not re-solve).
    *  Tokens, so hand-authored pull/grab levels can encode `@dir` moves. */
   solution?: MoveToken[];
+  /** Gravity level: there is no walking — each move tilts the whole board and all
+   *  crates (and the player, as a blocker) slide maximally that way. */
+  gravity?: boolean;
 }
 
 /** Mutable game state. Kept deliberately small so undo snapshots are cheap. */
@@ -117,6 +120,8 @@ export interface MoveEffect {
   /** True when this was a pull/grab: the player backed away dragging the crate
    *  behind it (so the avatar should face opposite its travel direction). */
   pulled?: boolean;
+  /** True when this was a board tilt (gravity level): many pieces slid at once. */
+  tilted?: boolean;
 }
 
 export interface MoveResult {

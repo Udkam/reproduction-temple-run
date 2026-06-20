@@ -407,6 +407,28 @@ button:disabled {
   border-radius: 50% 50% 50% 0;
   border: 3px solid #c9a227;
 }
+/* gravity icon: a crate with a downward tilt arrow */
+.legend-ic.ic-gravity::before {
+  content: '';
+  position: absolute;
+  inset: 22% 30% 40% 30%;
+  border-radius: 3px;
+  background: var(--crate);
+  box-shadow: inset 0 0 0 1.5px var(--crate-edge);
+  transform: rotate(8deg);
+}
+.legend-ic.ic-gravity::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 16%;
+  width: 22%;
+  height: 22%;
+  transform: translateX(-50%) rotate(-45deg);
+  border-right: 2.5px solid var(--accent);
+  border-bottom: 2.5px solid var(--accent);
+}
+
 /* pull/grab icon: a little crate with a leftward drag arrow */
 .legend-ic.ic-pull::before {
   content: '';

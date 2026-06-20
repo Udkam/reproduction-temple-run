@@ -219,10 +219,64 @@ function applyPull(level: Level, state: GameState, dir: Dir, openGates: Set<stri
   return { changed: true, state: next, effect };
 }
 
+/** Gravity tilt: every crate and the player slide maximally in `dir` until
+ *  blocked by a wall, a hole, the board edge, or an already-settled piece (the
+ *  player is a solid blocker). Leading pieces resolve first so they stack. */
+function applyTilt(level: Level, state: GameState, dir: Dir): MoveResult {
+  const { dx, dy } = DIRS[dir];
+  const proj = (x: number, y: number) => x * dx + y * dy;
+  interface Piece { x: number; y: number; player: boolean; id: number }
+  const pieces: Piece[] = state.crates.map((c) => ({ x: c.x, y: c.y, player: false, id: c.id }));
+  pieces.push({ x: state.playerX, y: state.playerY, player: true, id: -1 });
+  // Resolve the leading edge first (largest projection along the tilt).
+  pieces.sort((a, b) => proj(b.x, b.y) - proj(a.x, a.y));
+
+  const occupied = new Set<number>();
+  const settled = new Map<number, { x: number; y: number }>();
+  for (const p of pieces) {
+    let x = p.x;
+    let y = p.y;
+    for (;;) {
+      const nx = x + dx;
+      const ny = y + dy;
+      const cell = cellAt(level, nx, ny);
+      if (!cell || cell.terrain === 'wall') break;
+      if (occupied.has(idx(level, nx, ny))) break;
+      if (isHole(level, state, nx, ny)) break; // gravity levels avoid holes; stop at the edge
+      x = nx;
+      y = ny;
+    }
+    occupied.add(idx(level, x, y));
+    settled.set(p.id, { x, y });
+  }
+
+  let moved = false;
+  const crates = state.crates.map((c) => {
+    const s = settled.get(c.id)!;
+    if (s.x !== c.x || s.y !== c.y) moved = true;
+    return { ...c, x: s.x, y: s.y };
+  });
+  const ps = settled.get(-1)!;
+  if (ps.x !== state.playerX || ps.y !== state.playerY) moved = true;
+  if (!moved) return { changed: false, state };
+
+  const from = { x: state.playerX, y: state.playerY };
+  const next: GameState = {
+    ...state,
+    playerX: ps.x,
+    playerY: ps.y,
+    crates,
+    moves: state.moves + 1,
+  };
+  const effect: MoveEffect = { dir, player: { from, to: { x: ps.x, y: ps.y } }, tilted: true };
+  return { changed: true, state: next, effect };
+}
+
 /** Apply one move. Returns a brand-new immutable state (or the same one if blocked). */
 export function applyMove(level: Level, state: GameState, dir: Dir, pull = false): MoveResult {
   const { dx, dy } = DIRS[dir];
   const openGates = computeOpenGates(level, state);
+  if (level.gravity) return applyTilt(level, state, dir);
   if (pull) return applyPull(level, state, dir, openGates);
   const tx = state.playerX + dx;
   const ty = state.playerY + dy;
