@@ -55,6 +55,8 @@ const PORTAL_IDS = new Set(['o', 'p', 'q']);
 const ARROW_DIR: Record<string, Dir> = { '>': 'right', '<': 'left', A: 'up', V: 'down' };
 const KEY_IDS = new Set(['k', 'j']);
 const LOCK_GROUP: Record<string, string> = { K: 'k', J: 'j' };
+// 3D: ramp uphill direction glyphs (north=up, east=right, south=down, west=left).
+const RAMP_DIR: Record<string, Dir> = { n: 'up', e: 'right', s: 'down', w: 'left' };
 
 function blankCell(): Cell {
   return {
@@ -69,6 +71,7 @@ function blankCell(): Cell {
     key: null,
     lock: null,
     mirror: false,
+    ramp: null,
   };
 }
 
@@ -118,6 +121,12 @@ export function parseLevel(def: LevelDef): Level {
         cell.lock = LOCK_GROUP[ch]!;
       } else if (ch === 'M') {
         cell.mirror = true;
+      } else if (RAMP_DIR[ch]) {
+        cell.ramp = RAMP_DIR[ch]!;
+      } else if (ch === '=') {
+        cell.terrain = 'bridge';
+      } else if (ch === 'T') {
+        cell.terrain = 'lift';
       }
 
       // Object layer (player / crates).

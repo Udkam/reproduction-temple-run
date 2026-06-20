@@ -65,6 +65,58 @@ function locked(state: GameState, cell: Cell): boolean {
   return !!cell.lock && !state.keys.includes(cell.lock);
 }
 
+// ── 3D height traversal ──────────────────────────────────────────────────────
+const LIFT_RISE = 2; // a lift rises this many layers while a piece stands on it
+
+/** A lift is raised while occupied by the player or a crate. Derived from
+ *  positions, so stateKey (which includes them) already captures lift state. */
+function liftRaised(state: GameState, x: number, y: number): boolean {
+  if (state.playerX === x && state.playerY === y) return true;
+  return state.crates.some((c) => c.x === x && c.y === y);
+}
+
+/** Height at a cell's edge facing `edgeDir`. Ramps slope (+1 on their uphill
+ *  edge); lifts read raised when occupied (or when `asSource`, i.e. the moving
+ *  piece is on it). Everything else is its flat height. */
+function edgeHeight(
+  level: Level,
+  state: GameState,
+  x: number,
+  y: number,
+  edgeDir: Dir,
+  asSource: boolean,
+): number {
+  const c = cellAt(level, x, y);
+  if (!c) return Infinity;
+  if (c.ramp) return edgeDir === c.ramp ? c.height + 1 : c.height;
+  if (c.terrain === 'lift') {
+    return (asSource || liftRaised(state, x, y)) ? c.height + LIFT_RISE : c.height;
+  }
+  return c.height;
+}
+
+/** Can a piece move from (ax,ay) to (bx,by) in `dir` height-wise? You may cross
+ *  level or step down, but not climb up — except along a ramp or onto a lift. */
+function canClimb(
+  level: Level,
+  state: GameState,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  dir: Dir,
+): boolean {
+  const A = cellAt(level, ax, ay);
+  const B = cellAt(level, bx, by);
+  if (!A || !B) return false;
+  // ramps are only traversable along their axis
+  if (A.ramp && A.ramp !== dir && A.ramp !== OPPOSITE[dir]) return false;
+  if (B.ramp && B.ramp !== dir && B.ramp !== OPPOSITE[dir]) return false;
+  const exitA = edgeHeight(level, state, ax, ay, dir, true);
+  const entryB = edgeHeight(level, state, bx, by, OPPOSITE[dir], false);
+  return entryB <= exitA;
+}
+
 /** Can the player step onto (x, y)? Crates block; pushing is handled separately. */
 export function playerCanEnter(
   level: Level,
@@ -93,6 +145,7 @@ function crateCanEnter(
 ): boolean {
   const cell = cellAt(level, x, y);
   if (!cell || cell.terrain === 'wall') return false;
+  if (cell.terrain === 'bridge') return false; // bridges bear the player only
   if (cell.portal) return false; // crates can't enter portals (player-only)
   if (cell.gateGroup && !openGates.has(cell.gateGroup)) return false;
   if (locked(state, cell)) return false;
@@ -117,19 +170,19 @@ function resolveCratePush(
   openGates: Set<string>,
 ): PushOutcome {
   const { dx, dy } = DIRS[dir];
-  // A crate may enter (x,y) from height `fromH` if it's not blocked, a one-way
-  // arrow permits `dir`, and it isn't being pushed UP a step (down/flat only).
-  const mayEnter = (x: number, y: number, fromH: number): boolean => {
+  // A crate may move from (fx,fy) to (x,y) if it's not blocked, a one-way arrow
+  // permits `dir`, and the height step is traversable (down/flat, or up a ramp).
+  const mayEnter = (fx: number, fy: number, x: number, y: number): boolean => {
     const cell = cellAt(level, x, y);
     if (!cell) return false;
     if (cell.arrow && cell.arrow !== dir) return false;
-    if (cell.height > fromH) return false;
+    if (!canClimb(level, state, fx, fy, x, y, dir)) return false;
     return crateCanEnter(level, state, x, y, openGates, crate.id);
   };
 
   let nx = crate.x + dx;
   let ny = crate.y + dy;
-  if (!mayEnter(nx, ny, cellAt(level, crate.x, crate.y)!.height)) {
+  if (!mayEnter(crate.x, crate.y, nx, ny)) {
     return { moved: false, sank: false, to: { x: crate.x, y: crate.y } };
   }
 
@@ -145,7 +198,7 @@ function resolveCratePush(
     if (cellAt(level, cx, cy)!.terrain !== 'ice') break; // landed on solid ground -> stop
     const px = cx + dx;
     const py = cy + dy;
-    if (!mayEnter(px, py, cellAt(level, cx, cy)!.height)) break; // blocked -> stop on ice
+    if (!mayEnter(cx, cy, px, py)) break; // blocked -> stop on ice
     nx = px;
     ny = py;
   }
@@ -185,12 +238,13 @@ function applyPull(level: Level, state: GameState, dir: Dir, openGates: Set<stri
   const destCell = cellAt(level, tx, ty);
   if (destCell?.arrow && destCell.arrow !== dir) return { changed: false, state };
   if (destCell?.portal) return { changed: false, state }; // no portal-pull
-  if ((destCell?.height ?? 0) > (cellAt(level, from.x, from.y)?.height ?? 0)) return { changed: false, state };
+  if (!canClimb(level, state, from.x, from.y, tx, ty, dir)) return { changed: false, state };
   if (!playerCanEnter(level, state, tx, ty, openGates)) return { changed: false, state };
 
   // There must be a crate directly behind to drag into the player's old cell.
   const dragged = crateAt(state, bx, by);
   if (!dragged) return { changed: false, state };
+  if (!canClimb(level, state, bx, by, from.x, from.y, dir)) return { changed: false, state };
   const pCell = cellAt(level, from.x, from.y)!;
   if (pCell.arrow && pCell.arrow !== dir) return { changed: false, state };
   if (!crateCanEnter(level, state, from.x, from.y, openGates, dragged.id)) return { changed: false, state };
@@ -330,9 +384,8 @@ export function applyMove(level: Level, state: GameState, dir: Dir, pull = false
     destY = wy;
     teleported = true;
   } else {
-    // Walking: can't climb a step (down or flat only; portals/ramps/lifts ascend).
-    const hereH = cellAt(level, state.playerX, state.playerY)?.height ?? 0;
-    if ((targetCell?.height ?? 0) > hereH) return { changed: false, state };
+    // Walking: can't climb a step (down/flat only) unless via a ramp or lift.
+    if (!canClimb(level, state, state.playerX, state.playerY, tx, ty, dir)) return { changed: false, state };
     if (!playerCanEnter(level, state, tx, ty, openGates)) return { changed: false, state };
   }
 

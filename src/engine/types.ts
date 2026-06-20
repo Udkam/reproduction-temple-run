@@ -25,7 +25,7 @@ export type Color = 'natural' | 'rose' | 'sage' | 'slate' | 'amber';
 
 export const COLORS: Color[] = ['natural', 'rose', 'sage', 'slate', 'amber'];
 
-export type Terrain = 'wall' | 'floor' | 'ice' | 'pit';
+export type Terrain = 'wall' | 'floor' | 'ice' | 'pit' | 'bridge' | 'lift';
 
 export interface Cell {
   terrain: Terrain;
@@ -51,6 +51,10 @@ export interface Cell {
   lock: string | null;
   /** Mirror tile: while the player stands here, left/right input is reversed. */
   mirror: boolean;
+  /** Ramp/slope uphill direction, or null. A ramp connects its base `height` (on
+   *  the −ramp edge) to height+1 (on the +ramp edge); only traversable along its
+   *  axis. Lets the player/crates ascend one step. */
+  ramp: Dir | null;
 }
 
 export interface Crate {
