@@ -37,6 +37,7 @@ export class IsoRenderer {
   private cellEls = new Map<number, HTMLDivElement>();
   private goalEls: { i: number; el: HTMLDivElement; color: Color }[] = [];
   private lifts: { x: number; y: number; el: HTMLDivElement; base: number }[] = [];
+  private ramps: { el: HTMLDivElement; dir: Dir }[] = [];
   private crateEls = new Map<number, HTMLDivElement>();
   private playerEl!: HTMLDivElement;
   private ghostEl!: HTMLDivElement;
@@ -107,6 +108,7 @@ export class IsoRenderer {
     this.cellEls.clear();
     this.goalEls = [];
     this.lifts = [];
+    this.ramps = [];
     this.crateEls.clear();
 
     for (let i = 0; i < level.cells.length; i++) {
@@ -119,6 +121,7 @@ export class IsoRenderer {
       this.cellEls.set(i, el);
       if (cell.goal) this.goalEls.push({ i, el, color: cell.goal });
       if (cell.terrain === 'lift') this.lifts.push({ x, y, el, base: cell.height });
+      if (cell.ramp) this.ramps.push({ el, dir: cell.ramp });
     }
 
     // ghost outline (shown when the player is hidden behind a taller tile)
@@ -180,8 +183,20 @@ export class IsoRenderer {
       const y = Math.floor(i / lvl.width);
       this.place(el, x, y, topLayer(lvl.cells[i]!));
     }
+    // ramp arrows track the camera so they always point uphill ON SCREEN
+    for (const r of this.ramps) r.el.style.setProperty('--rampRot', `${this.rampScreenAngle(r.dir)}deg`);
     if (this.lastState) this.update(this.lastState);
     this.sizeToViewport();
+  }
+
+  /** On-screen rotation (deg) for a ramp's uphill chevron under the current camera. */
+  private rampScreenAngle(dir: Dir): number {
+    const delta: Record<Dir, [number, number]> = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+    let [dx, dy] = delta[dir];
+    for (let i = 0; i < (this.rotation & 3); i++) { const nx = -dy, ny = dx; dx = nx; dy = ny; }
+    const dsx = (dx - dy) * (TW / 2);
+    const dsy = (dx + dy) * (TH / 2);
+    return (Math.atan2(dsy, dsx) * 180) / Math.PI + 45; // chevron points NE at 0deg
   }
 
   private makeTile(cell: Cell, x: number, y: number): HTMLDivElement {
@@ -330,20 +345,24 @@ export class IsoRenderer {
     }
   }
 
-  // If a taller tile sits directly in front of the player, show an outline so the
-  // player is never fully lost behind geometry.
+  // Auxiliary occlusion hint: if a much taller tile sits IN FRONT of the player
+  // (higher view-depth — rotation-aware), outline it. Reliable methods are Alt
+  // highlight + top-down peek; this is just a passive cue.
   private updateGhost(state: GameState): void {
-    const here = this.cellAt(state.playerX, state.playerY).height;
-    const occluders: [number, number][] = [
-      [state.playerX + 1, state.playerY],
-      [state.playerX, state.playerY + 1],
-      [state.playerX + 1, state.playerY + 1],
-    ];
+    const px = state.playerX, py = state.playerY;
+    const here = this.effHeight(px, py);
+    const pv = this.view(px, py);
+    const pd = pv.vx + pv.vy;
     let hidden = false;
-    for (const [x, y] of occluders) {
-      if (x >= this.level.width || y >= this.level.height) continue;
-      const c = this.cellAt(x, y);
-      if (topLayer(c) >= here + 1.4) hidden = true;
+    for (let dy = -1; dy <= 1 && !hidden; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const x = px + dx, y = py + dy;
+        if (x < 0 || y < 0 || x >= this.level.width || y >= this.level.height) continue;
+        const nv = this.view(x, y);
+        if (nv.vx + nv.vy <= pd) continue; // not in front of the player on screen
+        if (topLayer(this.cellAt(x, y)) >= here + 1.6) { hidden = true; break; }
+      }
     }
     this.ghostEl.classList.toggle('show', hidden);
     this.playerEl.classList.toggle('occluded', hidden);

@@ -1132,32 +1132,34 @@ button:disabled {
 .iso-cell.t-mirror .iso-face.top {
   background: linear-gradient(120deg, color-mix(in srgb, var(--slate) 26%, var(--floor)), var(--floor));
 }
-/* ramp: a sloped tile with a bold uphill arrow (direction is unambiguous) */
+/* ramp: a sloped tile with treads + a bold uphill arrow that tracks the camera */
 .iso-cell.t-ramp .iso-face.top {
-  background: linear-gradient(150deg, color-mix(in srgb, var(--floor) 78%, #2a2018), var(--floor));
+  background:
+    repeating-linear-gradient(transparent 0 5px, rgba(0, 0, 0, 0.07) 5px 6px),
+    linear-gradient(150deg, color-mix(in srgb, var(--floor) 70%, #2a2018), color-mix(in srgb, var(--floor) 96%, white));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, var(--floor-line));
 }
 .iso-cell.t-ramp .iso-face.top::before {
   content: '';
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 22%;
-  height: 22%;
-  border-right: 3px solid var(--accent);
-  border-top: 3px solid var(--accent);
-  transform: translate(-50%, -50%) rotate(var(--rampRot, -45deg));
+  width: 30%;
+  height: 30%;
+  border-right: 4px solid var(--accent);
+  border-top: 4px solid var(--accent);
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--accent) 50%, transparent));
+  transform: translate(-50%, -50%) rotate(var(--rampRot, 45deg));
 }
-.iso-cell.r-up { --rampRot: -45deg; }
-.iso-cell.r-right { --rampRot: 45deg; }
-.iso-cell.r-down { --rampRot: 135deg; }
-.iso-cell.r-left { --rampRot: -135deg; }
-/* bridge: a plank span (player only) */
+/* bridge: a narrow plank span over a gap — visibly flimsy (player only) */
 .iso-cell.t-bridge .iso-face.top {
-  background: repeating-linear-gradient(90deg, var(--crate) 0 7px,
-      color-mix(in srgb, var(--crate) 76%, #2a1c10) 7px 9px);
+  background:
+    linear-gradient(0deg, transparent 0 14%, var(--crate) 14% 86%, transparent 86%),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--crate) 88%, white) 0 6px,
+      color-mix(in srgb, var(--crate) 64%, #2a1c10) 6px 8px);
 }
-.iso-cell.t-bridge .iso-face.left { background: color-mix(in srgb, var(--crate) 52%, #2a1c10); }
-.iso-cell.t-bridge .iso-face.right { background: color-mix(in srgb, var(--crate) 70%, #2a1c10); }
+.iso-cell.t-bridge .iso-face.left { background: color-mix(in srgb, var(--crate) 44%, #1a120c); }
+.iso-cell.t-bridge .iso-face.right { background: color-mix(in srgb, var(--crate) 60%, #1a120c); }
 /* lift: a marked platform that glides up/down */
 .iso-cell.t-lift {
   transition: left 0.2s cubic-bezier(0.22, 0.61, 0.36, 1), top 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
