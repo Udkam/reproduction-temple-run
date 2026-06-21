@@ -1093,31 +1093,50 @@ button:disabled {
       color-mix(in srgb, var(--floor) 80%, var(--crate)) 0 6px,
       color-mix(in srgb, var(--floor) 70%, var(--crate)) 6px 12px);
 }
-/* goal ring on the top face */
+/* goal ring on the top face — bright + soft glow so it pops on dark floors */
 .iso-cell.t-goal .iso-face.top::after {
   content: '';
   position: absolute;
-  inset: 28%;
+  inset: 24%;
   border-radius: 50%;
-  border: 2px solid var(--goal-color, rgba(50, 46, 40, 0.4));
+  border: 3px solid var(--goal-color, #6f8a5e);
+  background: radial-gradient(closest-side,
+      color-mix(in srgb, var(--goal-color, #6f8a5e) 22%, transparent), transparent);
+  box-shadow: 0 0 7px 1px color-mix(in srgb, var(--goal-color, #6f8a5e) 45%, transparent);
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 .iso-cell.t-goal.satisfied .iso-face.top::after {
-  background: color-mix(in srgb, var(--goal-color, #5b6b56) 30%, transparent);
+  background: color-mix(in srgb, var(--goal-color, #6f8a5e) 42%, transparent);
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--goal-color, #6f8a5e) 60%, transparent);
 }
 .iso-cell.t-goal.iso-c-rose { --goal-color: var(--rose); }
 .iso-cell.t-goal.iso-c-sage { --goal-color: var(--sage); }
 .iso-cell.t-goal.iso-c-slate { --goal-color: var(--slate); }
 .iso-cell.t-goal.iso-c-amber { --goal-color: var(--amber); }
-/* portal rings on the top face */
+/* portal rings on the top face — brighter, with a vertical light hint */
 .iso-cell.t-portal .iso-face.top::after {
   content: '';
   position: absolute;
-  inset: 30%;
+  inset: 26%;
   border-radius: 50%;
-  border: 2px solid var(--portal-color, #6f5b86);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--portal-color, #6f5b86) 22%, transparent);
+  border: 3px solid var(--portal-color, #8a72a6);
+  background: radial-gradient(closest-side,
+      color-mix(in srgb, var(--portal-color, #8a72a6) 28%, transparent), transparent);
+  box-shadow: 0 0 8px 2px color-mix(in srgb, var(--portal-color, #8a72a6) 50%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--portal-color, #8a72a6) 18%, transparent);
   animation: portalPulse 2.6s ease-in-out infinite;
+}
+.iso-cell.t-portal .iso-face.top::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 8%;
+  height: 60px;
+  transform: translateX(-50%);
+  background: linear-gradient(to top, color-mix(in srgb, var(--portal-color, #8a72a6) 55%, transparent), transparent);
+  opacity: 0.7;
+  pointer-events: none;
 }
 .iso-cell.t-portal.p-o { --portal-color: #6f5b86; }
 .iso-cell.t-portal.p-p { --portal-color: #4f8a86; }
