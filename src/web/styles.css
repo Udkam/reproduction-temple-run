@@ -1177,31 +1177,64 @@ button:disabled {
 .iso-piece {
   transition: left 0.16s cubic-bezier(0.22, 0.61, 0.36, 1), top 0.16s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
+/* "Pip" — the 2.5D explorer (scoped to the iso character only) */
 .iso-piece.player .iso-av {
   position: absolute;
-  left: -26px;
-  top: -64px;
-  width: 52px;
-  height: 80px;
+  left: -33px;
+  top: -74px;
+  width: 66px;
+  height: 82px;
   overflow: visible;
-  filter: drop-shadow(0 4px 3px var(--shadow));
+  filter: drop-shadow(0 5px 4px var(--shadow));
+  transition: transform 0.13s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-.player .av-sh { fill: var(--shadow); opacity: 0.5; }
-.player .av-body { fill: var(--player); stroke: color-mix(in srgb, var(--player) 55%, black); stroke-width: 1.4; }
-.player .av-head { fill: color-mix(in srgb, var(--player) 82%, white); stroke: color-mix(in srgb, var(--player) 55%, black); stroke-width: 1.4; }
-.player .av-foot { fill: color-mix(in srgb, var(--player) 55%, black); }
-.player .av-eye { fill: #1c2b29; }
-.player .av-glint { fill: #f4faf8; }
-.player .av-cheek { fill: var(--accent); opacity: 0.4; }
-.player .av-ant { fill: color-mix(in srgb, var(--player) 60%, black); }
-.player .av-tip { fill: var(--accent); }
-.iso-piece.player .av-face { transition: transform 0.12s ease, opacity 0.12s ease; transform-box: fill-box; transform-origin: center; }
-.iso-piece.player.face-left .av-face { transform: translateX(-3px); }
-.iso-piece.player.face-right .av-face { transform: translateX(3px); }
+.iso-piece.player .av-sh { fill: var(--shadow); opacity: 0.42; }
+.iso-piece.player .av-body {
+  fill: var(--player);
+  stroke: color-mix(in srgb, var(--player) 42%, black);
+  stroke-width: 2.6;
+}
+.iso-piece.player .av-belly { fill: color-mix(in srgb, var(--player) 72%, white); opacity: 0.5; }
+.iso-piece.player .av-arm {
+  fill: var(--player);
+  stroke: color-mix(in srgb, var(--player) 42%, black);
+  stroke-width: 2.2;
+  transition: transform 0.13s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.iso-piece.player .av-foot { fill: color-mix(in srgb, var(--player) 52%, black); }
+.iso-piece.player .av-scarf { fill: var(--accent); }
+.iso-piece.player .av-scarf-tail { fill: var(--accent-deep); }
+.iso-piece.player .av-cap {
+  fill: var(--accent-deep);
+  stroke: color-mix(in srgb, var(--accent-deep) 55%, black);
+  stroke-width: 1.6;
+}
+.iso-piece.player .av-cap-tip { fill: var(--accent); }
+.iso-piece.player .av-eye { fill: #20302e; }
+.iso-piece.player .av-glint { fill: #f6fbf9; }
+.iso-piece.player .av-cheek { fill: var(--accent); opacity: 0.4; }
+.iso-piece.player .av-face {
+  transition: transform 0.12s ease, opacity 0.12s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.iso-piece.player.face-left .av-face { transform: translateX(-5px); }
+.iso-piece.player.face-right .av-face { transform: translateX(5px); }
 .iso-piece.player.face-up .av-face { opacity: 0; }
-.iso-piece.player.stepping .iso-av { animation: iso-step 0.16s ease; }
-.iso-piece.player.pushing .iso-av { animation: iso-step 0.18s ease; }
-@keyframes iso-step { 0% { transform: translateY(-2px) scaleY(0.94); } 100% {} }
+.iso-piece.player.face-up .av-cap { fill: var(--accent); } /* back of cap brighter */
+/* poses */
+.iso-piece.player.stepping .iso-av { animation: iso-step 0.18s ease; }
+.iso-piece.player.pushing .iso-av { transform: translateY(-1px) scale(1.05, 0.95); }
+.iso-piece.player.pushing .av-arm { transform: translateY(4px); }
+.iso-piece.player.pulling .iso-av { transform: scale(0.95, 1.05); }
+.iso-piece.player.pulling .av-arm { transform: translateY(-3px); }
+.iso-piece.player.on-lift .av-arm { transform: translateY(-7px); }
+@keyframes iso-step {
+  0% { transform: translateY(-4px) scaleY(0.9); }
+  100% {}
+}
 .iso-piece.player.warp .iso-av { animation: warp 0.32s ease; }
 
 /* crate as a small iso cube */

@@ -216,20 +216,30 @@ export class IsoRenderer {
   }
 
   private makePlayer(): HTMLDivElement {
+    // "Pip" — a chunky cute explorer creature: big rounded head+body, big eyes,
+    // a terracotta scarf + explorer cap, strong outline so it pops against tiles.
     const el = document.createElement('div');
     el.className = 'iso-piece player face-down';
-    el.innerHTML = `<svg class="iso-av" viewBox="0 0 64 80" aria-hidden="true">
-      <ellipse class="av-sh" cx="32" cy="74" rx="17" ry="5"/>
-      <path class="av-foot" d="M22 64h8v8h-8z"/><path class="av-foot" d="M34 64h8v8h-8z"/>
-      <rect class="av-body" x="19" y="40" width="26" height="30" rx="12"/>
-      <ellipse class="av-head" cx="32" cy="26" rx="18" ry="17"/>
+    el.innerHTML = `<svg class="iso-av" viewBox="0 0 80 100" aria-hidden="true">
+      <ellipse class="av-sh" cx="40" cy="93" rx="24" ry="6"/>
+      <ellipse class="av-foot l" cx="30" cy="89" rx="8" ry="5.5"/>
+      <ellipse class="av-foot r" cx="50" cy="89" rx="8" ry="5.5"/>
+      <circle class="av-arm l" cx="13" cy="58" r="8"/>
+      <circle class="av-arm r" cx="67" cy="58" r="8"/>
+      <path class="av-body" d="M40 16 C61 16 70 36 70 60 C70 82 57 92 40 92 C23 92 10 82 10 60 C10 36 19 16 40 16 Z"/>
+      <ellipse class="av-belly" cx="40" cy="66" rx="17" ry="19"/>
+      <path class="av-scarf" d="M14 50 Q40 62 66 50 L64 60 Q40 70 16 60 Z"/>
+      <path class="av-scarf-tail" d="M60 56 q10 4 8 16 l-8 -2 q1 -8 -4 -12 z"/>
+      <path class="av-cap" d="M16 30 Q40 6 64 30 Q40 24 16 30 Z"/>
+      <circle class="av-cap-tip" cx="40" cy="9" r="4.5"/>
       <g class="av-face">
-        <circle class="av-cheek" cx="19" cy="31" r="2.6"/><circle class="av-cheek" cx="45" cy="31" r="2.6"/>
-        <circle class="av-eye" cx="25" cy="26" r="3.4"/><circle class="av-eye" cx="39" cy="26" r="3.4"/>
-        <circle class="av-glint" cx="26.3" cy="24.6" r="1.1"/><circle class="av-glint" cx="40.3" cy="24.6" r="1.1"/>
+        <ellipse class="av-eye" cx="30" cy="44" rx="5.5" ry="6.5"/>
+        <ellipse class="av-eye" cx="50" cy="44" rx="5.5" ry="6.5"/>
+        <circle class="av-glint" cx="32" cy="41.5" r="1.9"/>
+        <circle class="av-glint" cx="52" cy="41.5" r="1.9"/>
+        <circle class="av-cheek" cx="22" cy="53" r="4"/>
+        <circle class="av-cheek" cx="58" cy="53" r="4"/>
       </g>
-      <rect class="av-ant" x="30.5" y="4" width="3" height="8" rx="1.5"/>
-      <circle class="av-tip" cx="32" cy="5" r="3"/>
     </svg>`;
     return el;
   }
@@ -252,7 +262,7 @@ export class IsoRenderer {
       let dir: Dir | null = dx > 0 ? 'right' : dx < 0 ? 'left' : dy > 0 ? 'down' : dy < 0 ? 'up' : null;
       if (effect.pulled && dir) dir = OPPOSITE[dir];
       if (dir) this.setFacing(dir);
-      this.pulse(effect.crate && !effect.crate.sank ? 'pushing' : 'stepping');
+      this.pulse(effect.pulled ? 'pulling' : effect.crate && !effect.crate.sank ? 'pushing' : 'stepping');
     }
     this.lastPX = state.playerX;
     this.lastPY = state.playerY;
@@ -261,6 +271,7 @@ export class IsoRenderer {
     this.place(this.playerEl, state.playerX, state.playerY, pH, 2);
     // lift the player's z so it sits above its own tile (or all tiles in highlight)
     this.playerEl.style.zIndex = String(this.depthZ(state.playerX, state.playerY, pH) + (this.highlight ? 800005 : 5));
+    this.playerEl.classList.toggle('on-lift', this.cellAt(state.playerX, state.playerY).terrain === 'lift');
     if (effect?.teleported) {
       this.playerEl.classList.remove('warp');
       void this.playerEl.offsetWidth;
