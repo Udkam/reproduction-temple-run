@@ -1,5 +1,3 @@
-// Screens and interaction. Plain DOM — no framework — kept small and explicit.
-
 import type { BlockedReason, Dir, Level, MoveToken, V7Mechanic } from '../engine/types.js';
 import { CHAPTER_OF } from '../engine/levels.js';
 import { Game, DiptychGame } from './game.js';
@@ -7,15 +5,12 @@ import { BoardRenderer } from './render.js';
 import {
   loadProgress,
   recordClear,
-  recordChainNode,
   setLastPlayed,
-  isUnlocked,
   submitScore,
   chapterStats,
   type Progress,
 } from './progress.js';
 
-// tiny hyperscript helper
 function h<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   props: Partial<HTMLElementTagNameMap[K]> & { class?: string } = {},
@@ -25,13 +20,9 @@ function h<K extends keyof HTMLElementTagNameMap>(
   const { class: cls, ...rest } = props as Record<string, unknown> & { class?: string };
   if (cls) el.className = cls;
   Object.assign(el, rest);
-  for (const c of children) el.append(typeof c === 'string' ? document.createTextNode(c) : c);
+  for (const child of children) el.append(typeof child === 'string' ? document.createTextNode(child) : child);
   return el;
 }
-
-// Level gating is OFF for now (free practice of every level). Flip to true to
-// restore sequential unlocking before a public launch — nothing else changes.
-const LEVELS_LOCKED = false;
 
 const KEY_DIR: Record<string, Dir> = {
   ArrowUp: 'up',
@@ -50,76 +41,133 @@ const KEY_DIR: Record<string, Dir> = {
 
 const MECHANIC_LABEL: Record<V7Mechanic, string> = {
   'core-push': '能量核心',
-  'quantum-portal': '量子门',
+  'quantum-portal': '量子链接',
   'sync-actors': '同步体',
   'time-shadow': '时间残影',
   'chain-state': '连锁状态',
   'spatial-swap': '空间置换',
   'recursive-room': '递归舱',
+  'worldline-split': '世界线分裂',
+  'rule-block': '实验参数',
   'misdirection': '误导协议',
   'pull-field': '牵引场',
   'gravity-field': '重力场',
   'mirror-field': '镜像场',
-  'ice-vector': '冰轨',
-  'gate-circuit': '门禁电路',
+  'ice-vector': '冰轨向量',
+  'gate-circuit': '门闩电路',
 };
 
 const BLOCKED_TEXT: Record<BlockedReason, string> = {
-  wall: '墙体阻挡',
+  wall: '被 containment wall 阻断',
   height: '高度不匹配',
-  gate: '量子门未开启',
-  lock: '锁定舱门',
-  hole: '深坑阻挡',
-  crate: '核心无法推动',
+  gate: '量子门闩未开启',
+  lock: '权限锁未解除',
+  hole: '深坑不可进入',
+  crate: '核心无法继续推动',
   shadow: '时间残影占位',
-  portal: '折跃出口受阻',
+  portal: '链接出口受阻',
   pull: '牵引失败',
-  bounds: '越界阻挡',
+  bounds: '越界阻断',
   unknown: '路径受阻',
 };
 
-// Mechanic codex. Each entry unlocks once its anchor level (the level that first
-// introduces the mechanic) becomes reachable — rule + typical use, never a
-// per-level solution.
 interface CodexEntry {
+  key: V7Mechanic;
   icon: string;
   name: string;
   rule: string;
-  use: string;
+  implication: string;
   anchor: string;
 }
+
 const CODEX: CodexEntry[] = [
-  { icon: 'ic-crate', name: '能量核心', anchor: 'v7-001',
-    rule: '把发光能量核心推入同频接口即可完成实验。无人机只能推，不能穿过核心。',
-    use: '先判断核心最终落点，再决定从哪一侧进入推线。死角仍然是死角。' },
-  { icon: 'ic-portal', name: '量子门', anchor: 'v7-009',
-    rule: '量子门只传送无人机，不传送能量核心。门用于改变无人机的接近侧。',
-    use: '当核心的可推侧被隔离时，先折跃到另一舱室，再从新方向施力。' },
-  { icon: 'ic-sync', name: '同步体', anchor: 'v7-017',
-    rule: '一次输入会同时驱动多个无人机舱室；所有舱室都达成目标才算通过。',
-    use: '不要只看当前舱室。一次无效移动也可能是在给另一个舱室排位。' },
-  { icon: 'ic-mirror', name: '镜像同步', anchor: 'v7-018',
-    rule: '镜像同步体会左右反向响应同一次输入，上下保持一致。',
-    use: '把输入看成协议而不是方向：右键可能同时代表右推和左推。' },
-  { icon: 'ic-shadow', name: '时间残影', anchor: 'v7-025',
-    rule: '残影会延迟复制无人机位置。它能压住量子压板，也会成为实体阻挡。',
-    use: '先把残影留在需要维持的开关上，再趁门保持开启穿过。' },
-  { icon: 'ic-gate', name: '量子压板', anchor: 'v7-025',
-    rule: '压板被无人机、核心或残影压住时，会打开同组量子门闩。',
-    use: '读清压板到门闩之间的距离；时间差本身就是谜题。' },
-  { icon: 'ic-swap', name: '空间置换', anchor: 'v7-033',
-    rule: '置换实验把局部舱段、核心或目标视为可交换对象；当前章节以显式场景 replay 保证确定性。',
-    use: '把被标记的区域当成会换位的实验片段，先确认交换前后哪一侧仍能施力。' },
-  { icon: 'ic-recursive', name: '递归舱', anchor: 'v7-041',
-    rule: '递归舱把核心视为携带内部状态的小房间；外部移动会保留这份内部状态。',
-    use: '同时追踪“核心的位置”和“核心内部已经准备好的状态”，不要只看外壳。' },
-  { icon: 'ic-chain', name: '连锁实验', anchor: 'v7-049',
-    rule: '连锁实验把章节状态显示为星图节点。状态必须可见，不允许制造无提示不可解分支。',
-    use: '先读当前节点标签，再判断本关是重放、回访还是解锁下一段路径。' },
-  { icon: 'ic-misdirect', name: '误导协议', anchor: 'v7-057',
-    rule: '误导路线看似可行，但失败必须能从已公开规则推出，并且可以撤销。',
-    use: '把明显诱人的第一步当成假设来验证：若会把核心送进死角，就换顺序。' },
+  {
+    key: 'recursive-room',
+    icon: 'recursive',
+    name: '递归空间',
+    rule: '某些能量核心也是可携带的微型实验舱。外部位置和内部状态必须同时被追踪。',
+    implication: '先问“这个核心在哪里”，再问“这个核心里面发生了什么”。',
+    anchor: 'v7r-017',
+  },
+  {
+    key: 'worldline-split',
+    icon: 'branch',
+    name: '世界线分裂',
+    rule: '两个分支共享输入，但实体状态可以不同。合流要求两个分支同时满足稳定条件。',
+    implication: '一个分支提前解决不等于实验结束，真正目标是兼容合流。',
+    anchor: 'v7r-019',
+  },
+  {
+    key: 'time-shadow',
+    icon: 'echo',
+    name: '时间残影',
+    rule: '残影延迟复制无人机占位，可以压住量子压板，也会成为阻断体。',
+    implication: '把过去的路线当作未来一拍的工具，而不是跟随特效。',
+    anchor: 'v7r-011',
+  },
+  {
+    key: 'spatial-swap',
+    icon: 'swap',
+    name: '空间置换',
+    rule: '置换器有明确触发点和交换点。触发后核心或区域按标记交换。',
+    implication: '先预判置换后的施力侧，再决定是否触发。',
+    anchor: 'v7r-014',
+  },
+  {
+    key: 'sync-actors',
+    icon: 'sync',
+    name: '同步体',
+    rule: '一次输入驱动多个无人机或分支。镜像体会把左右输入反向解释。',
+    implication: '阻挡一个分支有时是在给另一个分支校准时机。',
+    anchor: 'v7r-008',
+  },
+  {
+    key: 'rule-block',
+    icon: 'rule',
+    name: '实验参数',
+    rule: '规则块是局部插槽，不是全局魔法。本 slice 使用 PUSH/GATE 语义作为轻量入口。',
+    implication: '读清楚参数作用域，再判断哪条轨道发生变化。',
+    anchor: 'v7r-003',
+  },
+  {
+    key: 'quantum-portal',
+    icon: 'portal',
+    name: '量子链接',
+    rule: '链接只移动无人机，不移动能量核心。它改变施力侧和邻接关系。',
+    implication: '入口不是捷径，出口才是新的相邻格。',
+    anchor: 'v7r-005',
+  },
+  {
+    key: 'misdirection',
+    icon: 'warning',
+    name: '误导协议',
+    rule: '误导路线必须能从公开规则推理出来，并始终支持撤销。',
+    implication: '把最顺手的第一步当作假设来验证，而不是直接相信。',
+    anchor: 'v7r-004',
+  },
 ];
+
+function droneSvg(state = 'idle'): string {
+  return `<svg class="drone-svg drone-${state}" viewBox="0 0 100 100" aria-hidden="true">
+    <defs>
+      <radialGradient id="drone-core-${state}" cx="50%" cy="48%" r="48%">
+        <stop offset="0%" stop-color="#f3fffd"/>
+        <stop offset="54%" stop-color="#59f4df"/>
+        <stop offset="100%" stop-color="#0b8a9a"/>
+      </radialGradient>
+    </defs>
+    <ellipse class="drone-shadow" cx="50" cy="88" rx="30" ry="7"/>
+    <path class="drone-ring" d="M18 50a32 18 0 1 0 64 0a32 18 0 1 0 -64 0"/>
+    <path class="drone-ring vertical" d="M50 18a18 32 0 1 0 0 64a18 32 0 1 0 0 -64"/>
+    <circle class="drone-core" cx="50" cy="50" r="21" fill="url(#drone-core-${state})"/>
+    <path class="drone-visor" d="M36 48h28l-6 9H42z"/>
+    <circle class="drone-thruster left" cx="22" cy="61" r="7"/>
+    <circle class="drone-thruster right" cx="78" cy="61" r="7"/>
+    <path class="drone-spark" d="M50 6l4 12h-8z"/>
+  </svg>`;
+}
+
+const NS = 'http://www.w3.org/2000/svg';
 
 export class App {
   private root: HTMLElement;
@@ -131,7 +179,7 @@ export class App {
   constructor(root: HTMLElement, levels: Level[]) {
     this.root = root;
     this.levels = levels;
-    this.order = levels.map((l) => l.id);
+    this.order = levels.map((level) => level.id);
     this.progress = loadProgress();
   }
 
@@ -144,257 +192,282 @@ export class App {
     this.cleanup = null;
     view.classList.add('screen-view', 'enter');
     this.root.replaceChildren(view);
+    const canUseNativeScroll = !window.navigator.userAgent.toLowerCase().includes('jsdom');
+    if (canUseNativeScroll) {
+      window.scrollTo(0, 0);
+    } else {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
     const enter = () => view.classList.add('entered');
     if (window.requestAnimationFrame) window.requestAnimationFrame(enter);
     else window.setTimeout(enter, 0);
   }
 
-  // ---------------- menu ----------------
-
-  private levelCard(lvl: Level, i: number, current: boolean): HTMLElement {
-    const unlocked = !LEVELS_LOCKED || isUnlocked(this.order, lvl.id, this.progress);
-    const done = !!this.progress.completed[lvl.id];
-    const best = this.progress.best[lvl.id];
-    const push = this.progress.bestPush[lvl.id];
-    const bestText =
-      best !== undefined
-        ? `最佳 ${best} 步${push !== undefined ? ` · ${push} 推` : ''}`
-        : unlocked
-          ? current
-            ? '从这里继续'
-            : '未通关'
-          : '';
-    const isLast = this.progress.lastPlayed?.id === lvl.id;
-    const cls = `level-card${unlocked ? '' : ' locked'}${current ? ' current' : ''}${isLast ? ' last' : ''}`;
-    const card = h(
-      'div',
-      { class: cls },
-      h('div', { class: 'idx' }, String(i + 1).padStart(2, '0')),
-      h('div', { class: 'name wordmark' }, unlocked ? lvl.name : '· · ·'),
-      h('div', { class: 'sub' }, unlocked ? lvl.subtitle : 'locked'),
-      h('div', { class: 'best' }, bestText),
-    );
-    if (done) {
-      const medals = h('div', { class: 'medals' });
-      if (this.progress.parHit[lvl.id]) medals.append(h('span', { class: 'medal par', title: '达到参考最优' }, '✦'));
-      if (this.progress.clean[lvl.id]) medals.append(h('span', { class: 'medal clean', title: '零撤销通关' }, '⟳'));
-      if (medals.childElementCount) card.append(medals);
-      card.append(h('div', { class: 'seal', title: '已通关' }));
-    }
-    if (unlocked) card.onclick = () => this.openLevel(lvl.id);
-    return card;
-  }
-
-  /** True if there is an unfinished saved board for this level to resume. */
-  private resumable(id: string): boolean {
-    const lp = this.progress.lastPlayed;
-    return !!lp && lp.id === id && !lp.won && lp.log.length > 0;
-  }
-
-  /** Open a level, offering "continue / restart" if a board is mid-progress. */
-  private openLevel(id: string): void {
-    if (!this.resumable(id)) {
-      this.playLevel(id);
-      return;
-    }
-    const lp = this.progress.lastPlayed!;
-    const actions = h('div', { class: 'actions' });
-    const resume = h('button', { class: 'primary' }, `继续当前局面（${lp.log.length} 步）`);
-    const fresh = h('button', {}, '从头开始');
-    actions.append(resume, fresh);
-    const card = h(
-      'div',
-      { class: 'card' },
-      h('h2', { class: 'wordmark' }, '继续上次？'),
-      h('p', { class: 'result' }, `你上次在这一关走了 ${lp.log.length} 步还没解开。`),
-      actions,
-    );
-    const overlay = h('div', { class: 'overlay' }, card);
-    resume.onclick = () => { overlay.remove(); this.playLevel(id, lp.log.slice()); };
-    fresh.onclick = () => { overlay.remove(); this.playLevel(id); };
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-    this.root.append(overlay);
+  private currentLevel(): Level | undefined {
+    return this.levels.find((level) => !this.progress.completed[level.id]) ?? this.levels[0];
   }
 
   private showMenu(): void {
     const total = this.levels.length;
-    const cleared = this.levels.filter((l) => this.progress.completed[l.id]).length;
+    const cleared = this.levels.filter((level) => this.progress.completed[level.id]).length;
     const pct = total ? Math.round((cleared / total) * 100) : 0;
-    const chainCount = Object.keys(this.progress.chainState).length;
+    const current = this.currentLevel();
+    const stats = chapterStats(this.order, CHAPTER_OF, this.progress);
 
-    // The recommended level: the first reachable-but-uncleared level in order.
-    const currentId =
-      this.levels.find(
-        (l) => (!LEVELS_LOCKED || isUnlocked(this.order, l.id, this.progress)) && !this.progress.completed[l.id],
-      )?.id ?? this.levels[0]?.id ?? '';
-    const current = this.levels.find((l) => l.id === currentId);
-
-    const continueBtn = h('button', { class: 'primary command' }, '继续实验');
-    continueBtn.onclick = () => this.openLevel(currentId);
-    const mapBtn = h('button', { class: 'command' }, '章节星图');
-    const codexBtn = h('button', { class: 'command' }, '机制档案');
-    codexBtn.onclick = () => this.showCodex();
-    const recordsBtn = h('button', { class: 'command' }, '挑战记录');
+    const continueBtn = h('button', { class: 'console-command primary' }, '恢复实验');
+    continueBtn.onclick = () => current && this.openLevel(current.id);
+    const mapBtn = h('button', { class: 'console-command' }, '世界线星图');
+    const notesBtn = h('button', { class: 'console-command' }, '研究笔记');
+    notesBtn.onclick = () => this.showCodex();
+    const recordsBtn = h('button', { class: 'console-command' }, '实验数据');
     recordsBtn.onclick = () => this.showRecords();
-    const settingsBtn = h('button', { class: 'command' }, '设置');
+    const settingsBtn = h('button', { class: 'console-command' }, '系统校准');
     settingsBtn.onclick = () => this.showSettings();
-    const progressRing = h('span', { class: 'progress-ring' }, `${pct}%`);
-    progressRing.style.setProperty('--pct', String(pct));
+
+    const observer = h(
+      'section',
+      { class: 'home-console' },
+      h('div', { class: 'wave-field' }),
+      h(
+        'div',
+        { class: 'observer-shell' },
+        h('div', { class: 'observer-core' }, h('div', { class: 'observer-drone' })),
+        h('div', { class: 'observer-ring ring-a' }),
+        h('div', { class: 'observer-ring ring-b' }),
+        h('div', { class: 'observer-ring ring-c' }),
+      ),
+      h(
+        'div',
+        { class: 'console-copy' },
+        h('span', { class: 'eyebrow' }, 'WORLDLINE LAB / REDESIGN SLICE'),
+        h('h1', {}, '量子实验舱'),
+        h('p', {}, '读取分支、残影、置换和递归舱状态。当前版本是 20 关 redesign vertical slice，不再沿用旧卡片/棋盘路线。'),
+      ),
+      h(
+        'div',
+        { class: 'telemetry-ring' },
+        h('b', {}, `${pct}%`),
+        h('span', {}, `稳定 ${cleared}/${total}`),
+        h('small', {}, current ? `当前实验：${current.name}` : '等待实验载入'),
+      ),
+      h('nav', { class: 'console-actions' }, continueBtn, mapBtn, notesBtn, recordsBtn, settingsBtn),
+    );
+
+    const map = this.worldlineMap(stats, current?.id);
+    mapBtn.onclick = () => map.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     const menu = h(
       'div',
-      { class: 'menu' },
+      { class: 'menu console-menu' },
+      observer,
+      map,
+      this.characterStateSheet(),
+    );
+    this.swap(menu);
+  }
+
+  private worldlineMap(stats: Record<string, { total: number; cleared: number }>, currentId?: string): HTMLElement {
+    const section = h(
+      'section',
+      { class: 'worldline-section', id: 'chapter-map' },
       h(
-        'section',
-        { class: 'home-deck' },
-        h('div', { class: 'scanline' }),
-        h('div', { class: 'eyebrow' }, 'QUANTUM DRIFT PROTOCOL'),
-        h('h1', {}, 'DRIFTBOX'),
-        h('p', { class: 'lede' }, '在量子实验舱中调度能量核心、同步体与折跃链路。读懂规则，重写路径。'),
-        h(
-          'div',
-          { class: 'progress-cluster' },
-          progressRing,
-          h('span', {}, `完成 ${cleared} / ${total}`),
-          h('span', {}, current ? `推荐 ${current.name}` : '等待实验载入'),
-          h('span', {}, chainCount ? `链路 ${chainCount}` : '链路待激活'),
-        ),
-        h('div', { class: 'command-row' }, continueBtn, mapBtn, codexBtn, recordsBtn, settingsBtn),
+        'div',
+        { class: 'section-heading' },
+        h('span', {}, 'WORLDLINE STAR GRAPH'),
+        h('h2', {}, '世界线星图'),
+        h('p', {}, '节点按实验语法连接，boss 节点使用外环标记；已稳定路径点亮，当前推荐节点脉冲。'),
       ),
     );
 
-    // "继续上次" — the level the player most recently opened/left.
-    const lp = this.progress.lastPlayed;
-    const lpLevel = lp ? this.levels.find((l) => l.id === lp.id) : undefined;
-    if (lp && lpLevel) {
-      const ch = CHAPTER_OF[lp.id] ?? '';
-      const status = lp.won ? '已通关 · 可重玩' : lp.log.length ? `进行中 · ${lp.log.length} 步` : '未通关';
-      const cont = h('button', { class: 'continue-card' },
-        h('span', { class: 'cont-label' }, '继续上次'),
-        h('span', { class: 'cont-name wordmark' }, `${ch} · ${lpLevel.name}`),
-        h('span', { class: 'cont-status' }, status));
-      cont.onclick = () => this.openLevel(lp.id);
-      menu.append(cont);
+    const graph = h('div', { class: 'worldline-graph' });
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'worldline-map');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    graph.append(svg);
+
+    const chapterOrder = [...new Set(this.levels.map((level) => CHAPTER_OF[level.id] ?? level.chapter ?? '未分组'))];
+    const coords = new Map<string, { x: number; y: number }>();
+    const nodesByChapter = new Map<string, Level[]>();
+    for (const chapter of chapterOrder) nodesByChapter.set(chapter, []);
+    for (const level of this.levels) nodesByChapter.get(CHAPTER_OF[level.id] ?? level.chapter ?? '未分组')?.push(level);
+
+    chapterOrder.forEach((chapter, ci) => {
+      const levels = nodesByChapter.get(chapter) ?? [];
+      const baseX = 11 + ci * (78 / Math.max(1, chapterOrder.length - 1));
+      levels.forEach((level, li) => {
+        const spread = levels.length === 1 ? 0 : (li - (levels.length - 1) / 2) * 18;
+        coords.set(level.id, { x: baseX, y: 50 + spread });
+      });
+    });
+
+    for (let i = 0; i < this.levels.length - 1; i++) {
+      const a = coords.get(this.levels[i]!.id)!;
+      const b = coords.get(this.levels[i + 1]!.id)!;
+      const line = document.createElementNS(NS, 'line');
+      line.setAttribute('class', `worldline-edge${this.progress.completed[this.levels[i]!.id] ? ' lit' : ''}`);
+      line.setAttribute('x1', String(a.x));
+      line.setAttribute('y1', String(a.y));
+      line.setAttribute('x2', String(b.x));
+      line.setAttribute('y2', String(b.y));
+      svg.append(line);
     }
 
-    const stats = chapterStats(this.order, CHAPTER_OF, this.progress);
-    const chapters: string[] = [];
-    for (const l of this.levels) {
-      const c = CHAPTER_OF[l.id] ?? '';
-      if (!chapters.includes(c)) chapters.push(c);
+    chapterOrder.forEach((chapter, ci) => {
+      const label = h('div', { class: 'branch-label' }, chapter, h('small', {}, `${stats[chapter]?.cleared ?? 0}/${stats[chapter]?.total ?? 0}`));
+      label.style.left = `${11 + ci * (78 / Math.max(1, chapterOrder.length - 1))}%`;
+      graph.append(label);
+    });
+
+    for (const level of this.levels) {
+      const p = coords.get(level.id)!;
+      const done = !!this.progress.completed[level.id];
+      const boss = level.id.endsWith('004') || level.id.endsWith('007') || level.id.endsWith('010') || level.id.endsWith('013') || level.id.endsWith('016') || level.id.endsWith('018') || level.id.endsWith('020');
+      const node = h(
+        'button',
+        { class: `worldline-node${done ? ' done' : ''}${level.id === currentId ? ' current' : ''}${boss ? ' boss-node' : ''}` },
+        h('span', {}, level.id.replace('v7r-', '')),
+        h('b', {}, level.name),
+      );
+      node.style.left = `${p.x}%`;
+      node.style.top = `${p.y}%`;
+      node.onclick = () => this.openLevel(level.id);
+      graph.append(node);
     }
-    const chapterMap = h('section', { class: 'chapter-map', id: 'chapter-map' },
-      h('div', { class: 'map-heading' },
-        h('span', {}, 'CHAPTER STAR MAP'),
-        h('b', {}, '章节星图')));
-    mapBtn.onclick = () => chapterMap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    for (const ch of chapters) {
-      const s = stats[ch];
-      const head = h('div', { class: 'chapter-head' }, h('h2', { class: 'chapter' }, ch));
-      if (s) {
-        head.append(h('span', { class: 'ch-progress' }, `${s.cleared}/${s.total}`));
-        if (s.perfect) head.append(h('span', { class: 'ch-badge perfect', title: '全章达到参考最优' }, '✦ 大师'));
-        else if (s.complete) head.append(h('span', { class: 'ch-badge done', title: '本章全部通关' }, '✓ 通章'));
-      }
-      chapterMap.append(head);
-      const grid = h('div', { class: 'level-grid' });
-      this.levels.forEach((lvl, i) => {
-        if ((CHAPTER_OF[lvl.id] ?? '') === ch) grid.append(this.levelCard(lvl, i, lvl.id === currentId));
-      });
-      chapterMap.append(grid);
-    }
-    menu.append(chapterMap);
-    this.swap(menu);
+
+    section.append(graph);
+    return section;
+  }
+
+  private characterStateSheet(): HTMLElement {
+    const states = ['idle', 'move', 'push', 'pull', 'sync', 'teleport', 'split', 'blocked', 'victory'];
+    const labels: Record<string, string> = {
+      idle: '静止',
+      move: '移动',
+      push: '推动',
+      pull: '牵引',
+      sync: '同步',
+      teleport: '折跃',
+      split: '分裂',
+      blocked: '阻断',
+      victory: '稳定',
+    };
+    const rows = states.map((state) =>
+      h(
+        'div',
+        { class: `state-row state-${state}` },
+        h('b', {}, labels[state] ?? state),
+        ...['s32', 's48', 's64'].map((size) => {
+          const cell = h('span', { class: `drone-sample ${size}` });
+          cell.innerHTML = droneSvg(state);
+          return cell;
+        }),
+      ),
+    );
+    return h(
+      'section',
+      { class: 'character-state-sheet', id: 'character-state-sheet' },
+      h('div', { class: 'section-heading' }, h('span', {}, 'QUANTUM DRONE STATES'), h('h2', {}, '量子无人机状态表')),
+      h('div', { class: 'state-grid' }, ...rows),
+    );
+  }
+
+  private openLevel(id: string): void {
+    this.playLevel(id);
   }
 
   private showCodex(): void {
     const list = h('div', { class: 'codex' });
-    for (const e of CODEX) {
-      const entry = h(
-        'div',
-        { class: 'codex-row' },
-        h('span', { class: `legend-ic ${e.icon}` }),
-        h('div', { class: 'codex-body' },
-          h('b', {}, e.name),
-          h('span', { class: 'codex-rule' }, e.rule),
-          h('span', { class: 'codex-use' }, e.use)),
+    for (const entry of CODEX) {
+      list.append(
+        h(
+          'div',
+          { class: `codex-row codex-${entry.icon}` },
+          h('span', { class: 'codex-icon' }),
+          h('div', { class: 'codex-body' }, h('b', {}, entry.name), h('span', {}, entry.rule), h('small', {}, entry.implication)),
+        ),
       );
-      list.append(entry);
     }
-    const card = h(
-      'div',
-      { class: 'card help' },
-      h('h2', { class: 'wordmark' }, '玩法 / 图鉴'),
-      h('p', { class: 'result' }, '方向键 / WASD 移动，只能推不能拉（除非按住 Shift 拉箱）。Z 撤销 · R 重开 · Esc 返回。下面是每种机制的规则与典型用法。'),
-      list,
-      h('div', { class: 'actions' }, (() => {
-        const b = h('button', { class: 'primary' }, '返回');
-        b.onclick = () => overlay.remove();
-        return b;
-      })()),
+    this.overlay(
+      h(
+        'div',
+        { class: 'card help' },
+        h('h2', {}, '研究笔记 / 机制档案'),
+        h('p', { class: 'result' }, '这里只记录规则、范围和可观察线索，不给完整解法。'),
+        list,
+      ),
     );
-    const overlay = h('div', { class: 'overlay' }, card);
-    overlay.addEventListener('click', (ev) => {
-      if (ev.target === overlay) overlay.remove();
-    });
-    this.root.append(overlay);
   }
 
   private showRecords(): void {
-    const rows = this.levels
-      .filter((l) => this.progress.completed[l.id])
-      .slice(-8)
-      .map((l) => h('div', { class: 'record-row' },
-        h('span', {}, l.name),
-        h('b', {}, `${this.progress.best[l.id] ?? '-'} 步`),
-        h('small', {}, `${this.progress.bestPush[l.id] ?? '-'} 推`)));
-    const card = h(
-      'div',
-      { class: 'card help' },
-      h('h2', { class: 'wordmark' }, '挑战记录'),
-      h('p', { class: 'result' }, '本地记录会在离线状态继续保存，通关后会尝试同步到后端排行榜。'),
-      h('div', { class: 'records' }, ...(rows.length ? rows : [h('p', { class: 'result' }, '暂无通关记录。')])),
-      h('div', { class: 'actions' }, (() => {
-        const b = h('button', { class: 'primary' }, '返回');
-        b.onclick = () => overlay.remove();
-        return b;
-      })()),
+    const cleared = this.levels.filter((level) => this.progress.completed[level.id]);
+    const rows = cleared.slice(-10).map((level) =>
+      h('div', { class: 'record-row' }, h('span', {}, level.name), h('b', {}, `${this.progress.best[level.id] ?? '-'} 步`), h('small', {}, `${this.progress.bestPush[level.id] ?? '-'} 推`)),
     );
-    const overlay = h('div', { class: 'overlay' }, card);
-    overlay.addEventListener('click', (ev) => { if (ev.target === overlay) overlay.remove(); });
-    this.root.append(overlay);
+    this.overlay(
+      h(
+        'div',
+        { class: 'card help' },
+        h('h2', {}, '实验数据'),
+        h('p', { class: 'result' }, '记录稳定次数、最少步数、推动数和 replay 证据。'),
+        h('div', { class: 'records' }, ...(rows.length ? rows : [h('p', { class: 'result' }, '暂无通关记录。')])),
+      ),
+    );
   }
 
   private showSettings(): void {
-    const card = h(
-      'div',
-      { class: 'card help' },
-      h('h2', { class: 'wordmark' }, '设置'),
-      h('p', { class: 'result' }, 'v7 将加入高对比度、减少动态、输入偏好和进度管理。当前阶段先保留稳定操作路径。'),
-      h('div', { class: 'settings-list' },
-        h('label', {}, h('input', { type: 'checkbox', disabled: true }), ' 高对比度模式'),
-        h('label', {}, h('input', { type: 'checkbox', disabled: true }), ' 减少动态效果'),
-        h('label', {}, h('input', { type: 'checkbox', disabled: true }), ' 触控方向键')),
-      h('div', { class: 'actions' }, (() => {
-        const b = h('button', { class: 'primary' }, '返回');
-        b.onclick = () => overlay.remove();
-        return b;
-      })()),
+    this.overlay(
+      h(
+        'div',
+        { class: 'card help' },
+        h('h2', {}, '系统校准'),
+        h('div', { class: 'settings-list' },
+          h('label', {}, h('input', { type: 'checkbox', disabled: true }), ' 高对比度模式'),
+          h('label', {}, h('input', { type: 'checkbox', disabled: true }), ' 减少动态效果'),
+          h('label', {}, h('input', { type: 'checkbox', disabled: true }), ' 放大世界线节点'),
+        ),
+        h('p', { class: 'result' }, '这些校准项将在完整 v7 扩展时接入；当前 slice 先保证布局和 replay 稳定。'),
+      ),
     );
+  }
+
+  private overlay(card: HTMLElement): void {
+    const close = h('button', { class: 'primary' }, '返回主控台');
+    close.onclick = () => overlay.remove();
+    card.append(h('div', { class: 'actions' }, close));
     const overlay = h('div', { class: 'overlay' }, card);
-    overlay.addEventListener('click', (ev) => { if (ev.target === overlay) overlay.remove(); });
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) overlay.remove();
+    });
     this.root.append(overlay);
   }
 
   private mechanicBar(level: Level): HTMLElement {
     const mechanics = level.levelDesignNote?.mechanics ?? level.mechanics ?? [];
-    return h(
-      'div',
-      { class: 'mechanic-bar' },
-      ...mechanics.map((m) =>
-        h('span', { class: `mechanic-chip m-${m}` }, MECHANIC_LABEL[m] ?? m),
-      ),
-    );
+    return h('div', { class: 'mechanic-bar' }, ...mechanics.map((m) => h('span', { class: `mechanic-chip m-${m}` }, MECHANIC_LABEL[m])));
+  }
+
+  private instruments(level: Level): HTMLElement {
+    const items: HTMLElement[] = [];
+    const mechanics = new Set(level.mechanics ?? []);
+    if (level.recursiveRoom) {
+      items.push(h('span', { class: 'instrument recursive-path' }, `层级：Lab > ${level.recursiveRoom.id}`));
+    }
+    if (level.timeShadow) {
+      items.push(h('span', { class: 'instrument echo-queue' }, `残影延迟：${level.timeShadow.delay} 拍`));
+    }
+    if (level.spatialSwap) {
+      items.push(h('span', { class: 'instrument swap-preview' }, level.spatialSwap.trigger === 'replay-only' ? '置换预览：场景标记' : '置换预览：触发后交换'));
+    }
+    if (level.twin || mechanics.has('worldline-split')) {
+      items.push(h('span', { class: 'instrument branch-state' }, level.mirrorTwin ? '分支：A / 镜像 B' : '分支：A / B 合流'));
+    }
+    if (mechanics.has('rule-block')) {
+      items.push(h('span', { class: 'instrument rule-socket' }, '参数槽：PUSH / GATE'));
+    }
+    if (!items.length) items.push(h('span', { class: 'instrument' }, '观测：标准稳定实验'));
+    return h('div', { class: 'instrument-rack' }, ...items);
   }
 
   private setBlocked(el: HTMLElement, reason: BlockedReason | null): void {
@@ -406,8 +479,6 @@ export class App {
     }
   }
 
-  // ---------------- game ----------------
-
   private playLevel(id: string, resumeLog?: MoveToken[]): void {
     const level = this.levels.find((l) => l.id === id);
     if (!level) return;
@@ -415,89 +486,55 @@ export class App {
       this.playDiptych(level, resumeLog);
       return;
     }
-    const game = new Game(level);
-    if (resumeLog && resumeLog.length) game.loadTokens(resumeLog);
-    const saveVisit = () => {
-      if (id !== 'demo') setLastPlayed(this.progress, { id, at: Date.now(), log: [...game.log], won: game.solved });
-    };
-    saveVisit();
 
-    const title = h(
-      'div',
-      { class: 'title wordmark' },
-      level.name,
-      h('small', {}, level.subtitle),
-    );
-    const back = h('button', { class: 'ghost' }, '← 关卡');
-    back.onclick = () => { saveVisit(); this.showMenu(); };
-    const helpBtn = h('button', { class: 'ghost', title: '机制图鉴' }, '?');
-    helpBtn.onclick = () => this.showCodex();
-    const topbar = h('div', { class: 'topbar' }, title, h('div', { class: 'top-actions' }, helpBtn, back));
+    const game = new Game(level);
+    if (resumeLog?.length) game.loadTokens(resumeLog);
+    const saveVisit = () => setLastPlayed(this.progress, { id, at: Date.now(), log: [...game.log], won: game.solved });
+    saveVisit();
 
     const movesEl = h('b', {}, '0');
     const pushesEl = h('b', {}, '0');
     const blockedEl = h('span', { class: 'blocked-feedback', 'aria-live': 'polite' } as Partial<HTMLSpanElement>);
-    const bestVal = this.progress.best[id];
-    const hud = h(
-      'div',
-      { class: 'hud' },
+    const hud = h('div', { class: 'hud chamber-hud' },
       h('span', { class: 'stat' }, '步数 ', movesEl),
       h('span', { class: 'stat' }, '推动 ', pushesEl),
+      h('span', { class: 'stat' }, `参考 ${level.par ?? '-'}`),
       blockedEl,
-      h('span', { class: 'spacer' }),
-      h('span', { class: 'stat' }, `参考 ${level.par ?? '—'}`),
-      h('span', { class: 'stat' }, bestVal !== undefined ? `最佳 ${bestVal}` : ''),
     );
 
-    const boardWrap = h('div', { class: 'board-wrap' });
+    const back = h('button', { class: 'ghost' }, '返回星图');
+    back.onclick = () => { saveVisit(); this.showMenu(); };
+    const help = h('button', { class: 'ghost' }, '研究笔记');
+    help.onclick = () => this.showCodex();
+    const topbar = h('div', { class: 'topbar chamber-top' },
+      h('div', { class: 'title' }, h('span', {}, level.chapter ?? ''), h('h1', {}, level.name), h('small', {}, level.subtitle)),
+      h('div', { class: 'top-actions' }, help, back),
+    );
+
+    const boardWrap = h('div', { class: 'board-wrap experiment-table' });
     const renderer = new BoardRenderer(boardWrap);
     renderer.mount(level);
     renderer.update(game.state);
 
-    const toLogical = (d: Dir): Dir => d;
-
     const undoBtn = h('button', {}, '撤销');
     const restartBtn = h('button', {}, '重开');
-    const controls = h(
-      'div',
-      { class: 'controls' },
-      undoBtn,
-      restartBtn,
-      h('span', { class: 'spacer' }),
-      h('span', { class: 'hint-keys' }, 'WASD/方向键 移动 · Shift+方向 拉箱 · Z 撤销 · R 重开'),
-    );
+    const controls = h('div', { class: 'controls' }, undoBtn, restartBtn, h('span', { class: 'hint-keys' }, '方向键 / WASD 移动，Z 撤销，R 重开'));
+    const dpad = this.dpad();
 
-    const dpad = h(
-      'div',
-      { class: 'dpad' },
-      h('button', { class: 'up' }, '↑'),
-      h('button', { class: 'left' }, '←'),
-      h('button', { class: 'right' }, '→'),
-      h('button', { class: 'down' }, '↓'),
-    );
-    const [upB, leftB, rightB, downB] = dpad.querySelectorAll('button');
-
-    const screen = h('div', { class: 'game' }, topbar, hud);
-    screen.append(this.mechanicBar(level));
-    // Only first-appearance mechanic levels carry an `intro`. Show that one terse
-    // rule line until the level is cleared — never an empty banner.
-    if (level.intro && !this.progress.completed[id]) screen.append(this.introBanner(level));
-    screen.append(boardWrap, controls, dpad);
+    const screen = h('div', { class: 'game chamber-screen' }, topbar, hud, this.mechanicBar(level), this.instruments(level));
+    if (level.intro && !this.progress.completed[id]) screen.append(this.observationLog(level));
+    screen.append(h('div', { class: 'experiment-panel' }, boardWrap), controls, dpad);
     this.swap(screen);
 
-    const refreshControls = () => {
+    const refresh = () => {
       (undoBtn as HTMLButtonElement).disabled = !game.canUndo;
       movesEl.textContent = String(game.moves);
       pushesEl.textContent = String(game.pushes);
     };
-    refreshControls();
+    refresh();
 
-    let locked = false; // hard lock during win sequence only
+    let locked = false;
     const doMove = (dir: Dir, pull = false) => {
-      // No input throttling: the engine is pure/synchronous and renderer.update
-      // always reconciles the DOM to the latest state, so rapid or repeated keys
-      // can never corrupt state — they just retarget the CSS transition. We only
-      // freeze input during the brief win hand-off below.
       if (locked) return;
       const res = game.move(dir, pull);
       if (!res) {
@@ -506,31 +543,30 @@ export class App {
       }
       this.setBlocked(blockedEl, null);
       renderer.update(game.state, res.effect);
-      refreshControls();
-
+      refresh();
+      saveVisit();
       if (game.solved) {
         locked = true;
-        const slid = res.effect?.crate?.slid;
-        window.setTimeout(() => this.win(level, game), slid ? 460 : 320);
+        window.setTimeout(() => this.win(level, game), 320);
       }
     };
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key in KEY_DIR) {
-        e.preventDefault();
-        doMove(toLogical(KEY_DIR[e.key]!), e.shiftKey);
-      } else if (e.key === 'z' || e.key === 'Z') {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key in KEY_DIR) {
+        event.preventDefault();
+        doMove(KEY_DIR[event.key]!, event.shiftKey);
+      } else if (event.key === 'z' || event.key === 'Z') {
         if (game.undo()) {
           this.setBlocked(blockedEl, null);
           renderer.update(game.state);
-          refreshControls();
+          refresh();
         }
-      } else if (e.key === 'r' || e.key === 'R') {
+      } else if (event.key === 'r' || event.key === 'R') {
         game.restart();
         this.setBlocked(blockedEl, null);
         renderer.update(game.state);
-        refreshControls();
-      } else if (e.key === 'Escape') {
+        refresh();
+      } else if (event.key === 'Escape') {
         saveVisit();
         this.showMenu();
       }
@@ -541,112 +577,72 @@ export class App {
       if (game.undo()) {
         this.setBlocked(blockedEl, null);
         renderer.update(game.state);
-        refreshControls();
+        refresh();
       }
     };
     restartBtn.onclick = () => {
       game.restart();
       this.setBlocked(blockedEl, null);
       renderer.update(game.state);
-      refreshControls();
+      refresh();
     };
-    upB!.onclick = () => doMove(toLogical('up'));
-    downB!.onclick = () => doMove(toLogical('down'));
-    leftB!.onclick = () => doMove(toLogical('left'));
-    rightB!.onclick = () => doMove(toLogical('right'));
-
-    // swipe
-    let sx = 0;
-    let sy = 0;
-    const onTouchStart = (e: TouchEvent) => {
-      const t = e.changedTouches[0]!;
-      sx = t.clientX;
-      sy = t.clientY;
-    };
-    const onTouchEnd = (e: TouchEvent) => {
-      const t = e.changedTouches[0]!;
-      const dx = t.clientX - sx;
-      const dy = t.clientY - sy;
-      if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
-      doMove(toLogical(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up'));
-    };
-    boardWrap.addEventListener('touchstart', onTouchStart, { passive: true });
-    boardWrap.addEventListener('touchend', onTouchEnd, { passive: true });
-
-    const onResize = () => renderer.sizeToViewport();
-    window.addEventListener('resize', onResize);
-
-    this.cleanup = () => {
-      window.removeEventListener('keydown', onKey);
-      window.removeEventListener('resize', onResize);
-    };
+    this.bindDpad(dpad, doMove);
+    window.addEventListener('resize', () => renderer.sizeToViewport());
+    this.cleanup = () => window.removeEventListener('keydown', onKey);
   }
 
-  // Diptych: two boards, one input drives both, win only when both are solved.
   private playDiptych(level: Level, resumeLog?: MoveToken[]): void {
-    const id = level.id;
     const game = new DiptychGame(level);
-    if (resumeLog && resumeLog.length) game.loadTokens(resumeLog);
-    const saveVisit = () => setLastPlayed(this.progress, { id, at: Date.now(), log: [...game.log], won: game.solved });
+    if (resumeLog?.length) game.loadTokens(resumeLog);
+    const saveVisit = () => setLastPlayed(this.progress, { id: level.id, at: Date.now(), log: [...game.log], won: game.solved });
     saveVisit();
-
-    const title = h('div', { class: 'title wordmark' }, level.name, h('small', {}, level.subtitle));
-    const back = h('button', { class: 'ghost' }, '← 关卡');
-    back.onclick = () => { saveVisit(); this.showMenu(); };
-    const helpBtn = h('button', { class: 'ghost', title: '机制图鉴' }, '?');
-    helpBtn.onclick = () => this.showCodex();
-    const topbar = h('div', { class: 'topbar' }, title, h('div', { class: 'top-actions' }, helpBtn, back));
 
     const movesEl = h('b', {}, '0');
     const pushesEl = h('b', {}, '0');
     const blockedEl = h('span', { class: 'blocked-feedback', 'aria-live': 'polite' } as Partial<HTMLSpanElement>);
-    const bestVal = this.progress.best[id];
-    const hud = h(
-      'div',
-      { class: 'hud' },
+    const hud = h('div', { class: 'hud chamber-hud' },
       h('span', { class: 'stat' }, '步数 ', movesEl),
       h('span', { class: 'stat' }, '推动 ', pushesEl),
+      h('span', { class: 'stat' }, `参考 ${level.par ?? '-'}`),
       blockedEl,
-      h('span', { class: 'spacer' }),
-      h('span', { class: 'stat' }, `参考 ${level.par ?? '—'}`),
-      h('span', { class: 'stat' }, bestVal !== undefined ? `最佳 ${bestVal}` : ''),
     );
 
-    const wrapA = h('div', { class: 'board-wrap' });
-    const wrapB = h('div', { class: 'board-wrap' });
+    const back = h('button', { class: 'ghost' }, '返回星图');
+    back.onclick = () => { saveVisit(); this.showMenu(); };
+    const topbar = h('div', { class: 'topbar chamber-top' },
+      h('div', { class: 'title' }, h('span', {}, level.chapter ?? ''), h('h1', {}, level.name), h('small', {}, level.subtitle)),
+      h('div', { class: 'top-actions' }, h('button', { class: 'ghost', onclick: () => this.showCodex() } as Partial<HTMLButtonElement>, '研究笔记'), back),
+    );
+
+    const wrapA = h('div', { class: 'board-wrap experiment-table branch-a' });
+    const wrapB = h('div', { class: 'board-wrap experiment-table branch-b' });
     const rendererA = new BoardRenderer(wrapA);
     const rendererB = new BoardRenderer(wrapB);
     rendererA.mount(level);
     rendererB.mount(level.twin!);
     rendererA.update(game.a);
     rendererB.update(game.b);
-    const pair = h('div', { class: 'diptych' }, wrapA, wrapB);
 
+    const pair = h('div', { class: 'diptych branch-lanes' },
+      h('div', { class: 'branch-panel' }, h('b', {}, 'Branch A'), wrapA),
+      h('div', { class: 'branch-panel' }, h('b', {}, level.mirrorTwin ? 'Mirror B' : 'Branch B'), wrapB),
+    );
     const undoBtn = h('button', {}, '撤销');
     const restartBtn = h('button', {}, '重开');
-    const hint = level.mirrorTwin
-      ? '两块棋盘一起动 · 右盘左右相反 · Shift+方向 拉箱 · Z 撤销 · R 重开'
-      : '一次输入，两块棋盘一起动 · 两边都要解开 · Z 撤销 · R 重开';
-    const controls = h('div', { class: 'controls' }, undoBtn, restartBtn,
-      h('span', { class: 'spacer' }), h('span', { class: 'hint-keys' }, hint));
+    const controls = h('div', { class: 'controls' }, undoBtn, restartBtn, h('span', { class: 'hint-keys' }, '一次输入驱动两条世界线；Z 撤销，R 重开'));
+    const dpad = this.dpad();
 
-    const dpad = h('div', { class: 'dpad' },
-      h('button', { class: 'up' }, '↑'), h('button', { class: 'left' }, '←'),
-      h('button', { class: 'right' }, '→'), h('button', { class: 'down' }, '↓'));
-    const [upB, leftB, rightB, downB] = dpad.querySelectorAll('button');
-
-    const screen = h('div', { class: 'game' }, topbar, hud);
-    screen.append(this.mechanicBar(level));
-    if (level.intro && !this.progress.completed[id]) screen.append(this.introBanner(level));
-    screen.append(pair, controls, dpad);
+    const screen = h('div', { class: 'game chamber-screen' }, topbar, hud, this.mechanicBar(level), this.instruments(level));
+    if (level.intro && !this.progress.completed[level.id]) screen.append(this.observationLog(level));
+    screen.append(h('div', { class: 'experiment-panel' }, pair), controls, dpad);
     this.swap(screen);
 
-    const refreshControls = () => {
+    const refresh = () => {
       (undoBtn as HTMLButtonElement).disabled = !game.canUndo;
       movesEl.textContent = String(game.moves);
       pushesEl.textContent = String(game.pushes);
     };
-    refreshControls();
+    refresh();
 
     let locked = false;
     const doMove = (dir: Dir, pull = false) => {
@@ -659,158 +655,109 @@ export class App {
       this.setBlocked(blockedEl, null);
       rendererA.update(game.a, res.a.effect);
       rendererB.update(game.b, res.b.effect);
-      refreshControls();
+      refresh();
+      saveVisit();
       if (game.solved) {
         locked = true;
-        window.setTimeout(() => this.win(level, game), 360);
+        window.setTimeout(() => this.win(level, game), 340);
       }
     };
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key in KEY_DIR) {
-        e.preventDefault();
-        doMove(KEY_DIR[e.key]!, e.shiftKey);
-      } else if (e.key === 'z' || e.key === 'Z') {
-        if (game.undo()) { this.setBlocked(blockedEl, null); rendererA.update(game.a); rendererB.update(game.b); refreshControls(); }
-      } else if (e.key === 'r' || e.key === 'R') {
-        game.restart(); this.setBlocked(blockedEl, null); rendererA.update(game.a); rendererB.update(game.b); refreshControls();
-      } else if (e.key === 'Escape') {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key in KEY_DIR) {
+        event.preventDefault();
+        doMove(KEY_DIR[event.key]!, event.shiftKey);
+      } else if (event.key === 'z' || event.key === 'Z') {
+        if (game.undo()) {
+          rendererA.update(game.a);
+          rendererB.update(game.b);
+          refresh();
+        }
+      } else if (event.key === 'r' || event.key === 'R') {
+        game.restart();
+        rendererA.update(game.a);
+        rendererB.update(game.b);
+        refresh();
+      } else if (event.key === 'Escape') {
         saveVisit();
         this.showMenu();
       }
     };
     window.addEventListener('keydown', onKey);
-
-    undoBtn.onclick = () => { if (game.undo()) { this.setBlocked(blockedEl, null); rendererA.update(game.a); rendererB.update(game.b); refreshControls(); } };
-    restartBtn.onclick = () => { game.restart(); this.setBlocked(blockedEl, null); rendererA.update(game.a); rendererB.update(game.b); refreshControls(); };
-    upB!.onclick = () => doMove('up');
-    downB!.onclick = () => doMove('down');
-    leftB!.onclick = () => doMove('left');
-    rightB!.onclick = () => doMove('right');
-
-    let sx = 0, sy = 0;
-    const onTouchStart = (e: TouchEvent) => { const t = e.changedTouches[0]!; sx = t.clientX; sy = t.clientY; };
-    const onTouchEnd = (e: TouchEvent) => {
-      const t = e.changedTouches[0]!;
-      const dx = t.clientX - sx, dy = t.clientY - sy;
-      if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
-      doMove(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up');
+    undoBtn.onclick = () => {
+      if (game.undo()) {
+        rendererA.update(game.a);
+        rendererB.update(game.b);
+        refresh();
+      }
     };
-    pair.addEventListener('touchstart', onTouchStart, { passive: true });
-    pair.addEventListener('touchend', onTouchEnd, { passive: true });
-
-    const sizeBoth = () => {
-      const half = Math.min(window.innerWidth * 0.94, 720) / 2;
-      rendererA.sizeToViewport(half);
-      rendererB.sizeToViewport(half);
+    restartBtn.onclick = () => {
+      game.restart();
+      rendererA.update(game.a);
+      rendererB.update(game.b);
+      refresh();
     };
-    sizeBoth();
-    const onResize = () => sizeBoth();
-    window.addEventListener('resize', onResize);
-
-    this.cleanup = () => {
-      window.removeEventListener('keydown', onKey);
-      window.removeEventListener('resize', onResize);
-    };
+    this.bindDpad(dpad, doMove);
+    this.cleanup = () => window.removeEventListener('keydown', onKey);
   }
 
-  private introBanner(level: Level): HTMLElement {
-    const dismiss = h('button', { class: 'ghost' }, '知道了');
-    const banner = h(
-      'div',
-      { class: 'intro' },
-      h('span', {}, level.intro),
-      dismiss,
+  private observationLog(level: Level): HTMLElement {
+    return h('div', { class: 'observation-log' }, h('b', {}, '观测注记'), h('span', {}, level.intro));
+  }
+
+  private dpad(): HTMLElement {
+    return h('div', { class: 'dpad' },
+      h('button', { class: 'up' }, '↑'),
+      h('button', { class: 'left' }, '←'),
+      h('button', { class: 'right' }, '→'),
+      h('button', { class: 'down' }, '↓'),
     );
-    dismiss.onclick = () => banner.remove();
-    return banner;
   }
 
-  // ---------------- win ----------------
+  private bindDpad(dpad: HTMLElement, handler: (dir: Dir) => void): void {
+    (dpad.querySelector('.up') as HTMLButtonElement).onclick = () => handler('up');
+    (dpad.querySelector('.down') as HTMLButtonElement).onclick = () => handler('down');
+    (dpad.querySelector('.left') as HTMLButtonElement).onclick = () => handler('left');
+    (dpad.querySelector('.right') as HTMLButtonElement).onclick = () => handler('right');
+  }
 
   private win(level: Level, game: Game | DiptychGame): void {
     setLastPlayed(this.progress, { id: level.id, at: Date.now(), log: [...game.log], won: true });
-    const par = level.par ?? Infinity;
     const outcome = recordClear(this.progress, level.id, {
       moves: game.moves,
       pushes: game.pushes,
-      par,
+      par: level.par ?? Infinity,
       usedUndo: game.usedUndo,
     });
-    const newChain = recordChainNode(this.progress, level.chain);
     void submitScore(level.id, game.moves, game.pushes, game.log);
 
-    const idx = this.order.indexOf(level.id);
-    const nextId = idx >= 0 ? this.order[idx + 1] : undefined;
-
-    const badge =
-      outcome.parHit
-        ? h('div', { class: 'badge' }, '达到参考最优 ✦')
-        : h('div', { class: 'badge' }, `参考 ${level.par} 步`);
-
-    // Challenge medals: par (≤ par moves) and clean (no undo). Newly earned ones
-    // get a highlight; these never gate progress — just replay value.
-    const medals = h('div', { class: 'win-medals' });
-    medals.append(
-      h('span', { class: `chip${outcome.parHit ? ' on' : ''}${outcome.firstParHit ? ' fresh' : ''}` },
-        `达标 ✦ ${outcome.parHit ? '已达成' : '未达成'}`),
-      h('span', { class: `chip${outcome.clean ? ' on' : ''}${outcome.firstClean ? ' fresh' : ''}` },
-        `零撤销 ⟳ ${outcome.clean ? '已达成' : '本局有撤销'}`),
-    );
-
-    const actions = h('div', { class: 'actions' });
-    const menuBtn = h('button', {}, '关卡列表');
-    menuBtn.onclick = () => {
+    const index = this.order.indexOf(level.id);
+    const nextId = index >= 0 ? this.order[index + 1] : undefined;
+    const nextButton = nextId
+      ? h('button', { class: 'primary' }, '下一实验')
+      : h('button', { class: 'primary' }, '返回主控台');
+    nextButton.onclick = () => {
+      overlay.remove();
+      if (nextId) this.playLevel(nextId);
+      else this.showMenu();
+    };
+    const mapButton = h('button', {}, '世界线星图');
+    mapButton.onclick = () => {
       overlay.remove();
       this.showMenu();
     };
-    actions.append(menuBtn);
-    if (nextId) {
-      const nextBtn = h('button', { class: 'primary' }, '下一关 →');
-      nextBtn.onclick = () => {
-        overlay.remove();
-        this.playLevel(nextId);
-      };
-      actions.append(nextBtn);
-    } else {
-      const doneBtn = h('button', { class: 'primary' }, '完成全部 ✓');
-      doneBtn.onclick = () => {
-        overlay.remove();
-        this.showMenu();
-      };
-      actions.append(doneBtn);
-    }
 
-    const chainResult = level.chain
-      ? h('p', { class: `chain-result${newChain ? ' fresh' : ''}` }, `${newChain ? '新链路激活' : '链路已记录'}：${level.chain.label}`)
-      : null;
-
-    const card = h(
-      'div',
-      { class: 'card' },
-      h('h2', { class: 'wordmark' }, nextId ? '过关' : '通关全部'),
-      badge,
-      h(
-        'p',
-        { class: 'result' },
-        ...[
-          h('span', {}, '用 '),
-          h('b', {}, String(game.moves)),
-          h('span', {}, ' 步、'),
-          h('b', {}, String(game.pushes)),
-          h('span', {}, ' 次推动完成。'),
-          ...(outcome.fresh ? [h('br'), h('span', {}, '刷新了你的最佳记录。')] : []),
-          ...(outcome.newPush && !outcome.fresh ? [h('br'), h('span', {}, '刷新了最少推动数。')] : []),
-        ],
+    const card = h('div', { class: 'card win-collapse' },
+      h('div', { class: 'collapse-core' }),
+      h('h2', {}, '实验稳定'),
+      h('p', { class: 'result' }, `世界线收束于 ${game.moves} 步 / ${game.pushes} 推。${outcome.parHit ? '达到参考稳定线。' : '已记录 replay，可继续优化。'}`),
+      h('div', { class: 'win-medals' },
+        h('span', { class: `chip${outcome.parHit ? ' on' : ''}` }, outcome.parHit ? 'PAR 稳定' : 'PAR 待优化'),
+        h('span', { class: `chip${outcome.clean ? ' on' : ''}` }, outcome.clean ? '无撤销' : '使用过撤销'),
       ),
-      ...(chainResult ? [chainResult] : []),
-      medals,
-      actions,
+      h('div', { class: 'actions' }, mapButton, nextButton),
     );
     const overlay = h('div', { class: 'overlay' }, card);
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.remove();
-    });
     this.root.append(overlay);
   }
 }

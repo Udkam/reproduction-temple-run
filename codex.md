@@ -447,3 +447,53 @@ Next steps:
 
 - Commit and push Stage 9B.
 - Continue by replacing the rejected runtime with the accepted redesign slice.
+
+### Stage 10: Worldline Lab 20-level redesign slice
+
+Phase: accepted redesign slice implementation and verification.
+
+Actions taken:
+
+- Replaced the public runtime with 20 `v7r-*` redesign slice levels across startup, quantum link, sync, time echo, spatial swap, recursive chamber, and misdirection/worldline chapters.
+- Switched `audit:levels` to slice mode: exactly 20 levels, required redesign mechanics, metadata depth, no one-step water levels, active spatial-swap probe, recursive entry-core check, and worldline twin-state check.
+- Rebuilt the active UI around a quantum experiment console, worldline star graph, chamber experiment panel, mechanism instruments, and quantum drone state sheet.
+- Updated `audit:ui`, `smoke:ui`, and `smoke:visual` to use the new worldline-node navigation instead of the rejected card-grid route.
+- Updated README, `claude.md`, v7 acceptance report, puzzle grammar, content audit, and 20-level report so they describe the current 20-level slice honestly without claiming final 70-level completion.
+- Regenerated the Stage 10 Playwright screenshot set under `docs/v7-loop/v7-loop-20260623-195154-f683/screenshots/`.
+
+Verification commands and results:
+
+- `npm run typecheck`: passed.
+- `npm run verify`: passed for 20/20 redesign slice levels.
+- `npm run audit:levels`: passed with one warning that all slice levels rely on replay/manual validation.
+- `npm run audit:ui`: passed.
+- `npm run audit:content`: passed.
+- `npm run smoke:api`: passed; `/api/levels` returns 20 and all stored replays are accepted.
+- `npm run smoke:ui`: passed for all 20 levels through jsdom UI.
+- `npm run smoke:visual`: passed and regenerated 13 redesign screenshots.
+- `npm run build`: passed.
+- Manual screenshot spot-check: home console/worldline graph/character state sheet, level 001, and mobile time-echo chamber were inspected.
+
+Changed files:
+
+- `src/engine/v7Levels.ts`
+- `src/web/ui.ts`
+- `src/web/styles.css`
+- `src/web/render.ts`
+- `scripts/audit-levels.ts`
+- `scripts/audit-ui.ts`
+- `scripts/audit-content.ts`
+- `scripts/smoke-ui.ts`
+- `scripts/smoke-visual.ts`
+- README, `claude.md`, v7 loop docs, screenshots, and `codex.md`
+
+Risks:
+
+- This is a verified 20-level redesign slice, not the final 70-level product.
+- Recursive-room and rule-block behavior are intentionally lightweight in this slice.
+- The level corpus still relies on stored replay/manual validation; deeper mechanism-specific solvers remain future work.
+
+Next steps:
+
+- Commit and push Stage 10.
+- After visual/product review, either deepen this slice or expand toward 70 levels using the new grammar and stricter level-quality gates.

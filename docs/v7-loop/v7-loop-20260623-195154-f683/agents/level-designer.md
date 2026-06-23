@@ -80,3 +80,32 @@ Review notes:
 Next handoff:
 
 - Engine and frontend should implement enough system support before finalizing level data.
+## Stage 10 Update
+
+Agent: level-designer
+
+Task clarity: clear
+Capability fit: good
+Questions needed: none
+Assumptions: The active gate is exactly 20 redesign slice levels.
+Proceed decision: proceed
+
+decisions made:
+- Accepted the 4/3/3/3/3/2/2 chapter distribution for the slice.
+- Required all slice levels to carry design metadata and stored replay solutions.
+- Required `audit:levels` to reject missing metadata, one-step water levels, missing active swap, missing recursive entry core, and worldline levels without twin state.
+
+files touched:
+- `src/engine/v7Levels.ts`
+- `scripts/audit-levels.ts`
+- `docs/v7-loop/v7-loop-20260623-195154-f683/06-level-design-matrix.md`
+
+risks:
+- All slice levels rely on replay/manual status.
+- Full 70-level variety is not yet delivered.
+
+review notes:
+- The current level corpus is acceptable as a slice gate only.
+
+next handoff:
+- Before 70-level expansion, create chapter-by-chapter quality gates for depth, non-isomorphism, and manual sample-play notes.

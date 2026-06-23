@@ -2,7 +2,7 @@
 
 RUN_ID: `v7-loop-20260623-195154-f683`
 
-Status: design grammar for the new 20-level vertical slice. No level may enter the accepted runtime catalog without a matching design note and replay.
+Status: design grammar for the implemented 20-level vertical slice. No level may enter the accepted runtime catalog without a matching design note and replay.
 
 ## Level Design Note Template
 
@@ -306,27 +306,27 @@ What not to do:
 
 ## 20-Level Slice Seeds
 
-These are not accepted levels yet. They are seeds that must become runtime levels only after implementation, replay verification, and QA.
+These seeds now exist as runtime levels in the Stage 10 redesign slice. Their current acceptance is limited to stored replay/manual validation and redesign-slice QA; they are not final 70-level acceptance.
 
 | ID | Group | Core system | Core question | Aha | Status |
 | --- | --- | --- | --- | --- | --- |
-| v7r-001 | Startup | core push + lab rails | How does a core stabilize a field node? | Goals are lab stabilizers, not old targets. | planned |
-| v7r-002 | Startup | blocker feedback | Why did the push fail? | The chamber explains wall/core/gate blockers. | planned |
-| v7r-003 | Startup | rule socket intro | What changes when `PUSH` is socketed? | Push is a local experiment parameter. | planned |
-| v7r-004 | Startup | false path | Why is the short route wrong? | The fair clue is visible before commitment. | planned |
-| v7r-005 | Quantum link | portal preserve | How does a link change adjacency? | The exit is the real neighbor. | planned |
-| v7r-006 | Quantum link | portal rotate | What does orientation do to a push? | Direction is part of the link law. | planned |
-| v7r-007 | Quantum link | portal + rule | Which objects may pass? | A parameter limits link traversal. | planned |
-| v7r-008 | Sync | same-direction pair | How can one input solve two routes? | One drone brakes against terrain. | planned |
-| v7r-009 | Sync | mirrored pair | How does symmetry become useful? | Mirrored motion aligns a heavy core. | planned |
-| v7r-010 | Sync | sync + rule | Can a rule affect only one drone lane? | Local sockets break obvious symmetry. | planned |
-| v7r-011 | Time echo | delayed plate | How do I use my past route? | The echo holds a gate after I leave. | planned |
-| v7r-012 | Time echo | echo push | Can the echo push for me? | Create a future push before needing it. | planned |
-| v7r-013 | Time echo | echo collision | Why is the direct route bad? | The visible queue predicts collision. | planned |
-| v7r-014 | Spatial swap | cell swap | What changes when two cells exchange? | The route, not just position, changes. | planned |
-| v7r-015 | Spatial swap | target/core swap | When should the target move? | Finish condition can be repositioned fairly. | planned |
-| v7r-016 | Spatial swap | swap + portal | How do two spatial laws interact? | Portal exits can be re-paired. | planned |
-| v7r-017 | Recursive | enter container | What is inside a chamber-core? | Inner completion changes outer property. | planned |
-| v7r-018 | Recursive | move container | Why move a room before entering it? | Outer position changes inner exit value. | planned |
-| v7r-019 | Misdirection | worldline split | Why does one solved branch still fail? | Merge compatibility is the real goal. | planned |
-| v7r-020 | Misdirection | combined boss | Which law is the actual constraint? | Rule block plus echo exposes the false path. | planned |
+| v7r-001 | Startup | core push + lab rails | How does a core stabilize a field node? | Goals are lab stabilizers, not old targets. | implemented |
+| v7r-002 | Startup | blocker feedback | Why did the push fail? | The chamber explains wall/core/gate blockers. | implemented |
+| v7r-003 | Startup | rule socket intro | What changes when `PUSH` is socketed? | Push is a local experiment parameter. | implemented |
+| v7r-004 | Startup | false path | Why is the short route wrong? | The fair clue is visible before commitment. | implemented |
+| v7r-005 | Quantum link | portal preserve | How does a link change adjacency? | The exit is the real neighbor. | implemented |
+| v7r-006 | Quantum link | portal rotate | What does orientation do to a push? | Direction is part of the link law. | implemented |
+| v7r-007 | Quantum link | portal + rule | Which objects may pass? | A parameter limits link traversal. | implemented |
+| v7r-008 | Sync | same-direction pair | How can one input solve two routes? | One drone brakes against terrain. | implemented |
+| v7r-009 | Sync | mirrored pair | How does symmetry become useful? | Mirrored motion aligns a heavy core. | implemented |
+| v7r-010 | Sync | sync + rule | Can a rule affect only one drone lane? | Local sockets break obvious symmetry. | implemented |
+| v7r-011 | Time echo | delayed plate | How do I use my past route? | The echo holds a gate after I leave. | implemented |
+| v7r-012 | Time echo | echo push | Can the echo push for me? | Create a future push before needing it. | implemented |
+| v7r-013 | Time echo | echo collision | Why is the direct route bad? | The visible queue predicts collision. | implemented |
+| v7r-014 | Spatial swap | cell swap | What changes when two cells exchange? | The route, not just position, changes. | implemented |
+| v7r-015 | Spatial swap | target/core swap | When should the target move? | Finish condition can be repositioned fairly. | implemented |
+| v7r-016 | Spatial swap | swap + portal | How do two spatial laws interact? | Portal exits can be re-paired. | implemented |
+| v7r-017 | Recursive | enter container | What is inside a chamber-core? | Inner completion changes outer property. | implemented |
+| v7r-018 | Recursive | move container | Why move a room before entering it? | Outer position changes inner exit value. | implemented |
+| v7r-019 | Misdirection | worldline split | Why does one solved branch still fail? | Merge compatibility is the real goal. | implemented |
+| v7r-020 | Misdirection | combined boss | Which law is the actual constraint? | Rule block plus echo exposes the false path. | implemented |

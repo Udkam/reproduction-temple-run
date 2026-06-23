@@ -105,3 +105,33 @@ Review notes:
 Next handoff:
 
 - Start from new screen composition and component boundaries before wiring level data.
+## Stage 10 Update
+
+Agent: frontend-engineer
+
+Task clarity: clear
+Capability fit: good
+Questions needed: none
+Assumptions: The app remains plain DOM + Vite; no framework migration.
+Proceed decision: proceed
+
+decisions made:
+- Reworked navigation tests around `.worldline-node` instead of `.level-card`.
+- Added CSS for quantum console, worldline graph, chamber screen, branch lanes, character state sheet, and victory collapse.
+- Kept mobile d-pad and board scaling active.
+
+files touched:
+- `src/web/ui.ts`
+- `src/web/styles.css`
+- `scripts/audit-ui.ts`
+- `scripts/smoke-ui.ts`
+- `scripts/smoke-visual.ts`
+
+risks:
+- Visual layout is screenshot-tested but not yet tested across many intermediate viewport widths.
+
+review notes:
+- `audit:ui`, `smoke:ui`, `smoke:visual`, and `build` passed after the redesign CSS and selector updates.
+
+next handoff:
+- Add viewport matrix checks before broad public release.

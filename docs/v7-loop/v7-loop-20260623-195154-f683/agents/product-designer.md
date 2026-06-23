@@ -77,3 +77,32 @@ Review notes:
 Next handoff:
 
 - Frontend and art agents should build the console/worldline/chamber structure from the new UI spec, not mutate the old card shell.
+## Stage 10 Update
+
+Agent: product-designer
+
+Task clarity: clear
+Capability fit: good
+Questions needed: none
+Assumptions: Stage 10 is a 20-level proof slice and must not be marketed as final 70-level completion.
+Proceed decision: proceed
+
+decisions made:
+- Accepted the runtime direction shift to `Worldline Lab`: quantum experiment console, worldline map, chamber panel, and drone state sheet.
+- Required top-level docs to state "20-level slice, not final 70-level product."
+
+files touched:
+- `README.md`
+- `claude.md`
+- `docs/v7-loop/v7-loop-20260623-195154-f683/10-acceptance-report.md`
+- `docs/v7-loop/v7-loop-20260623-195154-f683/15-vertical-slice-20-report.md`
+
+risks:
+- Final 70-level scope remains incomplete.
+- The slice still needs human product review beyond automated screenshots.
+
+review notes:
+- Reject any future claim that Stage 10 equals final v7 completion.
+
+next handoff:
+- QA should judge whether the new screenshots truly break away from the rejected card-grid route before 70-level expansion resumes.

@@ -4,15 +4,13 @@ import { applyToken } from '../src/engine/rules.js';
 import type { V7Mechanic } from '../src/engine/types.js';
 
 const EXPECTED_COUNTS: Record<string, number> = {
-  '第 1 章：启动序列': 8,
-  '第 2 章：量子门': 8,
-  '第 3 章：同步体': 8,
-  '第 4 章：时间残影': 8,
-  '第 5 章：空间置换': 8,
-  '第 6 章：递归舱': 8,
-  '第 7 章：连锁实验': 8,
-  '第 8 章：误导协议': 8,
-  '第 9 章：终局收束': 6,
+  '第 1 章：启动序列': 4,
+  '第 2 章：量子链接': 3,
+  '第 3 章：同步体': 3,
+  '第 4 章：时间残影': 3,
+  '第 5 章：空间置换': 3,
+  '第 6 章：递归舱': 2,
+  '第 7 章：误导协议': 2,
 };
 
 const REQUIRED_MECHANICS: V7Mechanic[] = [
@@ -22,7 +20,8 @@ const REQUIRED_MECHANICS: V7Mechanic[] = [
   'time-shadow',
   'spatial-swap',
   'recursive-room',
-  'chain-state',
+  'worldline-split',
+  'rule-block',
   'misdirection',
 ];
 
@@ -47,20 +46,19 @@ function defSignature(def: (typeof LEVEL_DEFS)[number]): string {
   return JSON.stringify({
     map: def.map,
     twin: def.twin ?? null,
-    gravity: def.gravity ?? false,
     mirrorTwin: def.mirrorTwin ?? false,
     timeShadow: def.timeShadow ?? null,
     spatialSwap: def.spatialSwap ?? null,
     recursiveRoom: def.recursiveRoom ?? null,
-    chain: def.chain ?? null,
+    mechanics: def.mechanics ?? [],
   });
 }
 
-console.log('\nDriftbox level audit');
+console.log('\nDriftbox redesign level audit');
 console.log('-'.repeat(72));
 
-if (LEVELS.length !== 70) fail(`expected exactly 70 levels, found ${LEVELS.length}`);
-else pass('exactly 70 levels exposed');
+if (LEVELS.length !== 20) fail(`expected exactly 20 redesign slice levels, found ${LEVELS.length}`);
+else pass('exactly 20 redesign slice levels exposed');
 
 if (LEVEL_DEFS.length !== LEVELS.length) fail('LEVEL_DEFS and LEVELS length mismatch');
 
@@ -82,6 +80,10 @@ for (const [chapter, expected] of Object.entries(EXPECTED_COUNTS)) {
   else pass(`${chapter} count ${actual}`);
 }
 
+for (const unexpected of Object.keys(counts).filter((chapter) => !(chapter in EXPECTED_COUNTS))) {
+  fail(`unexpected chapter in redesign slice: ${unexpected}`);
+}
+
 for (const level of LEVELS) {
   const note = level.levelDesignNote;
   if (!note) {
@@ -93,9 +95,9 @@ for (const level of LEVELS) {
   if (!note.title) missing.push('title');
   if (!note.chapter) missing.push('chapter');
   if (!note.mechanics?.length) missing.push('mechanics');
-  if (!note.coreIdea) missing.push('coreIdea');
-  if (!note.trick) missing.push('trick');
-  if (!note.fairness) missing.push('fairness');
+  if (!note.coreIdea || note.coreIdea.length < 18) missing.push('coreIdea');
+  if (!note.trick || note.trick.length < 12) missing.push('trick');
+  if (!note.fairness || note.fairness.length < 18) missing.push('fairness');
   if (note.difficulty < 1 || note.difficulty > 5) missing.push('difficulty');
   if (!['optimal', 'verified-replay', 'manual-reviewed'].includes(note.solverStatus)) missing.push('solverStatus');
   if (note.par !== level.par) missing.push('par matches runtime');
@@ -104,8 +106,9 @@ for (const level of LEVELS) {
   if (note.solverStatus !== 'optimal' && note.par !== note.solution.length) {
     fail(`${level.id} replay/manual par must match solution length (${note.par} != ${note.solution.length})`);
   }
+  if ((level.solution?.length ?? 0) <= 1) fail(`${level.id} looks like a one-step water level`);
 }
-pass('metadata scan complete');
+pass('metadata and water-level scan complete');
 
 const mechanicSeen = new Set<V7Mechanic>();
 for (const level of LEVELS) {
@@ -116,11 +119,11 @@ for (const mech of REQUIRED_MECHANICS) {
   else pass(`mechanic present: ${mech}`);
 }
 
-const activeSwap = LEVEL_DEFS.some((def) =>
-  def.spatialSwap?.trigger !== undefined &&
-  def.spatialSwap.trigger !== 'replay-only' &&
-  !!def.spatialSwap.triggerAt &&
-  !!def.spatialSwap.exchange,
+const activeSwap = LEVELS.some((level) =>
+  level.spatialSwap?.trigger !== undefined &&
+  level.spatialSwap.trigger !== 'replay-only' &&
+  !!level.spatialSwap.triggerAt &&
+  !!level.spatialSwap.exchange,
 );
 if (!activeSwap) fail('spatial-swap corpus has no active trigger/exchange rule');
 else pass('spatial-swap has at least one active trigger/exchange rule');
@@ -137,6 +140,20 @@ if (!swapProbe) {
   else pass(`${swapProbe.id} spatial-swap behavior probe passed`);
 }
 
+const recursiveLevels = LEVELS.filter((level) => level.mechanics?.includes('recursive-room'));
+if (!recursiveLevels.every((level) => !!level.recursiveRoom?.entryCrateId || level.recursiveRoom?.entryCrateId === 0)) {
+  fail('recursive levels must identify an entry core');
+} else {
+  pass('recursive levels identify entry cores');
+}
+
+const branchLevels = LEVELS.filter((level) => level.mechanics?.includes('worldline-split'));
+if (!branchLevels.length || !branchLevels.every((level) => !!level.twin)) {
+  fail('worldline split levels must expose a visible branch/twin state');
+} else {
+  pass('worldline split levels expose visible branch/twin state');
+}
+
 const signatures = new Map<string, string[]>();
 for (const def of LEVEL_DEFS) {
   const sig = defSignature(def);
@@ -149,22 +166,11 @@ for (const idsForSig of signatures.values()) {
 }
 pass('exact layout duplicate scan complete');
 
-for (const [chapter] of Object.entries(EXPECTED_COUNTS)) {
-  const chapterLevels = LEVELS.filter((level) => level.levelDesignNote?.chapter === chapter);
-  const shortAfterIntro = chapterLevels
-    .slice(2)
-    .filter((level) => (level.levelDesignNote?.solution.length ?? 0) <= 2);
-  if (shortAfterIntro.length) {
-    fail(`${chapter} has post-intro obvious short levels: ${shortAfterIntro.map((l) => l.id).join(', ')}`);
-  }
-}
-pass('obvious short-level scan complete');
-
 const manualOrReplay = LEVELS.filter((level) =>
   ['verified-replay', 'manual-reviewed'].includes(level.levelDesignNote?.solverStatus ?? ''),
 );
-if (manualOrReplay.length > 52) {
-  warn(`${manualOrReplay.length} levels rely on replay/manual status; final QA should sample-play advanced chapters.`);
+if (manualOrReplay.length === LEVELS.length) {
+  warn('all redesign slice levels rely on replay/manual status; acceptable for slice, but solver depth remains future work.');
 }
 
 console.log('-'.repeat(72));

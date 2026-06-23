@@ -534,3 +534,59 @@ Next step:
 
 - Commit and push Stage 9B to `origin main`.
 - Resume with the accepted redesign implementation target: replace the rejected runtime with the 20-level slice.
+
+## Stage 10: Worldline Lab 20-Level Redesign Slice
+
+Goal:
+
+- Replace the rejected 70-level runtime with the accepted `Worldline Lab` 20-level redesign slice.
+- Make the active game look and navigate like a new 2D sci-fi puzzle game: quantum experiment console, worldline star graph, chamber UI, and quantum drone state sheet.
+- Update verification so tests target the current slice honestly instead of passing the rejected route.
+
+Actual changes:
+
+- Exposed exactly 20 `v7r-*` levels with complete `levelDesignNote` metadata, stored solutions, and chapter counts of 4/3/3/3/3/2/2.
+- Covered required redesign mechanics: recursive-room, worldline-split, time-shadow, spatial-swap, sync-actors, rule-block, quantum-portal, and misdirection.
+- Switched `audit:levels` to 20-level slice mode and added checks for active spatial swap, recursive entry cores, worldline twin state, duplicate layouts, and water-level placeholders.
+- Rebuilt the UI around `.home-console`, `.worldline-graph`, `.chamber-screen`, `.experiment-panel`, mechanism instruments, and `.character-state-sheet`.
+- Added CSS for the new console, star graph, drone SVG state samples, chamber panels, branch lanes, and victory collapse.
+- Updated `audit:ui`, `smoke:ui`, and `smoke:visual` to drive worldline nodes instead of the rejected card grid.
+- Updated README, `claude.md`, `10-acceptance-report.md`, `13-puzzle-grammar.md`, `15-vertical-slice-20-report.md`, content audit, screenshots, and repo-local `codex.md`.
+
+Verification:
+
+- `npm run typecheck`: passed.
+- `npm run verify`: passed for 20/20 levels.
+- `npm run audit:levels`: passed with one warning: all redesign slice levels rely on replay/manual validation.
+- `npm run audit:ui`: passed.
+- `npm run audit:content`: passed.
+- `npm run smoke:api`: passed; `/api/levels` returns 20 and server replay accepts all stored solutions.
+- `npm run smoke:ui`: passed; all 20 levels play to a win through jsdom UI.
+- `npm run smoke:visual`: passed and regenerated the Stage 10 screenshot set.
+- `npm run build`: passed.
+- Manual screenshot spot-check: home/worldline/state sheet, level 001, and mobile time-echo chamber were inspected.
+
+Failure items:
+
+```text
+[FAIL] Final 70-level product acceptance
+Evidence: Stage 10 intentionally exposes 20 redesign slice levels, not the requested final 70.
+Root cause: Stage 9 product review rejected the first 70-level route; the loop reset to prove a better 20-level grammar before expansion.
+Fix plan: Do not claim final completion. Expand toward 70 only after this slice passes visual/product/puzzle QA.
+Files to change: future `src/engine/v7Levels.ts`, level matrix, audits, visual screenshots, and acceptance report.
+Re-test: full command gate plus renewed level-quality audit after expansion.
+```
+
+```text
+[FAIL] Solver-depth target
+Evidence: `npm run audit:levels` warns that all slice levels rely on replay/manual validation.
+Root cause: The slice prioritizes product redesign, deterministic replay, and mechanism coverage before mechanism-specific optimal solvers.
+Fix plan: Add targeted BFS/A* variants for classic, sync, time-shadow, and spatial-swap levels during the next gameplay-depth loop.
+Files to change: `src/engine/solver.ts`; `scripts/verify-levels.ts`; `src/engine/v7Levels.ts`.
+Re-test: npm run verify; npm run audit:levels.
+```
+
+Next step:
+
+- Commit and push Stage 10 to `origin main`.
+- Continue only from the `Worldline Lab` grammar: either deepen this 20-level slice or expand toward 70 with stricter puzzle-quality gates.

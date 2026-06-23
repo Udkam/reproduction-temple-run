@@ -6,9 +6,9 @@ Driftbox is in `v7-loop-20260623-195154-f683`.
 
 The previous v6 2.5D route is retired from the user-facing mainline.
 
-The first v7 70-level implementation checkpoint is now product-rejected. It still exists in the runtime until the next implementation stage replaces it, and its technical tests may pass, but it is not accepted as the final direction because the homepage, chapter map, chamber UI, role design, visual language, and level design still read too much like old Driftbox with a sci-fi skin.
+The first v7 70-level implementation checkpoint is product-rejected. It is no longer the public runtime, even though it remains in git history as evidence. It was rejected because the homepage, chapter map, chamber UI, role design, visual language, and level design still read too much like old Driftbox with a sci-fi skin.
 
-The active redesign target is a new 20-level vertical slice called `Driftbox: Worldline Lab`:
+The active runtime is now a 20-level vertical slice called `Driftbox: Worldline Lab`:
 
 - quantum experiment console home;
 - worldline/star graph chapter map;
@@ -17,6 +17,8 @@ The active redesign target is a new 20-level vertical slice called `Driftbox: Wo
 - six core systems: recursive space, worldline split, time echo, spatial swap, multi-drone sync, and rule-block parameters;
 - stored replay validation for every accepted slice level;
 - visual smoke screenshots proving the redesign is not the rejected card/grid route.
+
+This is a verified redesign slice, not the final 70-level target. Full 70-level expansion remains blocked until this slice passes visual/product/puzzle QA and a renewed level-quality loop.
 
 The v7 process log is under:
 
@@ -58,4 +60,4 @@ npm run smoke:visual
 npm run build
 ```
 
-Important: until the redesign implementation lands, these commands validate the rejected checkpoint and the process/documentation guardrails, not final product acceptance.
+Important: these commands validate the current 20-level redesign slice and process guardrails, not final 70-level product acceptance.

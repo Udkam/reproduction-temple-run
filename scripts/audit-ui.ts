@@ -21,72 +21,72 @@ g.KeyboardEvent = w.KeyboardEvent;
 g.requestAnimationFrame = w.requestAnimationFrame.bind(w);
 
 const root = w.document.getElementById('app')!;
-const allDone = Object.fromEntries(LEVELS.map((level) => [level.id, true]));
-w.localStorage.setItem('driftbox.progress.v7', JSON.stringify({ completed: allDone, best: {}, bestPush: {}, parHit: {}, clean: {} }));
-
 const app = new App(root as unknown as HTMLElement, LEVELS);
 app.start();
 
 const text = () => root.textContent ?? '';
 const buttonByText = (needle: string): HTMLElement | undefined =>
-  [...root.querySelectorAll('button')].find((b) => (b.textContent ?? '').includes(needle)) as HTMLElement | undefined;
+  [...root.querySelectorAll('button')].find((button) => (button.textContent ?? '').includes(needle)) as HTMLElement | undefined;
 
-console.log('\nDriftbox UI audit');
+console.log('\nDriftbox redesign UI audit');
 console.log('-'.repeat(72));
 
-check(!!root.querySelector('.home-deck'), 'home command deck exists');
-check(!!root.querySelector('#chapter-map'), 'chapter star map exists');
-check(!!buttonByText('继续实验'), 'primary continue action exists');
-check(!!buttonByText('章节星图'), 'chapter map action exists');
-check(!!buttonByText('机制档案'), 'mechanism archive action exists');
-check(!!buttonByText('挑战记录'), 'challenge records action exists');
-check(!!buttonByText('设置'), 'settings action exists');
-check(!!root.querySelector('.screen-view.enter'), 'page transition enter class exists');
-check(!text().includes('立体演示') && !text().includes('2.5D'), 'no visible 2.5D/3D entry text on home');
+check(!!root.querySelector('.home-console'), 'quantum experiment console home exists');
+check(!!root.querySelector('.observer-shell') && !!root.querySelector('.observer-core'), 'central observer device exists');
+check(!!buttonByText('恢复实验'), 'resume experiment command exists');
+check(!!buttonByText('世界线星图'), 'worldline map command exists');
+check(!!buttonByText('研究笔记'), 'research notes command exists');
+check(!!buttonByText('实验数据'), 'experiment data command exists');
+check(!!buttonByText('系统校准'), 'system calibration command exists');
+check(!!root.querySelector('.worldline-section'), 'worldline section exists');
+check(!!root.querySelector('svg.worldline-map'), 'worldline SVG map exists');
+check(root.querySelectorAll('.worldline-edge').length >= LEVELS.length - 1, 'worldline edges connect levels');
+check(root.querySelectorAll('.worldline-node').length === 20, '20 worldline level nodes exist');
+check(!!root.querySelector('.boss-node'), 'boss node shape exists');
+check(!!root.querySelector('.character-state-sheet'), 'character state sheet exists');
+check(root.querySelectorAll('.state-row').length >= 9, 'character sheet lists required states');
+check(!root.querySelector('.level-grid'), 'card-grid level selector is absent');
+check(!text().includes('2.5D') && !text().includes('立体演示'), 'no visible 2.5D/3D entry text');
 
-buttonByText('机制档案')?.click();
+buttonByText('研究笔记')?.click();
 check(!!root.querySelector('.codex'), 'mechanism archive overlay opens');
-check(
-  ['时间残影', '量子门', '空间置换', '递归舱', '连锁实验', '误导协议'].every((label) => text().includes(label)),
-  'mechanism archive contains core and advanced v7 mechanisms',
-);
+check(['递归空间', '世界线分裂', '时间残影', '空间置换', '同步体', '实验参数'].every((label) => text().includes(label)), 'archive covers redesign mechanisms');
 root.querySelector('.overlay button')?.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
-root.querySelector('.overlay')?.remove();
 
-buttonByText('设置')?.click();
-check(text().includes('高对比') && text().includes('减少动态'), 'settings overlay opens');
+buttonByText('系统校准')?.click();
+check(text().includes('高对比度') && text().includes('减少动态'), 'settings/calibration overlay opens');
 root.querySelector('.overlay button')?.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
-root.querySelector('.overlay')?.remove();
 
-buttonByText('挑战记录')?.click();
-check(text().includes('挑战记录'), 'challenge records overlay opens');
+buttonByText('实验数据')?.click();
+check(text().includes('实验数据'), 'experiment data overlay opens');
 root.querySelector('.overlay button')?.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
-root.querySelector('.overlay')?.remove();
 
-const firstCard = root.querySelector('.level-grid .level-card') as HTMLElement | null;
-firstCard?.click();
-check(!!root.querySelector('.game'), 'level screen opens');
-check(!!root.querySelector('.hud'), 'level HUD exists');
-check(!!root.querySelector('.mechanic-bar .mechanic-chip'), 'level mechanic chips exist');
-check(!!root.querySelector('.board-wrap'), '2D board wrapper exists');
+const firstNode = root.querySelector('.worldline-node') as HTMLElement | null;
+firstNode?.click();
+check(!!root.querySelector('.chamber-screen'), 'chamber screen opens');
+check(!!root.querySelector('.hud'), 'chamber HUD exists');
+check(!!root.querySelector('.mechanic-bar .mechanic-chip'), 'mechanic chips exist');
+check(!!root.querySelector('.instrument-rack .instrument'), 'mechanic instruments exist');
+check(!!root.querySelector('.experiment-panel .board-wrap'), 'experiment panel wraps board');
+check(!!root.querySelector('.player .drone-core'), 'quantum drone avatar renders');
 check(!!buttonByText('撤销') && !!buttonByText('重开'), 'undo and restart controls exist');
-check(!!buttonByText('?'), 'help control exists');
-check(!root.querySelector('.cam-bar'), 'legacy 3D camera bar absent');
 
 w.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
 check((root.querySelector('.blocked-feedback')?.textContent ?? '').length > 0, 'blocked movement feedback appears');
 
 for (const token of LEVELS[0]!.solution ?? []) {
-  const key = token === 'right' ? 'ArrowRight' : token === 'left' ? 'ArrowLeft' : token === 'up' ? 'ArrowUp' : 'ArrowDown';
-  w.dispatchEvent(new w.KeyboardEvent('keydown', { key, bubbles: true }));
+  const dir = token.startsWith('@') ? token.slice(1) : token;
+  const key = dir === 'right' ? 'ArrowRight' : dir === 'left' ? 'ArrowLeft' : dir === 'up' ? 'ArrowUp' : 'ArrowDown';
+  w.dispatchEvent(new w.KeyboardEvent('keydown', { key, shiftKey: token.startsWith('@'), bubbles: true }));
 }
 await new Promise((resolve) => w.setTimeout(resolve, 750));
-check(!!root.querySelector('.overlay'), 'win overlay appears');
-check(!!buttonByText('下一关'), 'next level button exists on win overlay');
+check(!!root.querySelector('.overlay .win-collapse'), 'victory collapse overlay appears');
+check(!!buttonByText('下一实验'), 'next experiment button exists on win overlay');
 
 const css = await import('node:fs').then((fs) => fs.readFileSync('src/web/styles.css', 'utf8'));
-check(/@media\s*\(max-width:\s*(900|720|620)px\)/.test(css), 'mobile media query exists');
+check(/@media\s*\(max-width:\s*(900|760|620)px\)/.test(css), 'mobile media query exists');
 check(css.includes('overflow-x: hidden'), 'mobile horizontal overflow guard exists');
+check(css.includes('.worldline-graph') && css.includes('.home-console') && css.includes('.experiment-panel'), 'redesign CSS landmarks exist');
 
 console.log('-'.repeat(72));
 if (failures) {

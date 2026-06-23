@@ -1,17 +1,17 @@
 # Acceptance Report
 
-Status: redesign reset in progress, not final accepted.
+Status: Stage 10 redesign slice implemented, not final 70-level accepted.
 
 RUN_ID: `v7-loop-20260623-195154-f683`
 
-## Current Stage 9 Status
+## Current Stage 10 Status
 
 - Product acceptance: failed for the previous v7 route.
-- Runtime catalog: still technically exposes the rejected 70-level v7 checkpoint until the next implementation stage replaces it.
+- Runtime catalog: exposes the new 20-level `Worldline Lab` redesign slice.
 - Technical baseline before reset: Stage 8 commands passed, but that is no longer sufficient product acceptance.
-- New accepted target: a rebuilt 20-level vertical slice using the redesign grammar before any renewed 70-level expansion.
+- New accepted target: prove this 20-level slice visually and mechanically before any renewed 70-level expansion.
 - v6 2.5D status: retired from user-facing runtime and treated as failed/archive context.
-- Current v7 skinning status: failed as a product direction and must not be extended.
+- Rejected 70-level v7 skinning route: archived in git history and must not be extended as the mainline.
 
 ## Failure Finding
 
@@ -30,27 +30,27 @@ Re-test: npm run audit:content; UTF-8/mojibake marker check; QA negative review;
 - `12-redesign-spec.md`: completed before implementation.
 - `13-puzzle-grammar.md`: completed before implementation.
 - `14-ui-redesign-spec.md`: completed before implementation.
-- `15-vertical-slice-20-report.md`: planned slice report, not implemented.
+- `15-vertical-slice-20-report.md`: implemented slice report.
 
-## Required Next Runtime Gate
+## Stage 10 Runtime Gate
 
-The next accepted runtime checkpoint is not "70 levels still pass." It is:
+The current accepted runtime checkpoint is not "70 levels still pass." It is:
 
-- New quantum experiment console home.
-- New worldline/star graph map.
-- New chamber experiment panel.
-- New non-human quantum drone state component.
-- New 20-level vertical slice with stored replay verification.
-- At least one accepted level each for recursion, worldline split, time echo, spatial swap, multi-drone sync, and rule blocks.
-- Updated visual smoke screenshots including a character state sheet.
+- New quantum experiment console home: implemented.
+- New worldline/star graph map: implemented.
+- New chamber experiment panel: implemented.
+- New non-human quantum drone state component and state sheet: implemented.
+- New 20-level vertical slice with stored replay verification: implemented.
+- At least one accepted level each for recursion, worldline split, time echo, spatial swap, multi-drone sync, and rule blocks: implemented.
+- Updated visual smoke screenshots including a character state sheet: required for final Stage 10 push.
 
 ## Known Non-Final Items
 
-- Runtime has not yet been replaced with the redesign slice.
-- Current screenshot set belongs to the rejected v7 route and is no longer final acceptance evidence.
-- Engine support for worldline split, recursive layer path, and rule sockets needs implementation.
-- The rejected 70-level runtime now has a deterministic spatial-swap trigger probe and visible local chain-state recording, but this does not make that runtime product-accepted.
-- `audit:levels` and `verify` still target the rejected 70-level checkpoint until the implementation stage updates them.
+- This is a 20-level redesign slice, not the final 70-level product.
+- Most slice validation is replay/manual rather than mechanism-specific optimal solving.
+- Recursive-room remains a lightweight visible layer/metadata implementation, not full nested-room simulation.
+- Rule-blocks are represented through local key/lock and gate semantics in the slice; a richer rule engine is future work.
+- Worldline split uses visible twin-board branch state; a full branching timeline model is future work.
 - Existing docs may still contain historical mojibake in old stage excerpts; new redesign docs must remain UTF-8 clean.
 
 ## Screenshot Path
@@ -59,7 +59,7 @@ The next accepted runtime checkpoint is not "70 levels still pass." It is:
 docs/v7-loop/v7-loop-20260623-195154-f683/screenshots/
 ```
 
-Current screenshot set is historical/rejected evidence only. The redesign slice must regenerate:
+The Stage 10 redesign slice must regenerate:
 
 - new home console;
 - worldline star graph;

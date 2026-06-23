@@ -18,17 +18,19 @@ The first v7 70-level implementation checkpoint is also rejected as a product di
 
 ## Active Target
 
-The accepted next target is a new 20-level vertical slice before any renewed 70-level expansion.
+The accepted next target was a new 20-level vertical slice before any renewed 70-level expansion. That slice is now the active runtime.
 
 The redesign direction is `Driftbox: Worldline Lab`:
 
 - quantum experiment console home;
 - worldline/star graph chapter map;
 - integrated chamber experiment panel;
-- non-human quantum drone state component;
+- non-human quantum drone state component and state sheet;
 - recursive space, worldline split, time echo, spatial swap, multi-drone sync, and rule-block parameters;
-- stored solution replay for every accepted slice level;
+- stored solution replay for all 20 accepted slice levels;
 - screenshot QA that proves the product no longer resembles the rejected v7 route.
+
+This is not the final 70-level product. The next loop must either deepen the 20-level slice after visual review or expand from this grammar toward 70 levels with fresh level-quality gates.
 
 ## Durable Loop Records
 

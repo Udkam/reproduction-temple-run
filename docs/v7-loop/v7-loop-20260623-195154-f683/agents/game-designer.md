@@ -77,3 +77,31 @@ Review notes:
 Next handoff:
 
 - Level designer should implement only the 20 planned seeds after the engine can express the relevant systems.
+## Stage 10 Update
+
+Agent: game-designer
+
+Task clarity: clear
+Capability fit: good
+Questions needed: none
+Assumptions: The 20-level slice is a grammar proof, not the full requested campaign.
+Proceed decision: proceed
+
+decisions made:
+- Kept the slice centered on recursive space, worldline split, time echo, spatial swap, sync actors, rule blocks, portals, and fair misdirection.
+- Preserved metadata fields for core idea, trick, fairness, difficulty, solver status, par, and solution.
+
+files touched:
+- `src/engine/v7Levels.ts`
+- `docs/v7-loop/v7-loop-20260623-195154-f683/06-level-design-matrix.md`
+- `docs/v7-loop/v7-loop-20260623-195154-f683/13-puzzle-grammar.md`
+
+risks:
+- Several levels are compact proofs rather than deep boss puzzles.
+- Recursive and rule-block systems are lightweight in this slice.
+
+review notes:
+- Stage 10 is directionally better but should be deepened before expanding to 70.
+
+next handoff:
+- Level design should add solver-backed variants and deeper non-trivial branches in the next loop.

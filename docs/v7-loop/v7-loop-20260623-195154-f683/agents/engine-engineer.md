@@ -116,3 +116,32 @@ Review notes:
 Next handoff:
 
 - Use this proof as implementation evidence, but replace the rejected runtime in the next slice rather than polishing it further.
+## Stage 10 Update
+
+Agent: engine-engineer
+
+Task clarity: clear
+Capability fit: good
+Questions needed: none
+Assumptions: Deterministic replay compatibility is mandatory.
+Proceed decision: proceed
+
+decisions made:
+- Kept current deterministic rules for portals, time shadow, twins, and spatial swap.
+- Exposed 20 redesign levels through `LEVEL_DEFS = V7_LEVEL_DEFS`.
+- Preserved server replay behavior.
+
+files touched:
+- `src/engine/v7Levels.ts`
+- `src/engine/levels.ts`
+- `src/engine/rules.ts`
+- `src/web/render.ts`
+
+risks:
+- Recursive-room and rule-blocks are not yet deep engine systems.
+
+review notes:
+- `verify` and `smoke:api` passed for all 20 stored replays.
+
+next handoff:
+- Implement richer recursive-layer and rule-block state only after the slice UI/product direction is accepted.

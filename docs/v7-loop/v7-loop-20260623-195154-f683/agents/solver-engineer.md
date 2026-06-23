@@ -86,3 +86,32 @@ Review notes:
 Next handoff:
 
 - Add slice-mode level audit and visual smoke assertions when the new runtime catalog is implemented.
+## Stage 10 Update
+
+Agent: solver-engineer
+
+Task clarity: clear
+Capability fit: good
+Questions needed: none
+Assumptions: Replay verification is acceptable for this slice but must be reported as a limitation.
+Proceed decision: proceed
+
+decisions made:
+- Retained stored replay validation for every slice level.
+- Updated level audit to warn, not fail, when all slice levels are replay/manual.
+- Required spatial-swap behavior probing in `audit:levels`.
+
+files touched:
+- `scripts/verify-levels.ts`
+- `scripts/audit-levels.ts`
+- `scripts/smoke-api.ts`
+- `scripts/smoke-ui.ts`
+
+risks:
+- Solver optimality is not proven for the new slice.
+
+review notes:
+- `npm run verify` passed for 20/20; `audit:levels` passed with the replay/manual warning.
+
+next handoff:
+- Add targeted solver modes for classic/sync/time/spatial-swap levels in the next gameplay-depth loop.

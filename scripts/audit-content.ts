@@ -24,19 +24,19 @@ function check(condition: boolean, label: string): void {
 console.log('\nDriftbox content audit');
 console.log('-'.repeat(72));
 
-check(LEVELS.length === 70, `runtime exposes 70 levels (actual ${LEVELS.length})`);
-check(files.readme.includes('70-level') || files.readme.includes('70 levels'), 'README references 70-level target/status');
+check(LEVELS.length === 20, `runtime exposes 20 redesign slice levels (actual ${LEVELS.length})`);
+check(files.readme.includes('20-level vertical slice') && files.readme.includes('not the final 70-level target'), 'README references current 20-level slice and non-final 70 status');
 check(files.readme.includes('v7-loop-20260623-195154-f683'), 'README links current RUN_ID');
-check(files.claude.includes('70-level') || files.claude.includes('70 levels'), 'claude.md references 70-level target/status');
+check(files.claude.includes('20-level vertical slice') && files.claude.includes('not the final 70-level product'), 'claude.md references current 20-level slice and non-final 70 status');
 check(files.claude.includes('v7-loop-20260623-195154-f683'), 'claude.md links current RUN_ID');
-check(files.matrix.includes('Stage 6') || files.matrix.includes('70/70'), 'level matrix records current 70-level buildout status');
+check(files.matrix.includes('20/20') && files.matrix.includes('v7r-020'), 'level matrix records current 20-level redesign slice status');
 check(files.art.includes('No external images') && files.art.includes('No external'), 'art direction records external asset/license status');
-check(files.report.includes('product-rejected') || files.report.includes('product acceptance'), 'acceptance report records current v7 product rejection/reset');
+check(files.report.includes('Stage 10 redesign slice implemented') && files.report.includes('not final 70-level accepted'), 'acceptance report records current Stage 10 status honestly');
 check(files.reference.includes("Patrick's Parabox") && files.reference.includes('Baba Is You') && files.reference.includes('茜塔和世界线悖论'), 'reference study covers required games');
 check(files.redesign.includes('20-level vertical slice') && /Six Core Systems/i.test(files.redesign), 'redesign spec records 20-level slice and system scope');
 check(files.grammar.includes('Recursive Space System') && files.grammar.includes('Rule Block / Experiment Parameter System'), 'puzzle grammar covers recursive space and rule blocks');
 check(files.uiRedesign.includes('Quantum Experiment Console') && files.uiRedesign.includes('Worldline Star Graph'), 'UI redesign spec rejects card-grid route');
-check(files.slice20.includes('Status: planned, not implemented') && files.slice20.includes('Runtime still exposes the rejected 70-level checkpoint'), '20-level report honestly records planned/not-implemented status');
+check(files.slice20.includes('Status: implemented in runtime') && files.slice20.includes('Total: 20'), '20-level report records implemented slice status');
 
 const combined = Object.values(files).join('\n');
 check(

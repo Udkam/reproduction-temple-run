@@ -1,14 +1,6 @@
-// Headless UI self-test. Drives the *real* UI (ui.ts) under jsdom: opens each
-// level from the menu, plays the solver's solution via simulated key presses,
-// and asserts the win overlay appears. This catches wiring bugs the engine-level
-// solver can't (input handling, render reconciliation, win flow, navigation).
-//
-// Run with:  npm run smoke:ui
-
 import { JSDOM } from 'jsdom';
 import type { Dir } from '../src/engine/types.js';
 import { LEVELS } from '../src/engine/levels.js';
-import { solve } from '../src/engine/solver.js';
 
 const DIR_KEY: Record<Dir, string> = {
   up: 'ArrowUp',
@@ -19,85 +11,63 @@ const DIR_KEY: Record<Dir, string> = {
 
 const dom = new JSDOM('<!doctype html><html><body><div id="app"></div></body></html>', {
   url: 'http://localhost/',
+  pretendToBeVisual: true,
 });
 const w = dom.window as unknown as typeof globalThis & Window;
-// Expose the jsdom globals the UI modules reach for at call time. (navigator is a
-// read-only global in Node, and the UI doesn't use it — so we leave it alone.)
 const g = globalThis as Record<string, unknown>;
 g.window = w;
 g.document = w.document;
 g.localStorage = w.localStorage;
 g.KeyboardEvent = w.KeyboardEvent;
+g.requestAnimationFrame = w.requestAnimationFrame.bind(w);
 
-// Unlock every level so we can open each from the menu.
-const allDone = Object.fromEntries(LEVELS.map((l) => [l.id, true]));
-w.localStorage.setItem('driftbox.progress.v1', JSON.stringify({ completed: allDone, best: {} }));
-
-// Import the UI after globals exist.
 const { App } = await import('../src/web/ui.js');
 
-const sleep = (ms: number) => new Promise((r) => w.setTimeout(r, ms));
+const sleep = (ms: number) => new Promise((resolve) => w.setTimeout(resolve, ms));
 const root = w.document.getElementById('app')!;
 const app = new App(root as unknown as HTMLElement, LEVELS);
 app.start();
 
 let failures = 0;
-console.log('\nDriftbox UI smoke test (jsdom)');
-console.log('─'.repeat(60));
+console.log('\nDriftbox redesign UI smoke test (jsdom)');
+console.log('-'.repeat(72));
 
-for (let i = 0; i < LEVELS.length; i++) {
-  const level = LEVELS[i]!;
-  const sol = level.solution ? { solvable: true, solution: level.solution } : solve(level);
-  if (!sol.solvable) {
-    console.log(`✗  ${level.id}  no solution to drive`);
+for (const level of LEVELS) {
+  const node = [...root.querySelectorAll('.worldline-node')]
+    .find((button) => (button.textContent ?? '').includes(level.id.replace('v7r-', ''))) as HTMLElement | undefined;
+  if (!node) {
+    console.log(`FAIL ${level.id} node not found`);
     failures++;
     continue;
   }
-
-  // Back to menu, then open this level's card.
-  const cards = root.querySelectorAll('.level-grid .level-card');
-  const card = cards[i] as HTMLElement | undefined;
-  if (!card) {
-    console.log(`✗  ${level.id}  card not found`);
+  node.click();
+  if (!root.querySelector('.chamber-screen .board-wrap')) {
+    console.log(`FAIL ${level.id} chamber did not open`);
     failures++;
     continue;
   }
-  card.click();
-
-  // Board built?
-  const crates = root.querySelectorAll('.board .crate').length;
-  // Play the solution. Tokens may be `@dir` (pull) — drive those with Shift held.
-  for (const token of sol.solution) {
+  for (const token of level.solution ?? []) {
     const pull = token.startsWith('@');
     const dir = (pull ? token.slice(1) : token) as Dir;
     w.dispatchEvent(new w.KeyboardEvent('keydown', { key: DIR_KEY[dir], shiftKey: pull, bubbles: true }));
   }
-  await sleep(700); // allow the win timeout to fire
-
-  const won = !!root.querySelector('.overlay .card h2');
-  const movesShown = root.querySelector('.hud .stat b')?.textContent;
-  if (won) {
-    console.log(
-      `✓  ${level.id} ${level.name}   crates=${crates}  played=${sol.solution.length}  moves=${movesShown}`,
-    );
-  } else {
-    console.log(`✗  ${level.id} ${level.name}   win overlay never appeared`);
+  await sleep(720);
+  const won = !!root.querySelector('.overlay .win-collapse');
+  if (!won) {
+    console.log(`FAIL ${level.id} ${level.name} win overlay never appeared`);
     failures++;
+  } else {
+    console.log(`PASS ${level.id} ${level.name} played=${level.solution?.length ?? 0}`);
   }
-
-  // Return to menu via the overlay's menu button for the next iteration.
-  const menuBtn = [...root.querySelectorAll('.overlay .actions button')].find((b) =>
-    /关卡列表/.test(b.textContent ?? ''),
-  ) as HTMLElement | undefined;
-  menuBtn?.click();
+  const mapBtn = [...root.querySelectorAll('.overlay .actions button')]
+    .find((button) => (button.textContent ?? '').includes('世界线星图')) as HTMLElement | undefined;
+  mapBtn?.click();
   await sleep(20);
 }
 
-console.log('─'.repeat(60));
+console.log('-'.repeat(72));
 if (failures > 0) {
-  console.error(`\n${failures} UI smoke check(s) FAILED.\n`);
+  console.error(`${failures} UI smoke check(s) FAILED.`);
   process.exit(1);
-} else {
-  console.log('\nAll levels playable to a win through the real UI.\n');
-  process.exit(0);
 }
+console.log('All redesign levels playable to a win through the real UI.');

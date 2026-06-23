@@ -77,26 +77,26 @@ export class BoardRenderer {
       if (cell.goal) this.goals.push({ i, el, color: cell.goal });
     }
 
-    // player — a small SVG explorer that faces its last move direction (its
-    // visor/eyes shift, and hide when it turns away) and leans when pushing.
+    // Non-human quantum drone avatar. CSS state classes carry movement, push,
+    // teleport, split, blocked, and victory feedback without bitmap assets.
     this.playerEl = document.createElement('div');
     this.playerEl.className = 'piece player face-down';
     this.playerEl.innerHTML = `<div class="body"><svg class="avatar" viewBox="0 0 100 100" aria-hidden="true">
-      <ellipse class="av-shadow" cx="50" cy="94" rx="26" ry="5.5"/>
-      <rect class="av-foot" x="38" y="80" width="11" height="11" rx="5"/>
-      <rect class="av-foot" x="51" y="80" width="11" height="11" rx="5"/>
-      <rect class="av-body" x="33" y="52" width="34" height="34" rx="15"/>
-      <circle class="av-head" cx="50" cy="34" r="27"/>
-      <g class="av-face">
-        <circle class="av-cheek" cx="34" cy="41" r="3.4"/>
-        <circle class="av-cheek" cx="66" cy="41" r="3.4"/>
-        <circle class="av-eye" cx="41" cy="34" r="4.6"/>
-        <circle class="av-eye" cx="59" cy="34" r="4.6"/>
-        <circle class="av-glint" cx="42.7" cy="32.3" r="1.5"/>
-        <circle class="av-glint" cx="60.7" cy="32.3" r="1.5"/>
-      </g>
-      <rect class="av-antenna" x="48.5" y="3" width="3" height="9" rx="1.5"/>
-      <circle class="av-tip" cx="50" cy="4" r="3.6"/>
+      <defs>
+        <radialGradient id="avatar-core" cx="50%" cy="48%" r="50%">
+          <stop offset="0%" stop-color="#f5fffd"/>
+          <stop offset="56%" stop-color="#54f4de"/>
+          <stop offset="100%" stop-color="#087982"/>
+        </radialGradient>
+      </defs>
+      <ellipse class="drone-shadow" cx="50" cy="88" rx="30" ry="7"/>
+      <path class="drone-ring" d="M18 50a32 18 0 1 0 64 0a32 18 0 1 0 -64 0"/>
+      <path class="drone-ring vertical" d="M50 18a18 32 0 1 0 0 64a18 32 0 1 0 0 -64"/>
+      <circle class="drone-core" cx="50" cy="50" r="21" fill="url(#avatar-core)"/>
+      <path class="drone-visor" d="M36 48h28l-6 9H42z"/>
+      <circle class="drone-thruster left" cx="22" cy="61" r="7"/>
+      <circle class="drone-thruster right" cx="78" cy="61" r="7"/>
+      <path class="drone-spark" d="M50 6l4 12h-8z"/>
     </svg></div>`;
     this.facing = 'down';
     this.lastPX = level.start.x;

@@ -131,3 +131,32 @@ Review notes:
 Next handoff:
 
 - Commit and push Stage 9B, then continue with the accepted redesign slice instead of declaring the current runtime final.
+## Stage 10 Update
+
+Agent: qa-reviewer
+
+Task clarity: clear
+Capability fit: good
+Questions needed: none
+Assumptions: The hard acceptance target for this stage is a verified 20-level redesign slice, not final 70-level completion.
+Proceed decision: proceed
+
+decisions made:
+- Required full command gate before commit/push.
+- Required manual screenshot spot-check after Playwright screenshots.
+- Recorded remaining failures instead of masking them as completion.
+
+files touched:
+- `docs/v7-loop/v7-loop-20260623-195154-f683/09-iteration-log.md`
+- `docs/v7-loop/v7-loop-20260623-195154-f683/10-acceptance-report.md`
+- `codex.md`
+
+risks:
+- Final 70-level product acceptance still fails by count.
+- Solver-depth target still fails because all slice levels are replay/manual.
+
+review notes:
+- Current stage passes technical gates and looks substantially different from the rejected route in sampled screenshots.
+
+next handoff:
+- Do not approve final v7 until 70-level expansion and deeper solver/level-quality gates are completed.
