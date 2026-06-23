@@ -614,6 +614,46 @@ button.command {
 .player.pushing .avatar { animation: push 0.18s ease; }
 .player.warp .avatar { animation: warp 0.32s ease; }
 
+.time-shadow {
+  opacity: 0;
+  transition:
+    transform var(--dur, 120ms) cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.16s ease;
+}
+
+.time-shadow.active {
+  opacity: 0.68;
+}
+
+.time-shadow .body {
+  position: absolute;
+  inset: 14%;
+  display: grid;
+  place-items: center;
+}
+
+.time-shadow .avatar {
+  filter: drop-shadow(0 0 12px rgba(255, 97, 200, 0.55));
+  animation: shadowPulse 1.15s ease-in-out infinite;
+}
+
+.shadow-core {
+  fill: rgba(255, 97, 200, 0.3);
+  stroke: rgba(255, 255, 255, 0.72);
+  stroke-width: 2.5;
+}
+
+.shadow-ring {
+  fill: none;
+  stroke: rgba(255, 97, 200, 0.76);
+  stroke-width: 5;
+}
+
+.shadow-ring.alt {
+  stroke: rgba(84, 244, 222, 0.7);
+  stroke-width: 3;
+}
+
 @keyframes bob {
   50% { transform: translateY(-4px); }
 }
@@ -629,6 +669,10 @@ button.command {
 
 @keyframes pulse {
   50% { transform: scale(1.25); opacity: 0.35; }
+}
+
+@keyframes shadowPulse {
+  50% { transform: scale(1.08); opacity: 0.8; }
 }
 
 .diptych {

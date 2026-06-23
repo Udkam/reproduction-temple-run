@@ -1,7 +1,7 @@
 // Thin stateful wrapper over the pure engine: holds the current level, the live
 // state, an undo stack of snapshots, and the move log (for server validation).
 
-import type { Dir, GameState, Level, MoveResult, MoveToken } from '../engine/types.js';
+import type { BlockedReason, Dir, GameState, Level, MoveResult, MoveToken } from '../engine/types.js';
 import { OPPOSITE } from '../engine/types.js';
 import { initialState } from '../engine/level.js';
 import { applyMove, isSolved, parseToken } from '../engine/rules.js';
@@ -14,6 +14,7 @@ export class Game {
   private undos = 0; // count of undo presses this run (for the "clean run" challenge)
   /** Effective move tokens taken (kept in sync with undo). For server replay. */
   readonly log: MoveToken[] = [];
+  lastBlockedReason: BlockedReason | null = null;
 
   constructor(level: Level) {
     this.level = level;
@@ -26,7 +27,11 @@ export class Game {
   move(dir: Dir, pull = false): MoveResult | null {
     if (this.solved) return null;
     const res = applyMove(this.level, this.state, dir, pull);
-    if (!res.changed) return null;
+    if (!res.changed) {
+      this.lastBlockedReason = res.blockedReason ?? 'unknown';
+      return null;
+    }
+    this.lastBlockedReason = null;
     this.undoStack.push(this.state);
     this.log.push(pull ? `@${dir}` : dir);
     this.state = res.state;
@@ -88,6 +93,7 @@ export class DiptychGame {
   private undos = 0;
   private solvedA = false;
   private solvedB = false;
+  lastBlockedReason: BlockedReason | null = null;
 
   constructor(level: Level) {
     this.level = level;
@@ -107,7 +113,11 @@ export class DiptychGame {
     if (this.solved) return null;
     const aRes = applyMove(this.level, this.a, dir, pull);
     const bRes = applyMove(this.twin, this.b, this.twinDir(dir), pull);
-    if (!aRes.changed && !bRes.changed) return null;
+    if (!aRes.changed && !bRes.changed) {
+      this.lastBlockedReason = aRes.blockedReason ?? bRes.blockedReason ?? 'unknown';
+      return null;
+    }
+    this.lastBlockedReason = null;
     this.stack.push({ a: this.a, b: this.b });
     this.a = aRes.state;
     this.b = bRes.state;

@@ -24,12 +24,32 @@
 // A gate opens when the number of pressed plates in its group reaches the
 // group threshold (default = number of plates in the group, i.e. AND).
 
-import type { Cell, Color, Crate, Dir, Level, MoveToken } from './types.js';
+import type {
+  Cell,
+  ChainConfig,
+  Color,
+  Crate,
+  Dir,
+  GameState,
+  Level,
+  LevelDesignNote,
+  MoveToken,
+  RecursiveRoomConfig,
+  SpaceProfile,
+  SpatialSwapConfig,
+  TimeShadowConfig,
+  V7Mechanic,
+  ValidationMethod,
+} from './types.js';
 
 export interface LevelDef {
   id: string;
   name: string;
   subtitle: string;
+  chapter?: string;
+  mechanics?: V7Mechanic[];
+  spaceProfile?: SpaceProfile;
+  levelDesignNote?: LevelDesignNote;
   intro: string;
   map: string[];
   /** Override gate thresholds, e.g. { '1': 1 } to make group 1 an OR gate. */
@@ -48,6 +68,11 @@ export interface LevelDef {
   heights?: string[];
   /** Recommended camera quarter-turn (0..3) for a 3D level. */
   preferredCamera?: number;
+  timeShadow?: TimeShadowConfig;
+  chain?: ChainConfig;
+  spatialSwap?: SpatialSwapConfig;
+  recursiveRoom?: RecursiveRoomConfig;
+  validationMethod?: ValidationMethod;
 }
 
 const CRATE_COLOR: Record<string, Color> = { R: 'rose', G: 'sage', B: 'slate', Y: 'amber' };
@@ -178,6 +203,10 @@ export function parseLevel(def: LevelDef): Level {
     id: def.id,
     name: def.name,
     subtitle: def.subtitle,
+    chapter: def.chapter,
+    mechanics: def.mechanics,
+    spaceProfile: def.spaceProfile,
+    levelDesignNote: def.levelDesignNote,
     intro: def.intro,
     width,
     height,
@@ -199,11 +228,16 @@ export function parseLevel(def: LevelDef): Level {
       (c) => c.height > 0 || !!c.ramp || c.terrain === 'bridge' || c.terrain === 'lift',
     ),
     preferredCamera: def.preferredCamera,
+    timeShadow: def.timeShadow,
+    chain: def.chain,
+    spatialSwap: def.spatialSwap,
+    recursiveRoom: def.recursiveRoom,
+    validationMethod: def.validationMethod,
   };
 }
 
 /** Fresh mutable state from a level's initial layout. */
-export function initialState(level: Level) {
+export function initialState(level: Level): GameState {
   return {
     playerX: level.start.x,
     playerY: level.start.y,
@@ -211,6 +245,8 @@ export function initialState(level: Level) {
     filled: [] as number[],
     collapsed: [] as number[],
     keys: [] as string[],
+    history: [] as { x: number; y: number }[],
+    shadow: null,
     moves: 0,
     pushes: 0,
   };

@@ -10,7 +10,7 @@
 //  - Gate openness is evaluated from the state at the *start* of a move and held
 //    constant for the whole move resolution, then recomputed for the next move.
 
-import type { Cell, Crate, Dir, GameState, Level, MoveEffect, MoveResult } from './types.js';
+import type { BlockedReason, Cell, Crate, Dir, GameState, Level, MoveEffect, MoveResult } from './types.js';
 import { DIRS, OPPOSITE, idx } from './types.js';
 
 export function cellAt(level: Level, x: number, y: number): Cell | null {
@@ -22,6 +22,29 @@ export function crateAt(state: GameState, x: number, y: number): Crate | undefin
   return state.crates.find((c) => c.x === x && c.y === y);
 }
 
+function blocked(state: GameState, blockedReason: BlockedReason = 'unknown'): MoveResult {
+  return { changed: false, state, blockedReason };
+}
+
+function shadowAt(level: Level, state: GameState, x: number, y: number): boolean {
+  return !!level.timeShadow && !!state.shadow && state.shadow.x === x && state.shadow.y === y;
+}
+
+function advanceTimeShadow(
+  level: Level,
+  before: GameState,
+  next: GameState,
+  effect?: MoveEffect,
+): GameState {
+  if (!level.timeShadow) return next;
+  const delay = Math.max(1, level.timeShadow.delay);
+  const from = before.shadow ? { ...before.shadow } : null;
+  const history = [...(before.history ?? []), { x: before.playerX, y: before.playerY }].slice(-delay);
+  const shadow = history.length >= delay ? { ...history[0]! } : null;
+  if (effect) effect.shadow = { from, to: shadow ? { ...shadow } : null };
+  return { ...next, history, shadow };
+}
+
 /** How many plates of a group are currently weighed down (by player or a crate). */
 export function pressedPlateCount(level: Level, state: GameState, group: string): number {
   let n = 0;
@@ -31,7 +54,8 @@ export function pressedPlateCount(level: Level, state: GameState, group: string)
     const y = Math.floor(i / level.width);
     const weighed =
       (state.playerX === x && state.playerY === y) ||
-      state.crates.some((c) => c.x === x && c.y === y);
+      state.crates.some((c) => c.x === x && c.y === y) ||
+      (!!level.timeShadow?.pressesPlates && shadowAt(level, state, x, y));
     if (weighed) n++;
   }
   return n;
@@ -131,6 +155,7 @@ export function playerCanEnter(
   if (cell.gateGroup && !openGates.has(cell.gateGroup)) return false;
   if (locked(state, cell)) return false;
   if (crateAt(state, x, y)) return false;
+  if (level.timeShadow?.blocksPlayer && shadowAt(level, state, x, y)) return false;
   return true;
 }
 
@@ -151,6 +176,7 @@ function crateCanEnter(
   if (locked(state, cell)) return false;
   const other = state.crates.find((c) => c.x === x && c.y === y && c.id !== movingId);
   if (other) return false;
+  if (level.timeShadow?.blocksCrates && shadowAt(level, state, x, y)) return false;
   return true;
 }
 
@@ -236,18 +262,18 @@ function applyPull(level: Level, state: GameState, dir: Dir, openGates: Set<stri
 
   // The player must be able to step forward (arrows/gates/locks/holes/crates apply).
   const destCell = cellAt(level, tx, ty);
-  if (destCell?.arrow && destCell.arrow !== dir) return { changed: false, state };
-  if (destCell?.portal) return { changed: false, state }; // no portal-pull
-  if (!canClimb(level, state, from.x, from.y, tx, ty, dir)) return { changed: false, state };
-  if (!playerCanEnter(level, state, tx, ty, openGates)) return { changed: false, state };
+  if (destCell?.arrow && destCell.arrow !== dir) return blocked(state, 'unknown');
+  if (destCell?.portal) return blocked(state, 'portal'); // no portal-pull
+  if (!canClimb(level, state, from.x, from.y, tx, ty, dir)) return blocked(state, 'height');
+  if (!playerCanEnter(level, state, tx, ty, openGates)) return blocked(state, 'pull');
 
   // There must be a crate directly behind to drag into the player's old cell.
   const dragged = crateAt(state, bx, by);
-  if (!dragged) return { changed: false, state };
-  if (!canClimb(level, state, bx, by, from.x, from.y, dir)) return { changed: false, state };
+  if (!dragged) return blocked(state, 'pull');
+  if (!canClimb(level, state, bx, by, from.x, from.y, dir)) return blocked(state, 'height');
   const pCell = cellAt(level, from.x, from.y)!;
-  if (pCell.arrow && pCell.arrow !== dir) return { changed: false, state };
-  if (!crateCanEnter(level, state, from.x, from.y, openGates, dragged.id)) return { changed: false, state };
+  if (pCell.arrow && pCell.arrow !== dir) return blocked(state, 'unknown');
+  if (!crateCanEnter(level, state, from.x, from.y, openGates, dragged.id)) return blocked(state, 'pull');
 
   const crates = state.crates.map((c) =>
     c.id === dragged.id ? { ...c, x: from.x, y: from.y } : c,
@@ -264,6 +290,8 @@ function applyPull(level: Level, state: GameState, dir: Dir, openGates: Set<stri
     filled: state.filled,
     collapsed: state.collapsed,
     keys,
+    history: state.history,
+    shadow: state.shadow,
     moves: state.moves + 1,
     pushes: state.pushes + 1,
   };
@@ -273,7 +301,7 @@ function applyPull(level: Level, state: GameState, dir: Dir, openGates: Set<stri
     crate: { id: dragged.id, from: { x: bx, y: by }, to: { x: from.x, y: from.y }, slid: false, sank: false },
     pulled: true,
   };
-  return { changed: true, state: next, effect };
+  return { changed: true, state: advanceTimeShadow(level, state, next, effect), effect };
 }
 
 /** Gravity tilt: every crate and the player slide maximally in `dir` until
@@ -315,7 +343,7 @@ function applyTilt(level: Level, state: GameState, dir: Dir): MoveResult {
   });
   const ps = settled.get(-1)!;
   if (ps.x !== state.playerX || ps.y !== state.playerY) moved = true;
-  if (!moved) return { changed: false, state };
+  if (!moved) return blocked(state, 'unknown');
 
   const from = { x: state.playerX, y: state.playerY };
   const next: GameState = {
@@ -326,7 +354,7 @@ function applyTilt(level: Level, state: GameState, dir: Dir): MoveResult {
     moves: state.moves + 1,
   };
   const effect: MoveEffect = { dir, player: { from, to: { x: ps.x, y: ps.y } }, tilted: true };
-  return { changed: true, state: next, effect };
+  return { changed: true, state: advanceTimeShadow(level, state, next, effect), effect };
 }
 
 /** Apply one move. Returns a brand-new immutable state (or the same one if blocked). */
@@ -346,7 +374,7 @@ export function applyMove(level: Level, state: GameState, dir: Dir, pull = false
   const targetCell = cellAt(level, tx, ty);
 
   // A one-way arrow gates entry into (tx,ty) for the player too.
-  if (targetCell?.arrow && targetCell.arrow !== dir) return { changed: false, state };
+  if (targetCell?.arrow && targetCell.arrow !== dir) return blocked(state, 'unknown');
 
   const target = crateAt(state, tx, ty);
   let destX = tx;
@@ -360,7 +388,7 @@ export function applyMove(level: Level, state: GameState, dir: Dir, pull = false
 
   if (target) {
     const push = resolveCratePush(level, state, target, dir, openGates);
-    if (!push.moved) return { changed: false, state };
+    if (!push.moved) return blocked(state, 'crate');
     const slid = !push.sank && manhattan({ x: target.x, y: target.y }, push.to) > 1;
     if (push.sank) {
       crates = state.crates.filter((c) => c.id !== target.id);
@@ -376,17 +404,19 @@ export function applyMove(level: Level, state: GameState, dir: Dir, pull = false
   } else if (targetCell?.portal) {
     // Stepping onto a portal warps the player to its partner cell.
     const partner = level.portalPartner[idx(level, tx, ty)] ?? -1;
-    if (partner < 0) return { changed: false, state };
+    if (partner < 0) return blocked(state, 'portal');
     const wx = partner % level.width;
     const wy = Math.floor(partner / level.width);
-    if (!playerCanEnter(level, state, wx, wy, openGates)) return { changed: false, state };
+    if (!playerCanEnter(level, state, wx, wy, openGates)) return blocked(state, 'portal');
     destX = wx;
     destY = wy;
     teleported = true;
   } else {
     // Walking: can't climb a step (down/flat only) unless via a ramp or lift.
-    if (!canClimb(level, state, state.playerX, state.playerY, tx, ty, dir)) return { changed: false, state };
-    if (!playerCanEnter(level, state, tx, ty, openGates)) return { changed: false, state };
+    if (!canClimb(level, state, state.playerX, state.playerY, tx, ty, dir)) return blocked(state, 'height');
+    if (!playerCanEnter(level, state, tx, ty, openGates)) {
+      return blocked(state, shadowAt(level, state, tx, ty) ? 'shadow' : 'unknown');
+    }
   }
 
   // Cracked floor under the player collapses into a pit once they step off it.
@@ -413,6 +443,8 @@ export function applyMove(level: Level, state: GameState, dir: Dir, pull = false
     filled,
     collapsed,
     keys,
+    history: state.history,
+    shadow: state.shadow,
     moves: state.moves + 1,
     pushes,
   };
@@ -421,7 +453,7 @@ export function applyMove(level: Level, state: GameState, dir: Dir, pull = false
   if (filledPit !== undefined) effect.filledPit = filledPit;
   if (collapsedNow !== undefined) effect.collapsed = collapsedNow;
   if (teleported) effect.teleported = true;
-  return { changed: true, state: next, effect };
+  return { changed: true, state: advanceTimeShadow(level, state, next, effect), effect };
 }
 
 /** Every goal covered by a crate of the right color? */
@@ -447,5 +479,7 @@ export function stateKey(state: GameState): string {
   const fl = [...state.filled].sort((a, b) => a - b).join(',');
   const co = [...state.collapsed].sort((a, b) => a - b).join(',');
   const ky = [...state.keys].sort().join(',');
-  return `${state.playerX},${state.playerY};${cr};${fl};${co};${ky}`;
+  const hi = [...(state.history ?? [])].map((p) => `${p.x},${p.y}`).join('|');
+  const sh = state.shadow ? `${state.shadow.x},${state.shadow.y}` : '';
+  return `${state.playerX},${state.playerY};${cr};${fl};${co};${ky};${hi};${sh}`;
 }

@@ -31,6 +31,7 @@ export class BoardRenderer {
   private goals: { i: number; el: HTMLDivElement; color: Color }[] = [];
   private crateEls = new Map<number, HTMLDivElement>();
   private playerEl!: HTMLDivElement;
+  private shadowEl: HTMLDivElement | null = null;
   private facing: Dir = 'down';
   private lastPX = 0;
   private lastPY = 0;
@@ -53,6 +54,7 @@ export class BoardRenderer {
     this.locks = [];
     this.goals = [];
     this.crateEls.clear();
+    this.shadowEl = null;
     this.board.style.setProperty('--cols', String(level.width));
     this.board.style.setProperty('--rows', String(level.height));
 
@@ -98,6 +100,17 @@ export class BoardRenderer {
     this.lastPX = level.start.x;
     this.lastPY = level.start.y;
     this.board.appendChild(this.playerEl);
+
+    if (level.timeShadow) {
+      this.shadowEl = document.createElement('div');
+      this.shadowEl.className = 'piece time-shadow';
+      this.shadowEl.innerHTML = `<div class="body"><svg class="avatar" viewBox="0 0 100 100" aria-hidden="true">
+        <circle class="shadow-core" cx="50" cy="50" r="26"/>
+        <path class="shadow-ring" d="M21 50a29 16 0 1 0 58 0a29 16 0 1 0 -58 0"/>
+        <path class="shadow-ring alt" d="M50 21a16 29 0 1 0 0 58a16 29 0 1 0 0 -58"/>
+      </svg></div>`;
+      this.board.appendChild(this.shadowEl);
+    }
 
     this.sizeToViewport();
   }
@@ -182,6 +195,15 @@ export class BoardRenderer {
       window.setTimeout(() => this.playerEl.classList.remove('warp'), 320);
     } else {
       this.setPos(this.playerEl, state.playerX, state.playerY, stepDur);
+    }
+
+    if (this.shadowEl) {
+      if (state.shadow) {
+        this.shadowEl.classList.add('active');
+        this.setPos(this.shadowEl, state.shadow.x, state.shadow.y, instant ? 0 : STEP_MS);
+      } else {
+        this.shadowEl.classList.remove('active');
+      }
     }
 
     const present = new Set(state.crates.map((c) => c.id));

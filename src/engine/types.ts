@@ -16,6 +16,98 @@ export const OPPOSITE: Record<Dir, Dir> = { up: 'down', down: 'up', left: 'right
  *  Used in the move log, stored solutions, and server replay. */
 export type MoveToken = Dir | `@${Dir}`;
 
+export type V7Mechanic =
+  | 'core-push'
+  | 'quantum-portal'
+  | 'sync-actors'
+  | 'time-shadow'
+  | 'chain-state'
+  | 'spatial-swap'
+  | 'recursive-room'
+  | 'misdirection'
+  | 'pull-field'
+  | 'gravity-field'
+  | 'mirror-field'
+  | 'ice-vector'
+  | 'gate-circuit';
+
+export type SolverStatus = 'optimal' | 'verified-replay' | 'manual-reviewed';
+
+export type ValidationMethod =
+  | 'astar'
+  | 'joint-state-replay'
+  | 'history-window-replay'
+  | 'scenario-replay'
+  | 'manual-replay';
+
+export interface LevelDesignNote {
+  id: string;
+  title: string;
+  chapter: string;
+  mechanics: V7Mechanic[];
+  coreIdea: string;
+  trick: string;
+  fairness: string;
+  difficulty: 1 | 2 | 3 | 4 | 5;
+  solverStatus: SolverStatus;
+  par: number | null;
+  solution: MoveToken[];
+}
+
+export type SpaceProfile =
+  | 'open'
+  | 'non-rectangular'
+  | 'partitioned'
+  | 'ring'
+  | 'dual-room'
+  | 'multi-room'
+  | 'portal-linked'
+  | 'recursive'
+  | 'node-map'
+  | 'variable'
+  | 'narrow'
+  | 'symmetric'
+  | 'misdirection'
+  | 'boss-arena';
+
+export interface TimeShadowConfig {
+  delay: number;
+  blocksPlayer: boolean;
+  blocksCrates: boolean;
+  pressesPlates: boolean;
+}
+
+export interface ChainConfig {
+  key: string;
+  label: string;
+  description: string;
+}
+
+export interface SpatialSwapConfig {
+  id: string;
+  trigger: 'player-step' | 'crate-seat' | 'replay-only';
+  description: string;
+}
+
+export interface RecursiveRoomConfig {
+  id: string;
+  entryCrateId?: number;
+  description: string;
+}
+
+export type BlockedReason =
+  | 'wall'
+  | 'height'
+  | 'gate'
+  | 'lock'
+  | 'hole'
+  | 'crate'
+  | 'shadow'
+  | 'portal'
+  | 'pull'
+  | 'bounds'
+  | 'unknown';
+
 /**
  * Crate / goal colors. `natural` is the uncolored crate and the "any" goal that
  * accepts a crate of any color. The remaining four are a muted, hand-picked
@@ -69,6 +161,10 @@ export interface Level {
   id: string;
   name: string;
   subtitle: string;
+  chapter?: string;
+  mechanics?: V7Mechanic[];
+  spaceProfile?: SpaceProfile;
+  levelDesignNote?: LevelDesignNote;
   /** One-line teaching blurb shown the first time a mechanic appears. */
   intro: string;
   width: number;
@@ -101,6 +197,11 @@ export interface Level {
   /** Optional recommended camera quarter-turn (0..3) the level opens at if the
    *  default view would mislead. */
   preferredCamera?: number;
+  timeShadow?: TimeShadowConfig;
+  chain?: ChainConfig;
+  spatialSwap?: SpatialSwapConfig;
+  recursiveRoom?: RecursiveRoomConfig;
+  validationMethod?: ValidationMethod;
 }
 
 /** Mutable game state. Kept deliberately small so undo snapshots are cheap. */
@@ -114,6 +215,10 @@ export interface GameState {
   collapsed: number[];
   /** Key groups the player has collected. */
   keys: string[];
+  /** Prior player positions used by delay-window mechanics such as time shadow. */
+  history: { x: number; y: number }[];
+  /** Current delayed copy position, if the level enables timeShadow. */
+  shadow: { x: number; y: number } | null;
   moves: number;
   pushes: number;
 }
@@ -142,12 +247,17 @@ export interface MoveEffect {
   pulled?: boolean;
   /** True when this was a board tilt (gravity level): many pieces slid at once. */
   tilted?: boolean;
+  shadow?: {
+    from: { x: number; y: number } | null;
+    to: { x: number; y: number } | null;
+  };
 }
 
 export interface MoveResult {
   changed: boolean;
   state: GameState;
   effect?: MoveEffect;
+  blockedReason?: BlockedReason;
 }
 
 export const idx = (level: Pick<Level, 'width'>, x: number, y: number): number =>

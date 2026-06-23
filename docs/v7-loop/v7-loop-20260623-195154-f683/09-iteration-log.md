@@ -106,3 +106,44 @@ Next step:
 
 - Commit Stage 3 and push to `origin main`.
 - Begin Stage 4 mechanism/data/test foundation.
+
+## Stage 4: Engine mechanism and verification foundation
+
+Goal:
+
+- Add a v7-compatible level metadata contract without breaking current replay.
+- Add deterministic time-shadow state support as the first new v7 mechanism foundation.
+- Add blocked-reason plumbing for later UI feedback.
+- Upgrade verification output to the v7-required fields.
+
+Actual changes:
+
+- Extended `src/engine/types.ts` with `V7Mechanic`, `LevelDesignNote`, `SolverStatus`, `ValidationMethod`, `SpaceProfile`, and typed configs for `timeShadow`, `chain`, `spatialSwap`, and `recursiveRoom`.
+- Extended `LevelDef` / `Level` parsing to carry v7 metadata and chapter/mechanic fields.
+- Added `history` and `shadow` to `GameState`; old levels default to empty history and no shadow.
+- Implemented deterministic `timeShadow` advancement in `rules.ts`: delayed player copy, optional player/crate blocking, optional plate pressure, and state-key participation.
+- Added `blockedReason` to `MoveResult`, and exposed `lastBlockedReason` from `Game` / `DiptychGame`.
+- Added a visible `time-shadow` renderer piece and CSS styling.
+- Upgraded `npm run verify` output to print `id`, `title`, `chapter`, `solverStatus`, `solutionLength`, `par`, `validation`, and pass/fail.
+- Added server `/api/levels` metadata fields for chapter, mechanics, solver status, and validation method.
+
+Verification:
+
+- `npm run typecheck`: passed.
+- `npm run verify`: passed, current exposed catalog remains 52/52 and output now includes v7 verification fields.
+- Temporary `npx tsx -` timeShadow engine check: passed; a delay-1 shadow appeared at the previous player position and blocked the player from stepping back into it.
+- `npm run smoke:api`: passed; server replay and bogus-solution rejection still work.
+- `npm run smoke:ui`: passed for all current exposed levels.
+- `npm run build`: passed.
+
+Failure items:
+
+- No Stage 4 blocker.
+- Carry-forward risk: `chain`, `spatialSwap`, and `recursiveRoom` are typed config surfaces only in this stage. They are not yet complete gameplay implementations.
+- Carry-forward risk: blocked-reason UI feedback is plumbed in the game wrapper but not yet rendered to the player.
+- Carry-forward risk: the runtime catalog is still 52 transitional levels, not the final 70 v7 levels.
+
+Next step:
+
+- Commit Stage 4 and push to `origin main`.
+- Begin Stage 5 level data format upgrade and 15-level vertical slice.

@@ -2,7 +2,7 @@
 //   - the level is solvable,
 //   - it is not already solved at the start (not trivial),
 //   - the solver's solution actually solves it on replay (engine sanity check).
-// Prints a table of optimal moves/pushes (par) and search cost.
+// Prints a table with the fields required by the v7 acceptance flow.
 //
 // Run with:  npm run verify
 
@@ -52,6 +52,19 @@ for (const level of LEVELS) {
     : isSolved(level, initialState(level));
   let ok = res.solvable && !trivial;
   let note = '';
+  const solverStatus =
+    level.levelDesignNote?.solverStatus ?? (level.solution || level.twin ? 'verified-replay' : 'optimal');
+  const validationMethod =
+    level.validationMethod ??
+    (level.twin
+      ? 'joint-state-replay'
+      : level.timeShadow
+        ? 'history-window-replay'
+        : level.solution
+          ? 'manual-replay'
+          : 'astar');
+  const title = level.levelDesignNote?.title ?? level.name;
+  const chapter = level.levelDesignNote?.chapter ?? level.chapter ?? 'legacy';
 
   if (!res.solvable) {
     note = res.truncated ? 'UNSOLVED (hit state cap — likely impossible)' : 'UNSOLVABLE';
@@ -71,22 +84,27 @@ for (const level of LEVELS) {
   if (!ok) failures++;
   rows.push(
     [
-      ok ? '✓' : '✗',
-      level.id.padEnd(3),
-      level.name.padEnd(4),
-      `moves=${String(res.moves).padStart(3)}`,
-      `pushes=${String(res.pushes).padStart(3)}`,
-      `states=${String(res.explored).padStart(7)}`,
-      `${String(ms).padStart(5)}ms`,
+      ok ? 'PASS' : 'FAIL',
+      `id=${level.id}`,
+      `title=${title}`,
+      `chapter=${chapter}`,
+      `solverStatus=${solverStatus}`,
+      `solutionLength=${res.solution.length}`,
+      `par=${level.par ?? 'null'}`,
+      `validation=${validationMethod}`,
+      `moves=${res.moves}`,
+      `pushes=${res.pushes}`,
+      `states=${res.explored}`,
+      `timeMs=${ms}`,
       note,
     ].join('  '),
   );
 }
 
 console.log('\nDriftbox level verification');
-console.log('─'.repeat(78));
+console.log('-'.repeat(120));
 for (const r of rows) console.log(r);
-console.log('─'.repeat(78));
+console.log('-'.repeat(120));
 
 if (failures > 0) {
   console.error(`\n${failures} level(s) FAILED verification.`);

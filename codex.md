@@ -115,3 +115,50 @@ Next steps:
 
 - Commit and push Stage 3.
 - Begin Stage 4 mechanism/data/test foundation.
+
+### Stage 4: Engine mechanism and verification foundation
+
+Phase: shared engine contract and replay foundation.
+
+Actions taken:
+
+- Added v7 typed metadata: `V7Mechanic`, `LevelDesignNote`, `SolverStatus`, `ValidationMethod`, `SpaceProfile`, and typed configs for time shadow, chain, spatial swap, and recursive room.
+- Extended `LevelDef` / `Level` parsing with chapter, mechanics, v7 design notes, and validation method fields.
+- Added deterministic `timeShadow` support to engine state/rules: delayed player copy, optional player/crate blocking, optional plate pressure, and state-key participation.
+- Added `blockedReason` to `MoveResult` and exposed `lastBlockedReason` on `Game` / `DiptychGame`.
+- Added renderer/CSS support for a visible `time-shadow` piece.
+- Upgraded `npm run verify` output to include v7 acceptance fields.
+- Added v7 metadata fields to `/api/levels`.
+
+Verification commands and results:
+
+- `npm run typecheck`: passed.
+- `npm run verify`: passed, 52/52 current exposed levels; output now lists `id`, `title`, `chapter`, `solverStatus`, `solutionLength`, `par`, and `validation`.
+- Temporary `npx tsx -` timeShadow check: passed, delay-1 shadow appeared and blocked re-entry.
+- `npm run smoke:api`: passed.
+- `npm run smoke:ui`: passed for all exposed levels.
+- `npm run build`: passed.
+
+Changed files:
+
+- `scripts/verify-levels.ts`
+- `server/index.ts`
+- `src/engine/types.ts`
+- `src/engine/level.ts`
+- `src/engine/rules.ts`
+- `src/web/game.ts`
+- `src/web/render.ts`
+- `src/web/styles.css`
+- v7 loop docs and agent logs
+- `codex.md`
+
+Risks:
+
+- Stage 4 is a foundation milestone, not final gameplay acceptance.
+- `chain`, `spatialSwap`, and `recursiveRoom` still need concrete rules and UI behavior.
+- The catalog remains the transitional 52-level set until Stage 5/7.
+
+Next steps:
+
+- Commit and push Stage 4.
+- Begin Stage 5 level data upgrade and first 15-level vertical slice.
