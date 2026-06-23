@@ -135,3 +135,38 @@ review notes:
 
 next handoff:
 - Add viewport matrix checks before broad public release.
+
+## Stage 10 Final Visual Repair
+
+Agent: frontend-engineer
+Task clarity: clear
+Capability fit: good
+Questions needed: none
+Assumptions: The UI should remain DOM/CSS driven and keep the current Playwright smoke path.
+Proceed decision: proceed
+
+Decisions made:
+
+- Reduced the desktop worldline graph width so the first desktop screenshot shows all 20 slice nodes.
+- Kept the mobile worldline graph horizontally browsable through the mobile media override.
+- Updated the visual smoke capture helper to wait for `.screen-view.entered` before taking screenshots.
+- Added scroll reset on screen swaps while avoiding jsdom `scrollTo` not-implemented console noise.
+
+Files touched:
+
+- `src/web/ui.ts`
+- `src/web/styles.css`
+- `scripts/smoke-visual.ts`
+
+Risks:
+
+- More viewport widths should be sampled before a public release.
+
+Review notes:
+
+- `npm run audit:ui` passed with clean output after the jsdom scroll guard.
+- `npm run smoke:visual` passed after the visual repair and regenerated the 13 screenshot set.
+
+Next handoff:
+
+- Treat the current UI as the slice baseline; future work should deepen gameplay and expand from the graph, not revive card grids.

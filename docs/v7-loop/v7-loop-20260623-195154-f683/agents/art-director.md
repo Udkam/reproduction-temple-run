@@ -101,3 +101,38 @@ review notes:
 
 next handoff:
 - Future polish should add more distinct chapter visual signatures without importing unlicensed assets.
+
+## Stage 10 Final Art Review
+
+Agent: art-director
+Task clarity: clear
+Capability fit: good
+Questions needed: none
+Assumptions: Custom SVG/CSS assets satisfy the no-unlicensed-media requirement.
+Proceed decision: proceed
+
+Decisions made:
+
+- Accepted the quantum drone as the implemented role direction.
+- Required the state sheet to remain visible in `10-character-state-sheet.png`.
+- Rejected any return to a humanoid/Pip-style avatar in future slice expansion.
+
+Files touched:
+
+- `src/web/render.ts`
+- `src/web/ui.ts`
+- `src/web/styles.css`
+- `docs/v7-loop/v7-loop-20260623-195154-f683/screenshots/10-character-state-sheet.png`
+
+Risks:
+
+- Future animation polish should preserve readability at 32px, 48px, and 64px.
+
+Review notes:
+
+- The final screenshot set shows idle, move, push, pull, sync, teleport, split, blocked, and victory states.
+- The role is non-human and visually distinct from the rejected old small-person direction.
+
+Next handoff:
+
+- Add motion polish only after gameplay-depth gates are protected.
