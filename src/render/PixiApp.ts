@@ -1,6 +1,6 @@
 import { Application, Graphics } from "pixi.js";
 import type { Rect2D, Size2D, WorldProjection } from "../projection/types";
-import { createStage2Projection } from "../projection/worldProjection";
+import { createRecursiveInteractionProjection } from "../projection/worldProjection";
 import { Camera2D } from "./Camera2D";
 import { createRenderLayers, type RenderLayers } from "./layers";
 import { getPalette, type RenderPalette } from "./palette";
@@ -11,14 +11,19 @@ import {
   createRecursiveContainerPrimitive,
 } from "./primitives/entityPrimitives";
 import { createWorldFrame } from "./primitives/worldFrame";
+import { RecursiveTransitionRenderer, type RecursiveTransitionGeometry } from "./RecursiveTransitionRenderer";
 
 export class PixiApp {
   private readonly host: HTMLElement;
   private readonly camera = new Camera2D();
+  private readonly worldBounds: Rect2D = { x: 0, y: 0, width: 960, height: 768 };
   private app: Application | null = null;
   private layers: RenderLayers | null = null;
-  private projection: WorldProjection = createStage2Projection();
+  private transitionRenderer: RecursiveTransitionRenderer | null = null;
+  private transitionGeometry: RecursiveTransitionGeometry | null = null;
+  private projection: WorldProjection = createRecursiveInteractionProjection();
   private lastViewport: Size2D = { width: 0, height: 0 };
+  private wantsInnerView = false;
   private readonly tick = () => {
     const app = this.app;
     if (!app) {
@@ -27,15 +32,13 @@ export class PixiApp {
 
     const viewport = { width: app.screen.width, height: app.screen.height };
     const resized = viewport.width !== this.lastViewport.width || viewport.height !== this.lastViewport.height;
-    const cameraMoved = this.camera.stepTransition(app.ticker.deltaMS);
 
     if (resized) {
       this.draw();
-      return;
     }
 
-    if (cameraMoved && this.layers) {
-      this.camera.applyTo(this.layers.cameraRoot);
+    if (this.transitionRenderer?.isTransitioning && this.transitionGeometry) {
+      this.transitionRenderer.update(app.ticker.deltaMS, this.transitionGeometry);
     }
   };
 
@@ -57,9 +60,14 @@ export class PixiApp {
 
     this.app = app;
     this.layers = createRenderLayers(app.stage);
+    this.transitionRenderer = new RecursiveTransitionRenderer(
+      this.camera,
+      this.layers.cameraRoot,
+      this.layers.effectLayer,
+    );
 
     app.canvas.setAttribute("data-testid", "pixi-canvas");
-    app.canvas.setAttribute("aria-label", "PixiJS renderer foundation");
+    app.canvas.setAttribute("aria-label", "PixiJS recursive transition prototype");
     this.host.appendChild(app.canvas);
     app.ticker.add(this.tick);
 
@@ -71,15 +79,27 @@ export class PixiApp {
     this.draw();
   }
 
+  toggleRecursiveTransition() {
+    if (!this.transitionRenderer || !this.transitionGeometry) {
+      return;
+    }
+
+    this.wantsInnerView = !this.wantsInnerView;
+    this.transitionRenderer.start(this.wantsInnerView ? "enter" : "exit", this.transitionGeometry);
+  }
+
   destroy() {
     if (!this.app) {
       return;
     }
 
     this.app.ticker.remove(this.tick);
+    this.transitionRenderer?.cancel();
     this.app.destroy({ removeView: true }, { children: true });
     this.app = null;
     this.layers = null;
+    this.transitionRenderer = null;
+    this.transitionGeometry = null;
   }
 
   private draw() {
@@ -91,20 +111,30 @@ export class PixiApp {
 
     const viewport = { width: app.screen.width, height: app.screen.height };
     this.lastViewport = viewport;
+    this.transitionGeometry = null;
     layers.backgroundLayer.removeChildren();
     layers.recursiveWorldLayer.removeChildren();
     layers.effectLayer.removeChildren();
     layers.overlayLayer.removeChildren();
+    this.transitionRenderer?.setLayers(layers.cameraRoot, layers.effectLayer);
 
     this.drawVoid(layers.backgroundLayer, viewport);
 
-    const worldBounds = { x: 0, y: 0, width: 960, height: 768 };
-    this.renderWorldProjection(this.projection, worldBounds, layers.recursiveWorldLayer);
-    this.camera.fitWorld(viewport, worldBounds, {
-      margin: Math.max(44, Math.min(viewport.width, viewport.height) * 0.08),
-      maxScale: 1.05,
-    });
-    this.camera.applyTo(layers.cameraRoot);
+    this.renderWorldProjection(this.projection, this.worldBounds, layers.recursiveWorldLayer);
+
+    if (this.transitionRenderer && this.transitionGeometry) {
+      if (this.transitionRenderer.isTransitioning) {
+        this.transitionRenderer.update(0, this.transitionGeometry);
+      } else {
+        this.transitionRenderer.applyRestingCamera(this.transitionGeometry);
+      }
+    } else {
+      this.camera.fitWorld(viewport, this.worldBounds, {
+        margin: Math.max(44, Math.min(viewport.width, viewport.height) * 0.08),
+        maxScale: 1.05,
+      });
+      this.camera.applyTo(layers.cameraRoot);
+    }
   }
 
   private drawVoid(layer: RenderLayers["backgroundLayer"], viewport: Size2D) {
@@ -151,19 +181,37 @@ export class PixiApp {
       }
 
       if (entityProjection.entity.kind === "recursive-container") {
-        this.renderRecursiveContainer(entityProjection.childWorld, entityRect, palette, worldFrame.contentLayer);
+        this.renderRecursiveContainer(
+          entityProjection.childWorld,
+          entityProjection.entity.id,
+          projection.depth,
+          entityRect,
+          palette,
+          worldFrame.contentLayer,
+        );
       }
     }
   }
 
   private renderRecursiveContainer(
     childWorld: WorldProjection | undefined,
+    entityId: string,
+    projectionDepth: number,
     rect: Rect2D,
     palette: RenderPalette,
     parent: RenderLayers["recursiveWorldLayer"],
   ) {
     const primitive = createRecursiveContainerPrimitive(rect, palette);
     parent.addChild(primitive.container);
+
+    if (projectionDepth === 0 && entityId === "container-b") {
+      this.transitionGeometry = {
+        viewport: this.lastViewport,
+        outerWorldBounds: this.worldBounds,
+        containerBounds: rect,
+        apertureBounds: primitive.previewRect,
+      };
+    }
 
     if (childWorld) {
       this.renderWorldProjection(childWorld, primitive.previewRect, primitive.previewLayer);

@@ -1,7 +1,7 @@
 # Implementation Plan
 
-Status: approved implementation contract through Stage 2 renderer foundation.
-Do not proceed to Stage 3 until the Stage 2 visual gate review is complete.
+Status: approved implementation contract through Stage 3A recursive space
+interaction prototype. Do not proceed to Stage 3B without review.
 
 ## Gate 0: Approval Required
 
@@ -9,14 +9,16 @@ Current allowed work:
 
 - Stage 1 scaffold.
 - Stage 2 PixiJS renderer foundation.
+- Stage 3A recursive space interaction prototype.
 - Browser/computer visual QA and screenshot evidence for Stage 2.
+- Browser/computer visual QA and screenshot evidence for Stage 3A.
 
 Current forbidden work:
 
 - Core gameplay logic.
 - Board grid or level systems.
-- Movement, input commands, undo/redo, or ECS implementation.
-- Proceeding to Stage 3 without explicit approval after visual gate review.
+- Movement system, undo/redo, or ECS implementation.
+- Proceeding to Stage 3B without explicit review.
 
 ## Evidence Already Collected
 
@@ -107,7 +109,7 @@ Unavailable/limited:
 
 ## Pre-Implementation Readiness Audit
 
-Current state before Stage 2 approval:
+Current state before Stage 3A approval:
 
 | Check | Evidence | Decision |
 | --- | --- | --- |
@@ -117,9 +119,9 @@ Current state before Stage 2 approval:
 | Architecture covers requested systems | Core graph, ECS, renderer, camera, input, history, serialization, and QA gates are defined. | Ready for approval review. |
 | Implementation has not started | `src`, `package.json`, `vite.config.ts`, and `index.html` do not exist. | Gate is intact. |
 | Local visual output has been compared | No local output exists yet, so comparison is impossible. | Deferred until Stage 7 after implementation output exists. |
-| Approval has been granted | Stage 1 and Stage 2 approval messages have been recorded. | Ready for Stage 2 only. |
+| Approval has been granted | Stage 1, Stage 2, and Stage 3A approval messages have been recorded. | Ready for Stage 3A only. |
 
-The next missing decision is Stage 3 approval after Stage 2 visual gate review.
+The next missing decision is Stage 3B approval after Stage 3A visual gate review.
 
 ## Approval Decision Record
 
@@ -128,15 +130,19 @@ entry from the user or a later agent records the exact approval message.
 
 Current decision:
 
-- Status: approved through Stage 2 renderer foundation only.
+- Status: approved through Stage 3A recursive space interaction prototype only.
 - Stage 1 approval evidence: user message on 2026-07-07:
   `Approved for Stage 1 scaffold: ARCHITECTURE.md, DESIGN_REFERENCE.md, and IMPLEMENTATION_PLAN.md are accepted as the implementation contract.`
 - Stage 2 approval evidence: user-provided objective on 2026-07-07:
   `Proceed with Stage 2: PixiJS Renderer Foundation. Stage 1 is approved.`
-- Allowed next action: Stage 2 renderer foundation, browser visual QA,
+- Stage 3A approval evidence: user-provided objective on 2026-07-07:
+  `Proceed with Stage 3A: Recursive Space Interaction Prototype. Stage 2 renderer foundation is approved.`
+- Allowed next action: Stage 3A recursive space interaction prototype,
+  browser visual QA, screenshot evidence, commit, and main-branch publication.
+- Previous allowed action: Stage 2 renderer foundation, browser visual QA,
   screenshot evidence, commit, and main-branch publication.
 - Forbidden next action: core gameplay logic, board grids, levels, movement,
-  input commands, undo/redo, ECS implementation, or Stage 3 work.
+  undo/redo, ECS implementation, or Stage 3B work.
 
 Approval can be recorded as:
 
@@ -253,7 +259,37 @@ Failure conditions:
 - The world frame reads as a flat spreadsheet grid rather than a thick slab.
 - No screenshot can distinguish void-mode from cropped-parent mode.
 
-## Stage 3: Simulation Core
+## Stage 3A: Recursive Space Interaction Prototype
+
+Goal: prove that entering a recursive container changes spatial scale
+continuously before implementing gameplay.
+
+Planned modules:
+
+- `src/animation/TransitionTimeline.ts`
+- `src/animation/easing.ts`
+- `src/render/RecursiveTransitionRenderer.ts`
+- `src/runtime/InteractionPrototype.ts`
+
+Acceptance:
+
+- Pressing `E` triggers an enter transition.
+- Pressing `E` again triggers the reverse exit transition.
+- The transition uses the existing projection tree: World A contains Box B,
+  whose aperture projects World C.
+- Camera transform interpolates position and scale deterministically.
+- Transition cancellation/reversal is safe if the prototype input is used while
+  a transition is active.
+- Browser QA captures `docs/screenshots/stage3a-enter-transition.png`.
+
+Failure conditions:
+
+- The prototype introduces movement, levels, undo/redo, or ECS.
+- The inner world is cloned into a second mutable gameplay state.
+- React renders gameplay nodes for the transition.
+- Entering the box hard-switches views instead of visibly changing scale.
+
+## Stage 3B: Simulation Core
 
 Goal: build deterministic recursive graph logic independent of PixiJS.
 

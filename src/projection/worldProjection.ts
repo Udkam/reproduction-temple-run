@@ -61,9 +61,11 @@ const STAGE2_PROTOTYPE_GRAPH: PrototypeWorldGraph = {
   ],
 };
 
-export function createStage2Projection(maxDepth = 2) {
+export function createRecursiveInteractionProjection(maxDepth = 2) {
   return projectWorldGraph(STAGE2_PROTOTYPE_GRAPH, STAGE2_PROTOTYPE_GRAPH.rootWorldId, maxDepth);
 }
+
+export const createStage2Projection = createRecursiveInteractionProjection;
 
 export function projectWorldGraph(
   graph: PrototypeWorldGraph,

@@ -1,22 +1,24 @@
 # Current Project Status
 
-Status: Stage 2 PixiJS renderer foundation implemented and verified after the
-failed implementation reset.
+Status: Stage 3A recursive space interaction prototype implemented and
+verified after the Stage 2 renderer foundation.
 
-The current workspace is runnable as a React/Vite/PixiJS v8 renderer foundation
-only. It intentionally contains no gameplay logic, movement, levels, board grid,
-or ECS implementation.
+The current workspace is runnable as a React/Vite/PixiJS v8 visual-spatial
+prototype. It intentionally contains no gameplay logic, movement system, levels,
+board grid, undo/redo, or ECS implementation.
 
 ## Current Workspace
 
 - Current branch: `main`
-- Implementation files in the working tree: Stage 2 renderer foundation only
+- Implementation files in the working tree: Stage 3A visual interaction
+  prototype only
 - Required records in the working tree: present
 - Draft approval documents in the working tree:
   - `ARCHITECTURE.md`
   - `DESIGN_REFERENCE.md`
   - `IMPLEMENTATION_PLAN.md`
-- Approval status: approved through Stage 2 renderer foundation only
+- Approval status: approved through Stage 3A recursive space interaction
+  prototype only
 - Local cleanup state: reset cleanup and Stage 2 renderer foundation are staged
   for the required main-branch publication step
 
@@ -39,8 +41,8 @@ failed round.
 
 ## Current Gate
 
-Do not create gameplay logic, levels, board grids, movement, input commands,
-undo/redo, ECS implementation, or Stage 3 work.
+Do not create gameplay logic, levels, board grids, movement systems, undo/redo,
+ECS implementation, or Stage 3B work.
 
 The current aligned action has been completed as Stage 2 renderer foundation:
 
@@ -63,6 +65,11 @@ The current aligned action has been completed as Stage 2 renderer foundation:
 - `src/projection/types.ts`
 - `src/projection/worldProjection.ts`
 - `docs/screenshots/stage2-renderer.png`
+- `src/animation/TransitionTimeline.ts`
+- `src/animation/easing.ts`
+- `src/render/RecursiveTransitionRenderer.ts`
+- `src/runtime/InteractionPrototype.ts`
+- `docs/screenshots/stage3a-enter-transition.png`
 
 ## Retained For Audit
 

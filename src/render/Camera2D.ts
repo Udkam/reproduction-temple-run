@@ -28,6 +28,10 @@ export class Camera2D {
     return { ...this.state };
   }
 
+  get isTransitioning() {
+    return this.transition !== null;
+  }
+
   fitWorld(viewport: Size2D, worldBounds: Rect2D, options: FitWorldOptions) {
     const next = this.getFitState(viewport, worldBounds, options);
     this.setState(next);
@@ -61,6 +65,10 @@ export class Camera2D {
       elapsedMs: 0,
       durationMs: Math.max(1, durationMs),
     };
+  }
+
+  cancelTransition() {
+    this.transition = null;
   }
 
   stepTransition(deltaMs: number) {

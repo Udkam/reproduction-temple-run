@@ -1,5 +1,76 @@
 # Codex Work Log
 
+## 2026-07-07 - Stage 3A Recursive Space Interaction Prototype
+
+Phase: approved Stage 3A visual-spatial validation.
+
+Time:
+- 2026-07-07 07:05:00 +08:00
+
+Actions taken:
+- Re-read `ARCHITECTURE.md`, `DESIGN_REFERENCE.md`, and
+  `IMPLEMENTATION_PLAN.md` before coding.
+- Re-read current PixiJS v8.16 documentation through Context7 for Container
+  transforms, masks, and ticker animation patterns.
+- Inspected current Stage 2 projection, renderer, camera, primitive, and runtime
+  integration code.
+- Added `TransitionTimeline` and easing helpers for deterministic forward and
+  reverse visual timelines.
+- Added `RecursiveTransitionRenderer` to interpolate camera position/scale from
+  the outer world to the recursive container aperture and back.
+- Added transition cancellation/reversal safety by starting new timelines from
+  the current visual progress.
+- Added `InteractionPrototype` with the only Stage 3A input: `E` toggles enter
+  and exit.
+- Kept World A -> Box B -> World C projected through the existing projection
+  tree; no duplicated mutable world state was introduced.
+- Captured `docs/screenshots/stage3a-enter-transition.png` after triggering the
+  enter transition in the browser.
+- Did not add gameplay movement, levels, board grids, undo/redo, or ECS.
+
+Verification commands and results:
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run build`: passed.
+- Source scope search for `Move`, `movement`, `level`, `ECS`, `grid`, `cell`,
+  `undo`, and `redo` found only the allowed `InteractionPrototype` key listener.
+- Browser enter QA: dispatched `KeyboardEvent('keydown', { key: 'e' })`, waited
+  for the transition, and confirmed one visible Pixi canvas.
+- Browser exit QA: dispatched `E` again, waited for the reverse transition, and
+  confirmed one visible Pixi canvas.
+- Browser snapshot: only `main` and the PixiJS canvas appeared; no gameplay DOM
+  nodes were present.
+- Browser console: 0 errors and 0 warnings.
+- Pixel sampling: screenshot measured `1000x996`, `SampledUniqueColors: 26`,
+  `NonBlank: true`, `DarkSampleRatio: 0.0`,
+  `SaturatedSampleRatio: 0.587`.
+
+Changed files:
+- `src/animation/TransitionTimeline.ts`
+- `src/animation/easing.ts`
+- `src/render/RecursiveTransitionRenderer.ts`
+- `src/runtime/InteractionPrototype.ts`
+- `src/render/Camera2D.ts`
+- `src/render/PixiApp.ts`
+- `src/runtime/GameRuntime.ts`
+- `src/projection/worldProjection.ts`
+- `IMPLEMENTATION_PLAN.md`
+- `docs/logs/CHANGELOG.md`
+- `docs/reboot/CURRENT_STATUS.md`
+- `docs/screenshots/stage3a-enter-transition.png`
+
+Risks and limitations:
+- This proves visual scale continuity only; it is not a gameplay enter/exit
+  system.
+- The inner world becomes primary through camera zoom into the existing
+  projected aperture; future stages still need canonical simulation state and
+  command semantics.
+- The screenshot after enter has low void coverage because the camera is inside
+  World C, which is expected for this specific gate.
+
+Next stage:
+- Stop for Stage 3A visual gate review. Do not proceed to Stage 3B without
+  explicit approval.
+
 ## 2026-07-07 - Stage 2 PixiJS Renderer Foundation
 
 Phase: approved Stage 2 renderer foundation.

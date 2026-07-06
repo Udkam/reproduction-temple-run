@@ -1,9 +1,11 @@
-import { createStage2Projection } from "../projection/worldProjection";
+import { createRecursiveInteractionProjection } from "../projection/worldProjection";
 import { PixiApp } from "../render/PixiApp";
+import { InteractionPrototype } from "./InteractionPrototype";
 
 export class GameRuntime {
   private readonly host: HTMLElement;
   private pixiApp: PixiApp | null = null;
+  private interactionPrototype: InteractionPrototype | null = null;
   private destroyed = false;
 
   constructor(host: HTMLElement) {
@@ -20,17 +22,19 @@ export class GameRuntime {
     }
 
     this.pixiApp = pixiApp;
-    this.pixiApp.render(createStage2Projection());
+    this.pixiApp.render(createRecursiveInteractionProjection());
+    this.interactionPrototype = new InteractionPrototype({
+      onToggleRecursiveSpace: () => this.pixiApp?.toggleRecursiveTransition(),
+    });
+    this.interactionPrototype.start();
   }
 
   destroy() {
     this.destroyed = true;
 
-    if (!this.pixiApp) {
-      return;
-    }
-
-    this.pixiApp.destroy();
+    this.interactionPrototype?.destroy();
+    this.pixiApp?.destroy();
+    this.interactionPrototype = null;
     this.pixiApp = null;
   }
 }
