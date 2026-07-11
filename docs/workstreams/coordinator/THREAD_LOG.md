@@ -419,3 +419,17 @@ Coordinator decision:
 - `docs/logs/CHANGELOG.md` is intentionally unchanged at this checkpoint; the
   coordinator will update it only when the complete frontend-and-engine
   framework milestone is accepted.
+
+### C1 ownership audit before implementation
+
+- A source search after I1 showed that `movement.ts`, `recursiveMovement.ts`,
+  and `systems.ts` still re-export or construct legacy command/resolver
+  surfaces, while the original C1 path list did not own those files.
+- C1 ownership is therefore expanded before source work to include those
+  wrappers plus `grid.ts`, `win.ts`, and `hash.ts`, alongside the previously
+  named core paths. This is a cleanup/implementation boundary only; it does not
+  change the frozen R1 public semantics or permit projection/runtime/render,
+  levels, serialization, push-in/out, or cycles.
+- C1 acceptance now explicitly requires a candidate-tree search proving that
+  no legacy `Move`/`Enter`/`Exit`, command/result/event, adapter, or wrapper
+  export survives in `src/core/**`.

@@ -183,6 +183,8 @@ Explicitly excluded:
 Owner: gameplay rules/engine task
 `019f4e82-7cb8-73c1-b4a1-d333273b359f`.
 
+Status: active on integrated base `cbfa5e6`.
+
 Independent reviewer: QA task
 `019f4e80-1462-7b32-8146-19ded692836c`.
 
@@ -195,8 +197,10 @@ accepted.
 Owned implementation paths:
 
 - existing `src/core/types.ts`, `commands.ts`, `components.ts`,
-  `worldGraph.ts`, `collision.ts`, `movementResolver.ts`,
-  `recursiveTransitions.ts`, `reducer.ts`, `history.ts`, and `replay.ts`;
+  `worldGraph.ts`, `collision.ts`, `grid.ts`, `movement.ts`,
+  `movementResolver.ts`, `recursiveMovement.ts`,
+  `recursiveTransitions.ts`, `reducer.ts`, `history.ts`, `replay.ts`,
+  `systems.ts`, `win.ts`, and `hash.ts`;
 - `src/core/legacyRuntimeAdapter.ts` and its test for required deletion once
   frozen semantics replace the bridge;
 - new `src/core/ports.ts` and `src/core/validation.ts`;
@@ -211,6 +215,9 @@ Required implementation:
   migrated I1 public interface; no second public-type migration is allowed;
 - replace and remove the temporary legacy adapter/exports while preserving the
   I1 consumer contract;
+- remove or migrate legacy wrapper/system exports in `movement.ts`,
+  `recursiveMovement.ts`, and `systems.ts`; no `Move`/`Enter`/`Exit`, legacy
+  command/result/event, or adapter symbol may survive the C1 candidate tree;
 - complete typed total attempt/result/rejection/transaction/event values;
 - replace throwing/unsafe entrance behavior with preflighted atomic resolution;
 - implement exact port mapping, full rule enablement/priority validation, and
