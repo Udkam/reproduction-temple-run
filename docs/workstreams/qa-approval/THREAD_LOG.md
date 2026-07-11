@@ -559,3 +559,97 @@ separate start conditions and each requires later independent QA by SHA.
 - Files changed by this QA follow-up: this `THREAD_LOG.md` only.
 - Follow-up commit hash: pending creation; report it with this log path to the
   coordinator after committing. No push, merge, or rebase is authorized.
+
+## Entry: independent QA-I1 replacement-chain review and acceptance
+
+- Workstream thread ID: `019f4e80-1462-7b32-8146-19ded692836c`
+- Coordinator thread ID: `019f4deb-7e83-7583-8cd5-8e6f075bc331`
+- Timestamp: 2026-07-12 Asia/Shanghai
+- Base: `0b7ebc38cc51b1fd314cdaeb3f1c8bdfa43140e6`.
+- Gameplay/core half: `a4633c2bbdd4c1780b7396bff5dff9c2d245d16a`.
+- Superseding frontend/complete-chain head:
+  `ef27c9c57baf940ceec3c693cfc537cba93cc6be`.
+- Superseded frontend head `9e3006528e9da69db59d87b7d8d4bc6d8f26dbcb`
+  received no QA verdict or acceptance commit.
+
+### Scope, ancestry, and hygiene
+
+- Candidate parentage is exact: `0b7ebc3 -> a4633c2 -> ef27c9c`. The QA
+  baseline was clean at `701bf51`; a detached `ef27c9c` worktree started with
+  no `node_modules`.
+- The gameplay half changes only its exact I1 core paths/tests and owner log.
+  The frontend half changes only its exact runtime/animation paths/tests and
+  owner log. The two allowlists are disjoint and the complete chain contains no
+  package, config, root contract/changelog, projection, render, React/UI,
+  level, asset, screenshot, or QA path.
+- The superseding amendment is bounded to
+  `src/animation/transitions.ts`, `src/animation/transitions.test.ts`, and the
+  frontend log. Full-chain and amendment `git diff --check`, plus `git show
+  --check` for both indivisible commits, pass. Candidate status is clean after
+  verification.
+
+### I1 contract and correction review
+
+1. **Public boundary remains exact.** Runtime/animation searches find no legacy
+   `Move`/`Enter`/`Exit`/`SimulationCommand`/`CommandDispatchResult`/
+   `TransitionEvent`/`dispatchCommand` import or construction, no `container-b`
+   or fixture identity, and no directionless E command. The adapter translates
+   only public `Step` to legacy `Move`; it contains no container, port, world,
+   or recursive-destination selection. Its amended fail-closed Enter/Exit and
+   unknown-command regression remains present.
+2. **The push correction resolves the P1 feedback defect.** A real bridge push
+   supplies the aggregate `push-resolved` event plus the addressed actor move.
+   `push-resolved` is now the sole impact/push-audio source. It creates the box
+   push motion; the aggregate actor match creates one ordinary actor move
+   without box anticipation/settle. The duplicate pushed-box motion is
+   suppressed by full occurrence-plus-addressed-cell equality.
+3. **Ordering and Undo are safe.** Both actor matching and box duplicate
+   detection scan the complete semantic event array and compare full
+   root-plus-container-path occurrence addresses, so they are independent of
+   forward versus reversed Undo order. The core adapter already reverses and
+   swaps Undo values once; transition planning preserves those supplied
+   endpoints/direction without a second transformation. Forward and reverse
+   correction tests each assert one aggregate impact and one push audio.
+4. **Reset/win semantics are corrected.** Reset now provides no success cue;
+   `win-changed { solved: true }` is the sole success-audio source and yields
+   exactly one cue. This closes the reported P2 misleading-reset feedback.
+5. **I1 remains a bridge, not feature acceptance.** The frozen public
+   command/result/event forwarding, Step/non-Step rejection invariants,
+   EventPipeline by-reference semantic forwarding, and temporary addressed
+   renderer-compatibility data remain intact. Recursive port/cycle safety,
+   address-keyed renderer ownership, visual lock, mobile/accessibility,
+   performance, levels, and release proof remain later C1/V1-V4 gates.
+
+### Independent clean-candidate verification
+
+- Environment: Node `v24.12.0`; npm `11.6.2`.
+- `npm.cmd ci --no-audit --no-fund`: passed from the absent-`node_modules`
+  precondition; added 64 packages.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run test`: passed, **10 files / 50 tests**.
+- `npm.cmd run build`: passed. The only warning is the pre-existing Vite
+  >500 kB advisory (main chunk `527.88 kB` minified), which remains V3
+  performance work and is not credited as I1 evidence.
+- Full source-boundary searches for legacy consumer symbols, fixed
+  container/fixture identity, adapter directionless selection, and forbidden
+  core presentation imports pass.
+
+### QA verdict
+
+**Accept the complete, indivisible I1 chain ending at `ef27c9c` only.** The
+replacement frontend half resolves the P1 duplicate push feedback and P2 reset
+success-cue findings without broadening the I1 scope. No P0 or I1-scope P1
+blocker remains. The historical P1 recursive-safety and runtime/render defects
+are deliberately not closed by this compatibility bridge and remain bounded to
+C1 and V1 under their existing independent QA gates.
+
+After coordinator integration and push, this acceptance opens **only C1**. It
+does **not** accept C1 implementation, V1/V2-V4, frontend or engine completion,
+levels, Stage 6, release, root changelog work, or any target-completion claim.
+Each later slice requires its own candidate SHA and independent QA decision.
+
+### Handoff
+
+- Files changed by this QA follow-up: this `THREAD_LOG.md` only.
+- Follow-up commit hash: pending creation; report it with this log path to the
+  coordinator after committing. No push, merge, or rebase is authorized.
