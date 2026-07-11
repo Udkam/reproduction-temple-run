@@ -121,8 +121,11 @@
 
 ### Commit, dependencies, blockers, and handoff
 
-- Initial documentation-only commit: pending at the time this entry was
-  created; the follow-up log entry records its SHA before final handoff.
+- Initial documentation-only audit commit:
+  `2ac2ed058af4ac49d7f5821f64d416b608ed845a`
+  (`docs(frontend): audit visual redesign`).
+- This follow-up log-only commit records the audit SHA for the coordinator and
+  independent QA handoff; it changes no production file.
 - Dependencies: generic projection-instance identity and interaction targeting
   from gameplay; schema-approved visual staging from level design; clean
   reproducibility and independent verdict from QA.
