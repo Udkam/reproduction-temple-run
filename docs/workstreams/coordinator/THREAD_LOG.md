@@ -502,3 +502,54 @@ Scope and decision:
 - V1 acceptance itself still requires source-candidate QA, deterministic
   desktop middle-frame evidence, and coordinator integration. R2, V2-V4,
   levels, showcase content, Stage 6, release, and completion remain closed.
+
+## 2026-07-12 - V1 accepted and integrated; R2D contract gate opened
+
+Accepted V1 chain:
+
+- occurrence-addressed implementation and unified visual completion barrier:
+  `cef6ab2b2f45e6a7f7e70579f5ddc951f9380074`;
+- deterministic browser evidence directly atop the implementation:
+  `5bb6a734efb670b37cf8577b40b5cde4cd13c789`;
+- independent QA acceptance directly atop the evidence:
+  `4df4528150481a93d1028cf4ee2d6411fbfdb40b`.
+
+Acceptance and integration evidence:
+
+- the implementation changes exactly 24 V1-owned source/test paths; the
+  evidence changes exactly the frontend log, two QA records, and seven PNGs;
+  the QA commit changes only the QA log;
+- independent QA reproduced a clean install with 64 packages on Node
+  `v24.12.0` / npm `11.6.2`, typecheck, one full test invocation with npm exit
+  `0` (18 test files / 91 cases), and build with only the existing 553.09 kB
+  Vite chunk advisory;
+- independent system-Chrome review used seven fresh valid and three fresh
+  invalid contexts at `1440x900`, DPR/resolution `1`. Structured state,
+  occurrence addresses, transaction traces, world sets, move midpoint,
+  enter/exit continuity, true parent/child/aperture midpoint geometry, invalid
+  fail-closed behavior, canvas/DOM/console/ticker, and explicit-render gates all
+  passed;
+- six live PNGs reproduced byte-for-byte. `move-50` differed only at 24 pixels
+  by one RGB value with identical state and geometry; QA records this as a V4
+  general-capture-automation observation, not a V1 defect;
+- the coordinator fast-forwarded the accepted chain to local `main` and ran one
+  integration clean install, typecheck, full JSON-reporter test pass (36/36
+  suites, 91/91 tests), and build. Generated `dist/` was removed afterward.
+
+Coordinator decision:
+
+- V1 is accepted only as the occurrence-addressed desktop continuity and
+  unified visual-transaction milestone. Visual fidelity is still prototype
+  quality; V2 material/composition, V3 retained rendering/performance, and V4
+  responsive interaction/accessibility/capture remain required;
+- the user requires correct recursive gameplay before any authored level.
+  Therefore the next slice is R2D: a documentation-only clean-room contract for
+  original acyclic push-in/push-out and world-bearing-container transfers;
+- R2D owns only a new gameplay contract and the gameplay workstream log. It
+  must freeze atomic rules, addressed transfers, history/replay/win/stress,
+  `cycleMode: "forbid"`, and an exact cross-layer migration plan, then receive
+  frontend compatibility review and independent QA before any R2 source work;
+- V2-V4, serialization, levels, solver work, the showcase level, Stage 6,
+  release, and overall completion remain closed;
+- `docs/logs/CHANGELOG.md` remains unchanged until the complete frontend-and-
+  engine framework milestone is accepted, matching the user's gate.

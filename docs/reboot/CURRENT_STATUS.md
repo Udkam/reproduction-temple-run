@@ -1,22 +1,22 @@
 # Current Project Status
 
 Status: Phase A recursive-foundation rebuild is active after the design reboot.
-D0, the complete I1 interface bridge, and C1 deterministic core are
-independently accepted and integrated. The exact V1 occurrence-address/visual-
-transaction authorization chain is also independently accepted; V1 becomes
-the sole active production slice when the coordinator pushes the status commit
-containing that chain. The user assesses the overall target as less than 10%
-complete.
+D0, the complete I1 interface bridge, C1 deterministic core, and V1
+occurrence-addressed rendering/visual-transaction barrier are independently
+accepted and integrated. The next and only active slice is R2D, a
+documentation-only contract freeze for original acyclic recursive transfers.
+The user assesses the overall target as less than 10% complete.
 
 `Stage 6` is a historical implementation label only. It does not mean that the
 visual design, recursive rules, gameplay depth, runtime stability, content, or
 playability has reached Stage 6-level completeness or release readiness.
 
 The current workspace is runnable as a React/Vite/PixiJS v8 visual-spatial
-prototype backed by a deterministic TypeScript recursive gameplay kernel, an
-event-driven animation pipeline, and metric-driven PixiJS renderer alignment.
-It intentionally contains no React gameplay UI, level packs, level editor,
-menus, polish UI, large content, or new gameplay rules.
+prototype backed by a deterministic TypeScript recursive gameplay kernel,
+structurally addressed projections, one event-driven visual completion barrier,
+and metric-driven PixiJS rendering. It intentionally contains no React gameplay
+UI, level packs, level editor, menus, polish UI, large content, push-in/push-out,
+or cyclic gameplay.
 
 ## Current Workspace
 
@@ -29,10 +29,10 @@ menus, polish UI, large content, or new gameplay rules.
   - `DESIGN_REFERENCE.md`
   - `IMPLEMENTATION_PLAN.md`
 - Approval status: R1 and D0 contracts, the complete I1 public-interface chain,
-  and C1 deterministic core are independently accepted and integrated. V1's
-  exact authorization chain `f2c47c3 -> c604d53 -> 272e138` is accepted and
-  may start only from the coordinator-confirmed pushed status baseline.
-  Historical Stage numbers are not current authority.
+  C1 deterministic core, and V1 are independently accepted and integrated.
+  V1's accepted implementation/evidence/QA chain is
+  `cef6ab2 -> 5bb6a73 -> 4df4528`. Historical Stage numbers are not current
+  authority.
 - Local cleanup state: no generated build output retained; dev server stopped
 
 ## Preserved Records
@@ -59,22 +59,24 @@ The user explicitly requested continued frontend and game-engine development on
 and `CURRENT_TASK.md` now define the active authority, design target, exact
 slice order, ownership, and QA gates.
 
-The dependency order is D0 documentation, accepted I1 shared public-interface
-bridge, C1 deterministic core safety, V1 occurrence-address projection and
-unified visual completion ownership, then V2 composition/material, V3 retained
-rendering/performance, and V4 responsive input/accessibility/capture. Every
-implementation slice requires independent QA before the next starts.
+The completed dependency order so far is D0 documentation, accepted I1 shared
+public-interface bridge, C1 deterministic core safety, and V1 occurrence-
+address projection/unified visual completion ownership. The next gate is R2D
+contract freeze, followed only after its acceptance by exact R2 implementation
+slices. V2 composition/material, V3 retained rendering/performance, and V4
+responsive input/accessibility/capture follow. Every implementation slice
+requires independent QA before the next starts.
 
 Per the user's 2026-07-12 clarification, no level design, serialization,
-authored test level, solver, or campaign content begins until the complete C1
-and V1-V4 frontend-and-engine framework is accepted and integrated. After that
-gate, the first content slice is one original showcase acceptance level; test
-level expansion starts only after the user accepts that showcase.
+authored test level, solver, or campaign content begins until C1, accepted R2
+recursive-transfer implementation, and V1-V4 are accepted and integrated.
+After that gate, the first content slice is one original showcase acceptance
+level; test-level expansion starts only after the user accepts that showcase.
 
 Do not treat this authorization as permission for overlapping workstreams,
-large content, copied assets, unreviewed schema, or a one-shot rewrite. V1 is
-the sole active production slice after this status is pushed; V2-V4, R2, and
-all level/content work remain frozen.
+large content, copied assets, unreviewed schema, or a one-shot rewrite. R2D may
+change only its two gameplay documentation paths. R2 production, V2-V4, and all
+level/content work remain frozen.
 
 ## Historical Prototype Inventory
 

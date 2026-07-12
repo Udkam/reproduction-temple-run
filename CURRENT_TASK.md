@@ -42,6 +42,15 @@ V1 occurrence-address projection + unified visual completion barrier
 QA-V1 independent acceptance with deterministic middle frames
         |
         v
+R2D acyclic recursive-transfer contract freeze (documentation only)
+        |
+        v
+QA-R2D independent acceptance
+        |
+        v
+R2 implementation slices named by the accepted contract
+        |
+        v
 V2 composition/material frontend rebuild
         |
         v
@@ -62,6 +71,13 @@ implements the frozen semantics without breaking unchanged consumers. V1 then
 adds occurrence-addressed rendering and visual completion ownership after
 QA-C1. Frontend design/test planning may proceed during C1, but V1 production
 edits begin only after QA-C1.
+
+V1 is now independently accepted and integrated. The next gate is R2D, a
+documentation-only contract freeze for original acyclic push-in/push-out and
+world-bearing-container transfer semantics. R2D must finish and receive both
+frontend compatibility review and independent QA acceptance before any R2
+production path is authorized. V2-V4 and all content remain frozen during
+R2D.
 
 ## 3. D0 — repository contracts (completed)
 
@@ -255,14 +271,13 @@ Owner: frontend/visual/runtime task
 Independent reviewer: QA task
 `019f4e80-1462-7b32-8146-19ded692836c`.
 
-Status: authorized as the next and only production slice. The accepted
-authorization chain is `f2c47c3 -> c604d53 -> 272e138`. Production edits may
-start only after the coordinator pushes the `main` status commit containing
-that chain and gives the frontend owner the exact resulting `origin/main` SHA.
+Status: completed, independently accepted, and integrated. The authorization
+chain is `f2c47c3 -> c604d53 -> 272e138`; the accepted implementation/evidence/
+QA chain is `cef6ab2 -> 5bb6a73 -> 4df4528`.
 
-Start condition: satisfied when the coordinator confirms that pushed SHA. The
-frontend owner must start from that exact baseline in its isolated worktree;
-no other production workstream may overlap V1-owned paths.
+Start condition: satisfied from coordinator-pushed baseline `e45d2ea`. The
+frontend owner used that exact baseline in its isolated worktree, and no other
+production workstream overlapped the V1-owned paths.
 
 Owned implementation paths:
 
@@ -407,7 +422,62 @@ V1 acceptance evidence:
 - no missing world frame and no fixed fixture ID in owned runtime/render code;
 - independent QA acceptance by candidate SHA.
 
-## 7. Later frontend completion slices
+## 7. R2D — acyclic recursive-transfer contract freeze
+
+Owner: gameplay rules/engine task
+`019f4e82-7cb8-73c1-b4a1-d333273b359f`.
+
+Frontend compatibility reviewer: frontend/visual/runtime task
+`019f4e80-145a-7520-81e1-41a45b2bec13`.
+
+Independent reviewer: QA task
+`019f4e80-1462-7b32-8146-19ded692836c`.
+
+Status: authorized as the next and only workstream slice after V1 integration.
+R2D is documentation only. It does not authorize core, runtime, projection,
+render, package, serialization, level, or content edits.
+
+Owned paths:
+
+- new `docs/workstreams/gameplay-rules-engine/RULES_SLICE_R2_CONTRACT.md`;
+- `docs/workstreams/gameplay-rules-engine/THREAD_LOG.md`.
+
+Required contract result:
+
+- preserve the accepted `PublicCommand`, occurrence-address, transaction,
+  rejection, history, and deterministic-dispatch foundation unless an exact
+  shared public-type migration is explicitly named;
+- define original acyclic `push-in` and `push-out` as atomic canonical-state
+  transfers through a resolved `PortOccurrenceAddress`, never as renderer
+  effects or fixture-specific branches;
+- freeze applicability, rule priority/enablement, source and destination
+  addresses, landing/outer-anchor geometry, occupancy and push-chain policy,
+  actor position, focus-path behavior, and unchanged-state rejection shapes;
+- define how a moved world-bearing container carries its `innerWorldId` while
+  containment/parent queries are derived from canonical positions and preserve
+  multiple addressed aliases rather than storing one mutable parent;
+- freeze semantic events, visual handoff, win crossings, Undo/Redo/Reset,
+  replay authentication, hashing, validation, and deterministic stress oracles
+  for every accepted and rejected transfer branch;
+- keep `cycleMode: "forbid"` across the complete graph. Self-containment,
+  cyclic play, infinite traversal, level schema/content, solver work, and
+  copied official layouts/assets remain excluded;
+- name the exact non-overlapping core and frontend consumer paths, owners,
+  linear commit order, migration/removal policy, and whole-chain QA gate needed
+  for implementation. No partial integration or compile-dead intermediate
+  state is allowed.
+
+R2D acceptance gate:
+
+- gameplay owner commits only the two owned documentation paths;
+- frontend owner performs a read-only compatibility review of command/result/
+  event, projection, animation, and visual-transaction consequences;
+- independent QA accepts the exact complete documentation chain by SHA;
+- the coordinator integrates and pushes the accepted contract, then amends
+  this file with the finite implementation allowlists before any R2 source
+  work begins.
+
+## 8. Later frontend completion slices
 
 The user has authorized this frontend-and-engine framework sequence as the
 current development objective. Each slice remains gated by its declared start
@@ -446,7 +516,7 @@ accepted, integrated, and verified together. Documentation research must not
 be turned into level layouts before that gate. This prevents an incorrect rule
 engine or incomplete renderer from becoming the de facto level contract.
 
-## 8. Known baseline defects to eliminate
+## 9. Known baseline defects to eliminate
 
 Current source evidence at phase start:
 
@@ -466,7 +536,7 @@ Current source evidence at phase start:
 No later slice may hide these defects with a special fixture, longer arbitrary
 timeout, copied scene, or visual effect.
 
-## 9. Repository and handoff rules for this phase
+## 10. Repository and handoff rules for this phase
 
 - Workstreams use `gpt-5.6-terra`, `xhigh` reasoning effort, standard speed.
 - Every candidate report uses task ID and candidate SHA as its identity.
@@ -480,13 +550,16 @@ timeout, copied scene, or visual effect.
   local logs remain untracked/unstaged.
 - `git add .` is forbidden.
 
-## 10. Phase completion definition
+## 11. Phase completion definition
 
-The frontend-and-engine framework phase is not complete until I1, C1, V1, V2,
-V3, and V4 are independently accepted, integrated, and verified together from
-a clean install. At that point:
+The frontend-and-engine framework phase is not complete until I1, C1, V1, the
+R2 implementation defined by an accepted R2D contract, V2, V3, and V4 are
+independently accepted, integrated, and verified together from a clean install.
+At that point:
 
 - core commands are total, deterministic, and stress-tested;
+- original acyclic push-in/push-out and world-bearing-container transfers are
+  deterministic, atomic, replayable, and still reject all cycles;
 - renderer/runtime use occurrence addresses and no fixed IDs;
 - one visual transaction barrier protects recursive motion;
 - deterministic middle-frame evidence proves continuous spatial context;
@@ -495,7 +568,8 @@ a clean install. At that point:
   evidence, responsive input, accessibility, and deterministic capture are
   accepted without a false stage-completion claim.
 
-Current checkpoint: **D0, I1, and C1 are independently accepted and integrated.
-The V1 authorization chain is independently accepted and becomes the sole
-active production slice after the coordinator pushes this status. V2-V4 and
-all level/content work remain frozen until their declared gates pass.**
+Current checkpoint: **D0, I1, C1, and V1 are independently accepted and
+integrated. R2D is the sole active documentation slice. No R2 production code
+is authorized until its contract, frontend compatibility review, and
+independent QA gate are accepted and integrated. V2-V4 and all level/content
+work remain frozen until their declared gates pass.**
