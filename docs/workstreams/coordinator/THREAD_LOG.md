@@ -433,3 +433,43 @@ Coordinator decision:
 - C1 acceptance now explicitly requires a candidate-tree search proving that
   no legacy `Move`/`Enter`/`Exit`, command/result/event, adapter, or wrapper
   export survives in `src/core/**`.
+
+## 2026-07-12 - C1 accepted and integrated; V1 authorization correction opened
+
+Accepted C1 chain:
+
+- deterministic core implementation:
+  `63750f9d1e9bf53b90074d9c341e8c5eec6f5f7a`;
+- independent QA acceptance directly atop that candidate:
+  `8cdf0f3f2628498fb6fcfc6eee89f996e2e0e15a`.
+
+C1 acceptance evidence:
+
+- exact parent `d3552c81894a43805854611822bcfab86e993538`;
+- exactly 24 C1-owned candidate paths and one QA-log-only acceptance path;
+- total deterministic Step/Undo/Redo/Reset, validated ports and full-graph
+  `cycleMode: "forbid"`, authenticated history/events, and fail-closed session
+  sequence metadata;
+- fixed xorshift32 1,000-fixture x 64-command stress protocol plus 3,000 initial
+  non-Step cases;
+- independent clean install with 64 packages, typecheck, one full test command
+  with exit 0 (12 files / 70 cases), and build; only the existing Pixi/Vite
+  large-chunk advisory remains;
+- coordinator fast-forwarded the accepted linear chain to `main` and reproduced
+  clean install, typecheck, 12 files / 70 tests, and build. Generated `dist/`
+  output was removed after verification.
+
+Coordinator decision:
+
+- C1 is accepted as a deterministic R1 core milestone only. It does not accept
+  push-in/push-out, cyclic gameplay, levels, frontend completion, Stage 6,
+  release, or overall completion.
+- `docs/logs/CHANGELOG.md` remains unchanged until the complete frontend-and-
+  engine framework milestone is accepted, matching the user's prior gate.
+- Before V1 production starts, correct the V1 authorization text to enumerate
+  every owned source/test/evidence path, reuse C1 occurrence addresses, name
+  one `VisualTransactionController`, freeze the one-slot FIFO lifecycle, and
+  define exact dev-only normalized-progress QA states and desktop evidence.
+- This documentation candidate must receive frontend-owner read-only acceptance
+  and independent QA acceptance before it is integrated/pushed as V1 source
+  authority. Until then no V1 source or level work may start.

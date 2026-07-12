@@ -183,9 +183,12 @@ Explicitly excluded:
 Owner: gameplay rules/engine task
 `019f4e82-7cb8-73c1-b4a1-d333273b359f`.
 
-Status: active on the current pushed `origin/main`; the accepted I1 integration
-checkpoint begins at `cbfa5e6` and the coordinator's C1 ownership update is
-part of the required implementation base.
+Status: independently accepted and integrated. The accepted implementation is
+`63750f9d1e9bf53b90074d9c341e8c5eec6f5f7a`; the independent QA decision is
+`8cdf0f3f2628498fb6fcfc6eee89f996e2e0e15a`. The coordinator reproduced a
+clean install, typecheck, 12 Vitest files / 70 tests, and production build on
+the integrated `main` history. This closes C1 only; it does not authorize R2,
+levels, frontend completion, or release.
 
 Independent reviewer: QA task
 `019f4e80-1462-7b32-8146-19ded692836c`.
@@ -252,33 +255,72 @@ Owner: frontend/visual/runtime task
 Independent reviewer: QA task
 `019f4e80-1462-7b32-8146-19ded692836c`.
 
-Start condition: C1 is integrated and independently accepted.
+Status: authorization-document candidate only. Production edits have not
+started. C1 satisfies the engine dependency, but V1 remains closed until the
+frontend owner and independent QA accept this exact authorization text and the
+coordinator integrates/pushes that documentation decision.
+
+Start condition: accepted C1 is integrated, this exact V1 authorization is
+independently accepted and pushed, and the frontend owner starts from that
+named baseline SHA.
 
 Owned implementation paths:
 
-- `src/projection/types.ts`, `worldProjection.ts`,
-  `simulationProjection.ts` and their tests;
-- `src/runtime/EventPipeline.ts`, `GameRuntime.ts`,
-  `InteractionPrototype.ts` and their tests;
-- `src/animation/AnimationSystem.ts`, `AnimationSystem.test.ts`, `Timeline.ts`,
-  `TransitionTimeline.ts`, `transitions.ts`, `transitions.test.ts`, and any
-  directly corresponding existing tests;
-- `src/render/PixiApp.ts`, `RecursiveTransitionRenderer.ts`, `Camera2D.ts`
-  and relevant tests;
-- deterministic browser-capture tooling/evidence explicitly approved with the
-  V1 candidate;
+- `src/app/GameCanvasHost.tsx`;
+- `src/projection/types.ts`, `src/projection/worldProjection.ts`, new
+  `src/projection/worldProjection.test.ts`,
+  `src/projection/simulationProjection.ts`, and
+  `src/projection/simulationProjection.test.ts`;
+- `src/runtime/EventPipeline.ts`, `src/runtime/EventPipeline.test.ts`,
+  `src/runtime/GameRuntime.ts`, new `src/runtime/GameRuntime.test.ts`,
+  `src/runtime/InteractionPrototype.ts`,
+  `src/runtime/InteractionPrototype.test.ts`, new
+  `src/runtime/VisualTransactionController.ts`, new
+  `src/runtime/VisualTransactionController.test.ts`, new
+  `src/runtime/v1QaScenario.ts`, and new
+  `src/runtime/v1QaScenario.test.ts`;
+- `src/animation/AnimationSystem.ts`,
+  `src/animation/AnimationSystem.test.ts`, `src/animation/Timeline.ts`,
+  `src/animation/TransitionTimeline.ts`, `src/animation/transitions.ts`, and
+  `src/animation/transitions.test.ts`;
+- `src/render/PixiApp.ts`, new `src/render/PixiApp.test.ts`,
+  `src/render/RecursiveTransitionRenderer.ts`, new
+  `src/render/RecursiveTransitionRenderer.test.ts`, `src/render/Camera2D.ts`,
+  and `src/render/Camera2D.test.ts`;
+- exactly the V1 QA evidence paths listed below;
 - frontend workstream log.
+
+No other source, test, package, config, root-contract, core, audio, layer,
+primitive, metric, level, serialization, or general browser-automation path is
+owned by V1. If one becomes necessary, the frontend owner stops for a bounded
+scope amendment before editing it.
 
 Required implementation:
 
 - remove every runtime/render dependency on `container-b` or another fixture
   identity;
-- carry stable root-plus-container-path occurrence addresses through
-  projection, events, animation lookup, camera targeting, and diagnostics;
+- reuse C1's public `WorldAddress` and `EntityOccurrenceAddress` rather than a
+  parallel projection-only address shape;
+- carry the complete root-plus-`containerPath` occurrence through every world
+  and entity projection, event, animation lookup, facing/progress map, camera
+  target, render geometry, and diagnostic;
+- use a collision-safe structural occurrence key/comparator. Canonical entity
+  ID and ambiguous delimiter-joined strings are forbidden as keys;
+- derive `projectionId` from the complete occurrence without collisions and
+  test IDs containing delimiter-like text;
 - support at least two containers, nested focus, and repeated canonical entity
   occurrences without map-key overwrite;
-- replace separate animation/camera readiness with one authoritative visual
-  completion barrier;
+- remove production fallback selection of the historical recursive projection;
+  only the named V1 QA scenario may select synthetic state, and only at
+  application composition;
+- make new `VisualTransactionController` the only owner of normalized
+  transaction progress, entity/projection/camera/aperture/effect progress,
+  completion, buffering, cancellation, and destruction;
+- normalized progress is always `0 -> 1`, where `0` is the visual state before
+  the command and `1` is its canonical result state, including Undo/Redo.
+  Core-supplied reverse endpoints/events are never reversed a second time;
+- `AnimationSystem`, `Camera2D`, and `RecursiveTransitionRenderer` consume the
+  controller's progress and cannot own independent readiness clocks;
 - keep all visible world frames present during move/enter/exit middle frames;
 - enforce one bounded input policy: while a visual transaction is active, the
   first subsequent PublicCommand occupies a one-slot FIFO buffer; every later
@@ -288,7 +330,56 @@ Required implementation:
 - apply that same one-slot policy to Step/Undo/Redo/Reset; cancellation cannot
   reorder or double-dispatch, destroy clears the slot without dispatch, and a
   completion callback fires exactly once;
+- natural completion commits the exact final frame, fires completion once,
+  then dispatches the buffered command once;
+- non-destroy cancellation settles to the canonical destination, completes
+  once, then drains the buffer once; destroy aborts, clears the slot, emits no
+  dispatch/completion callback, and can never drain later;
+- a zero-duration or no-presentation result commits and completes
+  synchronously exactly once;
+- accepted and rejected Step/Undo/Redo/Reset results that produce presentation
+  feedback use the same controller and one-slot policy;
 - preserve the accepted C1 semantics without core mutation or reinterpretation.
+
+Deterministic V1 QA state surface:
+
+- authorize only these dev-mode query forms:
+  - `?qa=v1&case=move&progress=0.5`;
+  - `?qa=v1&case=enter&progress=<value>`, where `<value>` is exactly `0`,
+    `0.5`, or `1`;
+  - `?qa=v1&case=exit&progress=<value>`, where `<value>` is exactly `0`,
+    `0.5`, or `1`;
+- invalid query values fail closed;
+- QA mode disables wall-clock/ticker advancement and sets the controller to
+  the exact normalized progress;
+- inline synthetic states live only in `src/runtime/v1QaScenario.ts`; they are
+  not levels, serialization, campaign content, or special production rules;
+- each scenario dispatches real C1 `PublicCommand` values through
+  `EventPipeline`; it never fabricates `CommandResult` or `SemanticEvent`;
+- QA branching may choose a scenario only in `GameCanvasHost` application
+  composition. Runtime, projection, animation, camera, and renderer remain
+  fixture-agnostic;
+- exit progress is `0 = settled child`, `0.5 = continuous midpoint`, and
+  `1 = settled parent`.
+
+Exact V1 evidence paths:
+
+- `docs/qa/V1_BROWSER_EVIDENCE.md`;
+- `docs/qa/v1-browser-evidence.json`;
+- `docs/screenshots/v1/move-50.png`;
+- `docs/screenshots/v1/enter-00.png`;
+- `docs/screenshots/v1/enter-50.png`;
+- `docs/screenshots/v1/enter-100.png`;
+- `docs/screenshots/v1/exit-00.png`;
+- `docs/screenshots/v1/exit-50.png`;
+- `docs/screenshots/v1/exit-100.png`.
+
+Every V1 capture uses desktop `1440x900`, reported/effective DPR `1`, and
+records candidate SHA, browser/OS, exact query/command trace, normalized
+progress, screenshot/CSS/backing dimensions, canvas count, gameplay-DOM count,
+console problems, visible occurrence addresses, and geometry/world-frame
+continuity metrics. These checked-in records are deterministic V1 evidence,
+not the general capture-automation system assigned to V4.
 
 Explicitly excluded:
 
@@ -298,7 +389,8 @@ Explicitly excluded:
   diagnosable;
 - retained-scene-graph/performance work assigned to V3, and mobile/DPR,
   reduced-motion, pointer/touch, accessibility, and checked-in capture
-  automation assigned to V4; V1 may not claim those deferred capabilities;
+  automation assigned to V4; the V1 QA state-control surface is not general
+  capture automation, and V1 may not claim any deferred capability;
 - React gameplay DOM.
 
 V1 acceptance evidence:
@@ -309,6 +401,8 @@ V1 acceptance evidence:
 - deterministic desktop captures for move midpoint and enter/exit
   start/midpoint/settle, with capture timestamps defined as normalized visual
   transaction progress rather than wall-clock guesses;
+- exact evidence files, metadata, occurrence lists, frame geometry, and
+  continuity measurements defined above;
 - one canvas, zero gameplay DOM, zero unexpected console problems;
 - no missing world frame and no fixed fixture ID in owned runtime/render code;
 - independent QA acceptance by candidate SHA.
@@ -401,7 +495,7 @@ a clean install. At that point:
   evidence, responsive input, accessibility, and deterministic capture are
   accepted without a false stage-completion claim.
 
-Current checkpoint: **D0 and the complete I1 chain are independently accepted
-and integrated. After this status update is pushed, C1 is the only active
-production slice. V1-V4 remain dependency-gated, and all level/content work is
-frozen until the complete frontend-and-engine framework gate passes.**
+Current checkpoint: **D0, I1, and C1 are independently accepted and integrated.
+V1 remains closed while this exact authorization-document candidate receives
+frontend-owner and independent-QA review. V1-V4 production and all
+level/content work remain frozen until their declared gates pass.**

@@ -1,10 +1,11 @@
 # Current Project Status
 
-Status: Phase A recursive-foundation rebuild authorized after the design reboot.
-The D0 repository-contract slice is independently accepted and integrated. The
-I1 gameplay/core interface-bridge half is the only production slice that may
-start after the accepted D0 baseline is pushed. The user assesses the overall
-target as less than 10% complete.
+Status: Phase A recursive-foundation rebuild is active after the design reboot.
+D0, the complete I1 interface bridge, and C1 deterministic core are
+independently accepted and integrated. V1 production remains closed while its
+exact occurrence-address/visual-transaction authorization text receives
+frontend-owner and independent-QA review. The user assesses the overall target
+as less than 10% complete.
 
 `Stage 6` is a historical implementation label only. It does not mean that the
 visual design, recursive rules, gameplay depth, runtime stability, content, or
@@ -26,10 +27,10 @@ menus, polish UI, large content, or new gameplay rules.
   - `ARCHITECTURE.md`
   - `DESIGN_REFERENCE.md`
   - `IMPLEMENTATION_PLAN.md`
-- Approval status: R1 and D0 documentation contracts accepted. The complete I1
-  public-interface chain is independently accepted and integrated; C1 is the
-  next active implementation slice. Historical Stage numbers are not current
-  authority.
+- Approval status: R1 and D0 contracts, the complete I1 public-interface chain,
+  and C1 deterministic core are independently accepted and integrated. V1 is
+  not yet authorized for source edits; its exact documentation gate is under
+  review. Historical Stage numbers are not current authority.
 - Local cleanup state: no generated build output retained; dev server stopped
 
 ## Preserved Records
@@ -64,11 +65,14 @@ implementation slice requires independent QA before the next starts.
 
 Per the user's 2026-07-12 clarification, no level design, serialization,
 authored test level, solver, or campaign content begins until the complete C1
-and V1-V4 frontend-and-engine framework is accepted and integrated.
+and V1-V4 frontend-and-engine framework is accepted and integrated. After that
+gate, the first content slice is one original showcase acceptance level; test
+level expansion starts only after the user accepts that showcase.
 
 Do not treat this authorization as permission for overlapping workstreams,
-large content, copied assets, unreviewed schema, or a one-shot rewrite. C1 is
-the sole active production slice after the integrated I1 checkpoint is pushed.
+large content, copied assets, unreviewed schema, or a one-shot rewrite. No
+production slice is active while the V1 authorization-document candidate is
+under review.
 
 ## Historical Prototype Inventory
 
