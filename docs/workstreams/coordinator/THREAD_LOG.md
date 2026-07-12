@@ -473,3 +473,32 @@ Coordinator decision:
 - This documentation candidate must receive frontend-owner read-only acceptance
   and independent QA acceptance before it is integrated/pushed as V1 source
   authority. Until then no V1 source or level work may start.
+
+## 2026-07-12 - V1 authorization accepted; production gate prepared
+
+Accepted documentation chain:
+
+- coordinator authorization `f2c47c3fa31875a8fb5ac2a8a6943f02c3ffbc3a`;
+- frontend-owner read-only acceptance
+  `c604d530ce8408fa561053a538db3beb9ea15839`;
+- independent QA acceptance
+  `272e13893d6252f0f9de603e36c0873acf4f5b3d`.
+
+Scope and decision:
+
+- the cumulative accepted chain changes only `CURRENT_TASK.md`,
+  `docs/reboot/CURRENT_STATUS.md`, the coordinator log, the frontend log, and
+  the QA log;
+- no product source, package, config, root changelog, level, or serialization
+  path changed during this authorization gate;
+- V1 has an exact finite source/test/evidence allowlist, reuses C1 occurrence
+  addresses, names one visual-transaction controller and one-slot lifecycle,
+  and defines fail-closed normalized-progress desktop evidence;
+- retained rendering/performance remains V3; mobile/DPR/reduced-motion/pointer,
+  accessibility, and general capture automation remain V4;
+- after the coordinator pushes the status commit containing this chain, V1 is
+  the sole active production slice. The frontend owner must start from the
+  exact pushed `origin/main` SHA supplied by the coordinator;
+- V1 acceptance itself still requires source-candidate QA, deterministic
+  desktop middle-frame evidence, and coordinator integration. R2, V2-V4,
+  levels, showcase content, Stage 6, release, and completion remain closed.

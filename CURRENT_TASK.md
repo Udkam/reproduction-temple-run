@@ -255,14 +255,14 @@ Owner: frontend/visual/runtime task
 Independent reviewer: QA task
 `019f4e80-1462-7b32-8146-19ded692836c`.
 
-Status: authorization-document candidate only. Production edits have not
-started. C1 satisfies the engine dependency, but V1 remains closed until the
-frontend owner and independent QA accept this exact authorization text and the
-coordinator integrates/pushes that documentation decision.
+Status: authorized as the next and only production slice. The accepted
+authorization chain is `f2c47c3 -> c604d53 -> 272e138`. Production edits may
+start only after the coordinator pushes the `main` status commit containing
+that chain and gives the frontend owner the exact resulting `origin/main` SHA.
 
-Start condition: accepted C1 is integrated, this exact V1 authorization is
-independently accepted and pushed, and the frontend owner starts from that
-named baseline SHA.
+Start condition: satisfied when the coordinator confirms that pushed SHA. The
+frontend owner must start from that exact baseline in its isolated worktree;
+no other production workstream may overlap V1-owned paths.
 
 Owned implementation paths:
 
@@ -496,6 +496,6 @@ a clean install. At that point:
   accepted without a false stage-completion claim.
 
 Current checkpoint: **D0, I1, and C1 are independently accepted and integrated.
-V1 remains closed while this exact authorization-document candidate receives
-frontend-owner and independent-QA review. V1-V4 production and all
-level/content work remain frozen until their declared gates pass.**
+The V1 authorization chain is independently accepted and becomes the sole
+active production slice after the coordinator pushes this status. V2-V4 and
+all level/content work remain frozen until their declared gates pass.**
