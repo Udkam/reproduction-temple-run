@@ -33,7 +33,13 @@ function validateEvidence(entries) {
     'slide-mid': 'running',
     'turn-mid': 'running',
     'turn-lane-change': 'running',
+    milestone: 'running',
+    'chase-close': 'running',
     collision: 'game-over',
+    'beam-preview': 'running',
+    'ring-preview': 'running',
+    'column-preview': 'running',
+    'gap-preview': 'running',
     'pause-high-contrast': 'paused',
     'mobile-portrait': 'running',
     'mobile-landscape': 'running',
@@ -61,6 +67,10 @@ function validateEvidence(entries) {
       `${entry.id}: presented lane differs from canonical state`,
       failures,
     );
+    assertEvidence(entry.ui.hud.score === entry.simulation.score, `${entry.id}: HUD score differs from canonical state`, failures);
+    assertEvidence(entry.ui.hud.distance === Math.floor(entry.simulation.distance), `${entry.id}: HUD distance differs from canonical state`, failures);
+    assertEvidence(entry.ui.hud.shards === entry.simulation.shards, `${entry.id}: HUD shards differ from canonical state`, failures);
+    assertEvidence(entry.ui.hud.flow === entry.simulation.multiplier, `${entry.id}: HUD flow differs from canonical state`, failures);
     for (const area of entry.safeAreas) {
       assertEvidence(area.insideViewport, `${entry.id}: ${area.selector} leaves the safe viewport`, failures);
     }
@@ -100,10 +110,48 @@ function validateEvidence(entries) {
     failures,
   );
   assertEvidence(
-    (turnLane?.simulation.lanePosition ?? 0) > 0,
-    'turn-lane-change: lane transition did not advance',
+    (turnLane?.simulation.targetLane ?? 0) > (turnLane?.simulation.lanePosition ?? 0) &&
+      Math.abs(
+        (turnLane?.simulation.lanePosition ?? 0) -
+          (turnLane?.simulation.previousLanePosition ?? 0),
+      ) > 0.001,
+    'turn-lane-change: lane transition did not advance toward its canonical target',
     failures,
   );
+
+  const milestone = byId.get('milestone');
+  assertEvidence(milestone?.simulation.lastDistanceMilestone === 250, 'milestone: canonical marker missing', failures);
+  assertEvidence((milestone?.simulation.score ?? 0) > 0, 'milestone: score did not progress', failures);
+  assertEvidence(milestone?.ui.milestone?.includes('250 m'), 'milestone: visible 250 m callout missing', failures);
+
+  const traceScenarios = ['milestone', 'chase-close', 'beam-preview', 'ring-preview', 'column-preview', 'gap-preview'];
+  for (const id of traceScenarios) {
+    const entry = byId.get(id);
+    assertEvidence(entry?.simulation.scenarioTrace?.name === entry?.scenario, `${id}: missing matching command trace`, failures);
+    assertEvidence(entry?.simulation.scenarioTrace?.replayHash === entry?.simulation.hash, `${id}: trace hash differs from canonical state`, failures);
+    assertEvidence((entry?.simulation.scenarioTrace?.commands.length ?? 0) > 0, `${id}: command trace is empty`, failures);
+  }
+
+  const chaseClose = byId.get('chase-close');
+  assertEvidence((chaseClose?.simulation.chaseGap ?? 99) <= 1.2, 'chase-close: canonical gap is not threatening', failures);
+  assertEvidence(chaseClose?.render.pursuerScreen?.visible === true, 'chase-close: pursuer is not visible', failures);
+  assertEvidence(
+    (chaseClose?.render.pursuerScreen?.bounds?.area ?? 0) > 64,
+    'chase-close: pursuer lacks meaningful clipped visible area',
+    failures,
+  );
+
+  const hazardKinds = {
+    'beam-preview': 'beam',
+    'ring-preview': 'ring',
+    'column-preview': 'column',
+    'gap-preview': 'gap',
+  };
+  for (const [id, kind] of Object.entries(hazardKinds)) {
+    const matching = byId.get(id)?.render.hazardScreens?.find((hazard) => hazard.kind === kind);
+    assertEvidence(Boolean(matching), `${id}: canonical ${kind} has no renderer bounds`, failures);
+    assertEvidence((matching?.bounds?.area ?? 0) > 64, `${id}: ${kind} bounds have no meaningful clipped area`, failures);
+  }
 
   const highContrast = byId.get('pause-high-contrast');
   assertEvidence(highContrast?.appearance.highContrast === true, 'high contrast class not active', failures);
@@ -177,8 +225,12 @@ function compactSimulation(snapshot) {
     shieldCharges: state.runner.shieldCharges,
     score: state.score,
     shards: state.shards,
+    multiplier: state.multiplier,
+    chaseGap: state.chaseGap,
+    lastDistanceMilestone: state.lastDistanceMilestone,
     failureReason: state.failureReason,
     events: snapshot.events,
+    scenarioTrace: snapshot.scenarioTrace,
   };
 }
 
@@ -190,7 +242,8 @@ async function capture({
   isMobile = false,
   hasTouch = false,
   reducedMotion = 'no-preference',
-  highContrastPause = false,
+  highContrast = false,
+  pause = false,
   turnProgress = null,
   advanceTicks = 0,
   keys = [],
@@ -213,12 +266,15 @@ async function capture({
   page.on('pageerror', (error) => problems.push({ type: 'pageerror', text: error.message }));
   await page.goto(baseUrl, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => Boolean(window.__TIDE_RELAY_QA__));
-  if (highContrastPause) {
-    await page.getByRole('button', { name: 'CONTRAST' }).click();
+  if (highContrast) {
+    await page.getByRole('button', { name: 'contrast' }).click();
     await page.waitForFunction(() => document.querySelector('main')?.classList.contains('is-high-contrast'));
   }
   if (scenario) {
     await page.evaluate((name) => window.__TIDE_RELAY_QA__.loadScenario(name), scenario);
+  }
+  if (keys.length > 0) {
+    await page.locator('canvas').focus();
   }
   for (const key of keys) {
     await page.keyboard.press(key);
@@ -229,7 +285,7 @@ async function capture({
   if (turnProgress !== null) {
     await page.evaluate((progress) => window.__TIDE_RELAY_QA__.setTurnProgress(progress), turnProgress);
   }
-  if (highContrastPause) {
+  if (pause) {
     await page.locator('canvas').focus();
     await page.keyboard.press('Escape');
   }
@@ -278,6 +334,18 @@ async function capture({
         highContrast: document.querySelector('main')?.classList.contains('is-high-contrast') ?? false,
         reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
       },
+      ui: {
+        hud: (() => {
+          const hud = document.querySelector('.hud');
+          return {
+            score: Number(hud?.getAttribute('data-score')),
+            distance: Number(hud?.getAttribute('data-distance')),
+            shards: Number(hud?.getAttribute('data-shards')),
+            flow: Number(hud?.getAttribute('data-flow')),
+          };
+        })(),
+        milestone: document.querySelector('.distance-milestone')?.textContent ?? null,
+      },
       safeAreas: ['.brandbar', '.hud', '.pause-control', '.turn-cue', '.gesture-hint', '.touch-controls', '.settings']
         .map(visibleSafeArea)
         .filter(Boolean),
@@ -294,6 +362,7 @@ async function capture({
     viewport: structured.viewport,
     dom: structured.dom,
     appearance: structured.appearance,
+    ui: structured.ui,
     safeAreas: structured.safeAreas,
     simulation: compactSimulation(structured.simulation),
     render: structured.render,
@@ -321,7 +390,8 @@ async function realDesktopInput() {
       events: snapshot.events,
     });
   };
-  await page.getByRole('button', { name: /begin relay/i }).click();
+  await page.getByRole('button', { name: /start running/i }).click();
+  await page.evaluate(() => window.__TIDE_RELAY_QA__.freeze(true));
   await recordAction('Begin relay');
   await page.keyboard.press('ArrowLeft');
   await recordAction('ArrowLeft');
@@ -359,7 +429,8 @@ async function realTouchInput() {
   });
   page.on('pageerror', (error) => problems.push(error.message));
   await page.goto(baseUrl, { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /begin relay/i }).click();
+  await page.getByRole('button', { name: /start running/i }).click();
+  await page.evaluate(() => window.__TIDE_RELAY_QA__.freeze(true));
   const beforeSwipe = await page.evaluate(() => window.__TIDE_RELAY_QA__.getSimulationSnapshot());
   const canvas = page.locator('canvas');
   const box = await canvas.boundingBox();
@@ -424,7 +495,27 @@ try {
     advanceTicks: 5,
   });
   await capture({ id: 'collision', scenario: 'collision' });
-  await capture({ id: 'pause-high-contrast', scenario: 'running', highContrastPause: true });
+  await capture({ id: 'milestone', scenario: 'milestone' });
+  await capture({ id: 'chase-close', scenario: 'chase-close' });
+  await capture({ id: 'pause-high-contrast', scenario: 'running', highContrast: true, pause: true });
+  await capture({ id: 'beam-preview', scenario: 'beam-preview' });
+  await capture({
+    id: 'ring-preview',
+    scenario: 'ring-preview',
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+  });
+  await capture({
+    id: 'column-preview',
+    scenario: 'column-preview',
+    viewport: { width: 844, height: 390 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+  });
+  await capture({ id: 'gap-preview', scenario: 'gap-preview', highContrast: true });
   await capture({
     id: 'mobile-portrait',
     scenario: 'running',

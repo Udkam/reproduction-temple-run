@@ -101,6 +101,10 @@ export type FailureReason =
       readonly kind: "gap-fall";
       readonly sectionId: string;
       readonly eventId: string;
+    }
+  | {
+      readonly kind: "pursuer-caught";
+      readonly hazard: "black-tide";
     };
 
 export interface RunnerState {
@@ -113,11 +117,15 @@ export interface RunnerState {
   readonly sectionIndex: number;
   readonly sectionDistance: number;
   readonly speed: number;
+  /** Canonical pursuer distance in meters. Smaller values mean more danger. */
+  readonly chaseGap: number;
   readonly score: number;
   readonly shards: number;
   readonly multiplier: number;
   readonly queuedTurn: TurnDirection | null;
   readonly failureReason: FailureReason | null;
+  /** Highest emitted distance milestone, in whole meters. */
+  readonly lastDistanceMilestone: number;
   readonly runner: RunnerBodyState;
   readonly course: CourseState;
   readonly resolvedEventIds: readonly string[];
@@ -179,6 +187,19 @@ export type RunnerEvent =
       readonly sectionId: string;
       readonly eventId: string;
       readonly hazard: HazardKind;
+    }
+  | {
+      readonly type: "stumbled";
+      readonly tick: number;
+      readonly sectionId: string;
+      readonly eventId: string;
+      readonly hazard: Exclude<HazardKind, "gap">;
+      readonly shielded: boolean;
+    }
+  | {
+      readonly type: "distance-milestone";
+      readonly tick: number;
+      readonly meters: number;
     }
   | {
       readonly type: "run-failed";

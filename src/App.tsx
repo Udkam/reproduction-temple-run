@@ -40,11 +40,12 @@ function describeFailure(reason: FailureReason | null): string {
   if (reason.kind === 'wrong-turn') return `Wrong turn — relay expected ${reason.expected}.`;
   if (reason.kind === 'missed-turn') return `Missed ${reason.expected} turn window.`;
   if (reason.kind === 'gap-fall') return 'The causeway collapsed beneath the relay.';
+  if (reason.kind === 'pursuer-caught') return 'The black tide caught you.';
   return `Impact detected: ${reason.hazard}.`;
 }
 
 function formatDistance(value: number): string {
-  return Math.floor(value).toString().padStart(5, '0');
+  return Math.floor(value).toLocaleString('en-US');
 }
 
 export default function App() {
@@ -134,7 +135,17 @@ export default function App() {
   };
 
   const status = state?.status ?? 'ready';
+  const hudScore = Math.floor(state?.score ?? 0);
+  const hudDistance = Math.floor(state?.distance ?? 0);
+  const hudShards = state?.shards ?? 0;
+  const hudFlow = state?.multiplier ?? 1;
   const section = state ? getCurrentSection(state) : null;
+  const milestoneMeters = Math.floor((state?.distance ?? 0) / 250) * 250;
+  const showMilestone = Boolean(
+    state?.status === 'running' &&
+    milestoneMeters > 0 &&
+    state.distance - milestoneMeters < Math.max(12, state.speed * 1.15),
+  );
   const turnWindowActive = Boolean(state && isTurnWindow(state));
   const showTurnCue = Boolean(
     state &&
@@ -155,16 +166,22 @@ export default function App() {
       <a className="skip-link" href="#primary-action">Skip to game controls</a>
       <div ref={hostRef} className="world-host" data-testid="world-host" />
 
-      <header className="brandbar" aria-label="TIDE RELAY">
-        <span className="brand-glyph" aria-hidden="true" />
-        <span className="brand-copy"><strong>TIDE//RELAY</strong><span>RUN THE LAST MERIDIAN</span></span>
+      <header className="brandbar" aria-label="Tide Relay">
+        <span className="brand-glyph" aria-hidden="true"><i /></span>
+        <span className="brand-copy"><strong>Tide Relay</strong><span>follow the jade line</span></span>
       </header>
 
-      <section className="hud" aria-label="Run status">
-        <div className="metric"><span>DISTANCE</span><strong>{formatDistance(state?.distance ?? 0)} M</strong></div>
-        <div className="metric metric--center"><span>FLOW</span><strong>×{(state?.multiplier ?? 1).toFixed(1)}</strong></div>
-        <div className="metric metric--end"><span>SCORE {String(state?.score ?? 0).padStart(6, '0')}</span><strong>{String(state?.shards ?? 0).padStart(3, '0')} SIG</strong></div>
+      <section className="hud" aria-label="Run status" data-score={hudScore} data-distance={hudDistance} data-shards={hudShards} data-flow={hudFlow}>
+        <div className="metric metric--score"><span>Score</span><strong>{hudScore.toLocaleString('en-US')}</strong></div>
+        <div className="metric metric--distance"><span>Distance</span><strong>{hudDistance.toLocaleString('en-US')} <small>m</small></strong></div>
+        <div className="metric metric--support"><span>Flow ×{hudFlow}</span><strong>{hudShards} shards</strong></div>
       </section>
+
+      {showMilestone ? (
+        <div className="distance-milestone" aria-hidden="true">
+          <span>still running</span><strong>{milestoneMeters.toLocaleString('en-US')} m</strong>
+        </div>
+      ) : null}
 
       <button
         className="pause-control"
@@ -177,7 +194,7 @@ export default function App() {
       {showTurnCue && section ? (
         <div className={`turn-cue${turnWindowActive ? '' : ' turn-cue--warning'}`} data-testid="turn-cue">
           <strong aria-hidden="true">{section.requiredTurn === 'left' ? '←' : '→'}</strong>
-          <span>{turnWindowActive ? 'TURN' : 'PREPARE'} {section.requiredTurn.toUpperCase()}</span>
+          <span>{turnWindowActive ? 'turn now' : 'path bends'} {section.requiredTurn}</span>
         </div>
       ) : null}
 
@@ -188,21 +205,21 @@ export default function App() {
           <div className="overlay-card">
             {status === 'ready' ? (
               <>
-                <p className="overlay-eyebrow">OBSERVATORY LINK // 01</p>
-                <h1 id="overlay-title">TIDE<em>//</em><br />RELAY</h1>
-                <p className="overlay-copy">Carry the last star-map beyond the black tide. Shift lanes, vault broken meridians, slide beneath the instruments, and commit each turn before the causeway ends.</p>
-                <div className="record-grid">
-                  <article><span>BEST</span><strong>{formatDistance(bestDistance)} M</strong></article>
-                  <article><span>TOP SCORE</span><strong>{String(bestScore).padStart(6, '0')}</strong></article>
-                  <article><span>CONTROL</span><strong>ARROWS / WASD</strong></article>
+                <p className="overlay-eyebrow">the path remembers every footstep</p>
+                <h1 id="overlay-title">Tide<br /><em>Relay</em></h1>
+                <p className="overlay-copy">Run the flooded observatory. Read the ruins, jump the broken spans, duck beneath the instruments—and do not let the tide catch you.</p>
+                <div className="ready-meta">
+                  <p><span>best distance</span><strong>{formatDistance(bestDistance)} m</strong></p>
+                  <p><span>best score</span><strong>{bestScore.toLocaleString('en-US')}</strong></p>
+                  <p><span>move</span><strong>arrows / swipe</strong></p>
                 </div>
-                <div className="overlay-actions"><button id="primary-action" className="primary-action" type="button" onClick={start}>Begin relay</button></div>
+                <div className="overlay-actions"><button id="primary-action" className="primary-action" type="button" onClick={start}>Start running</button></div>
               </>
             ) : status === 'paused' ? (
               <>
-                <p className="overlay-eyebrow">LINK SUSPENDED</p>
-                <h2 id="overlay-title">HOLD<br />THE LINE</h2>
-                <p className="overlay-copy">The tide is frozen. Resume when your path is clear.</p>
+                <p className="overlay-eyebrow">take a breath</p>
+                <h2 id="overlay-title">Run<br />paused</h2>
+                <p className="overlay-copy">The route is waiting exactly where you left it.</p>
                 <div className="overlay-actions">
                   <button id="primary-action" className="primary-action" type="button" onClick={resume}>Resume</button>
                   <button className="secondary-action" type="button" onClick={restart}>Restart run</button>
@@ -210,14 +227,14 @@ export default function App() {
               </>
             ) : (
               <>
-                <p className="overlay-eyebrow">TRANSMISSION ENDED</p>
-                <h2 id="overlay-title">SIGNAL<br />LOST</h2>
+                <p className="overlay-eyebrow">the tide caught up</p>
+                <h2 id="overlay-title">Run<br />ended</h2>
                 <p className="failure-reason">{describeFailure(state?.failureReason ?? null)}</p>
-                <div className="record-grid record-grid--four">
-                  <article><span>DISTANCE</span><strong>{formatDistance(state?.distance ?? 0)} M</strong></article>
-                  <article><span>BEST</span><strong>{formatDistance(Math.max(bestDistance, state?.distance ?? 0))} M</strong></article>
-                  <article><span>SCORE</span><strong>{String(state?.score ?? 0).padStart(6, '0')}</strong></article>
-                  <article><span>SIGNAL</span><strong>{String(state?.shards ?? 0).padStart(3, '0')}</strong></article>
+                <div className="ready-meta ready-meta--results">
+                  <p><span>distance</span><strong>{formatDistance(state?.distance ?? 0)} m</strong></p>
+                  <p><span>best</span><strong>{formatDistance(Math.max(bestDistance, state?.distance ?? 0))} m</strong></p>
+                  <p><span>score</span><strong>{Math.floor(state?.score ?? 0).toLocaleString('en-US')}</strong></p>
+                  <p><span>shards</span><strong>{state?.shards ?? 0}</strong></p>
                 </div>
                 <div className="overlay-actions"><button id="primary-action" className="primary-action" type="button" onClick={restart}>Run again</button></div>
               </>
@@ -232,11 +249,11 @@ export default function App() {
         <button className="touch-action" type="button" aria-label="Slide" onClick={() => action('slide')}>↓</button>
         <button className="touch-action" type="button" aria-label="Move or turn right" onClick={() => action('right')}>→</button>
       </nav>
-      {status === 'running' && (state?.distance ?? 0) < 20 ? <p className="gesture-hint">SWIPE TO SHIFT · JUMP · SLIDE</p> : null}
+      {status === 'running' && (state?.distance ?? 0) < 20 ? <p className="gesture-hint">swipe sideways · up to jump · down to slide</p> : null}
 
       <div className="settings" aria-label="Presentation settings">
-        <button className="setting-button" type="button" aria-pressed={audioEnabled} onClick={toggleAudio}>SOUND</button>
-        <button className="setting-button" type="button" aria-pressed={highContrast} onClick={() => setHighContrast((value) => !value)}>CONTRAST</button>
+        <button className="setting-button" type="button" aria-pressed={audioEnabled} onClick={toggleAudio}>sound</button>
+        <button className="setting-button" type="button" aria-pressed={highContrast} onClick={() => setHighContrast((value) => !value)}>contrast</button>
       </div>
       <p className="sr-only" aria-live="polite">{liveMessage}</p>
     </main>

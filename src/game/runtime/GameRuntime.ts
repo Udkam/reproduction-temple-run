@@ -18,6 +18,7 @@ import {
 import {
   QA_SCENARIO_NAMES,
   createQaScenario,
+  type QaScenario,
   type QaScenarioName,
 } from "./qaScenarios";
 
@@ -47,6 +48,12 @@ export interface SimulationQaSnapshot {
   readonly hash: string;
   readonly frozen: boolean;
   readonly accumulatorMs: number;
+  /** Present only when state came from a command-derived stored QA scenario. */
+  readonly scenarioTrace: {
+    readonly name: QaScenarioName;
+    readonly commands: readonly RunnerCommand[];
+    readonly replayHash: string;
+  } | null;
 }
 
 export interface FrameBenchmark {
@@ -180,6 +187,7 @@ export class GameRuntime {
   private frozen = false;
   private initPromise: Promise<void> | null = null;
   private qaApi: TideRelayQaApi | null = null;
+  private qaScenario: QaScenario | null = null;
   private resourcesDestroyed = false;
 
   constructor(
@@ -449,7 +457,7 @@ export class GameRuntime {
     this.lastEvents = [...events];
     this.pendingRenderEvents = [...events];
     this.accumulatorMs = 0;
-    this.input?.clear();
+      this.input?.clear();
     if (render) this.forceRender(0, 1);
     this.notify();
   }
@@ -481,6 +489,13 @@ export class GameRuntime {
       hash: hashState(this.state),
       frozen: this.frozen,
       accumulatorMs: this.accumulatorMs,
+      scenarioTrace: this.qaScenario && hashState(this.state) === this.qaScenario.replayHash
+        ? {
+            name: this.qaScenario.name,
+            commands: [...this.qaScenario.trace],
+            replayHash: this.qaScenario.replayHash,
+          }
+        : null,
     };
   }
 
@@ -493,12 +508,14 @@ export class GameRuntime {
         const state = createInitialState(seed);
         this.options = { ...this.options, seed: state.seed };
         this.frozen = true;
+        this.qaScenario = null;
         this.replaceState(state, [], true);
         return this.simulationQaSnapshot();
       },
       loadScenario: (name) => {
         const scenario = createQaScenario(name, this.options.seed);
         this.frozen = true;
+        this.qaScenario = scenario;
         this.replaceState(
           scenario.state,
           scenario.events,
@@ -524,6 +541,7 @@ export class GameRuntime {
           if (!result.accepted) break;
           this.acceptResult(result, false);
         }
+        if (count > 0) this.qaScenario = null;
         this.accumulatorMs = 0;
         this.forceRender(0, 1);
         this.notify();

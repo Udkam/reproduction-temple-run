@@ -1,17 +1,22 @@
 import { LANE_WIDTH } from '../core';
 
 export const PALETTE = {
-  void: 0x06141c,
-  sky: 0x0a2630,
-  basalt: 0x17272b,
-  basaltEdge: 0x294247,
-  porcelain: 0xd8e0da,
-  verdigris: 0x2c827c,
-  signal: 0x87f1dd,
-  hazard: 0xff705a,
-  brass: 0xb49758,
-  ink: 0xeaf6f0,
-  blackTide: 0x02070a,
+  void: 0x2c3029,
+  sky: 0xc7d8d1,
+  mist: 0x9fb7af,
+  basalt: 0x4b5148,
+  basaltEdge: 0x777a69,
+  porcelain: 0xe7dfca,
+  verdigris: 0x315b4a,
+  signal: 0x12ae9d,
+  hazard: 0xc9513a,
+  brass: 0xe7c68a,
+  ink: 0xf7f4ea,
+  blackTide: 0x111410,
+  soil: 0x342d25,
+  foliage: 0x315b4a,
+  runnerCloth: 0x243933,
+  runnerLeather: 0x342d25,
 } as const;
 
 export const WORLD_METRICS = {

@@ -56,6 +56,22 @@ export interface RenderOptions {
   reducedMotion: boolean;
 }
 
+export interface ClippedScreenBounds {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+  area: number;
+}
+
+export interface HazardScreenBounds {
+  eventId: string;
+  kind: "beam" | "ring" | "column" | "gap";
+  bounds: ClippedScreenBounds;
+}
+
 export interface RenderSnapshot {
   canvas: { width: number; height: number; resolution: number };
   options: RenderOptions;
@@ -64,6 +80,9 @@ export interface RenderSnapshot {
   presentedLanePosition: number;
   runnerWorld: { x: number; y: number; z: number; yaw: number };
   runnerScreen: { x: number; y: number; visible: boolean };
+  pursuerScreen: { x: number; y: number; visible: boolean; bounds: ClippedScreenBounds | null };
+  /** Clipped CSS-pixel geometry for every visible unresolved hazard. */
+  hazardScreens: HazardScreenBounds[];
   camera: { x: number; y: number; z: number; fov: number; yaw: number };
   lanePosition: number;
   posture: 'run' | 'jump' | 'slide';
@@ -154,21 +173,24 @@ export class WorldRenderer {
   private readonly cameraLook = new Vector3();
   private readonly ocean = new Mesh(
     new PlaneGeometry(900, 900),
-    new MeshBasicMaterial({ color: 0x020b10 }),
+    new MeshBasicMaterial({ color: PALETTE.soil }),
   );
   private readonly horizon = new Mesh(
     new PlaneGeometry(360, 110),
-    new MeshBasicMaterial({ color: 0x0b3440, transparent: true, opacity: 0.5, side: DoubleSide, depthWrite: false }),
+    new MeshBasicMaterial({ color: PALETTE.mist, transparent: true, opacity: 0.34, side: DoubleSide, depthWrite: false }),
   );
-  private readonly floorMaterial = new MeshStandardMaterial({ color: PALETTE.basalt, roughness: 0.7, metalness: 0.18 });
-  private readonly railMaterial = new MeshStandardMaterial({ color: PALETTE.verdigris, roughness: 0.42, metalness: 0.58 });
-  private readonly seamMaterial = new MeshStandardMaterial({ color: PALETTE.signal, emissive: PALETTE.signal, emissiveIntensity: 1.7, roughness: 0.22 });
-  private readonly guideMaterial = new MeshStandardMaterial({ color: PALETTE.basaltEdge, emissive: 0x0b292e, emissiveIntensity: 0.55, roughness: 0.5, metalness: 0.32 });
-  private readonly porcelainMaterial = new MeshStandardMaterial({ color: PALETTE.porcelain, roughness: 0.58, metalness: 0.06 });
-  private readonly rockMaterial = new MeshStandardMaterial({ color: 0x102126, roughness: 0.88, metalness: 0.04 });
-  private readonly hazardMaterial = new MeshStandardMaterial({ color: PALETTE.hazard, emissive: 0x6a150d, emissiveIntensity: 0.9, roughness: 0.54 });
-  private readonly gapMaterial = new MeshStandardMaterial({ color: 0x010508, emissive: 0x180a08, emissiveIntensity: 0.8, roughness: 0.96 });
-  private readonly shardMaterial = new MeshStandardMaterial({ color: PALETTE.signal, emissive: PALETTE.signal, emissiveIntensity: 2.5, roughness: 0.16, metalness: 0.18 });
+  private readonly floorMaterial = new MeshStandardMaterial({ color: PALETTE.basalt, roughness: 0.92, metalness: 0.02 });
+  private readonly railMaterial = new MeshStandardMaterial({ color: PALETTE.basaltEdge, roughness: 0.9, metalness: 0.02 });
+  private readonly seamMaterial = new MeshStandardMaterial({ color: PALETTE.signal, emissive: PALETTE.signal, emissiveIntensity: 0.32, roughness: 0.48 });
+  private readonly guideMaterial = new MeshStandardMaterial({ color: PALETTE.brass, roughness: 0.76, metalness: 0.12 });
+  private readonly porcelainMaterial = new MeshStandardMaterial({ color: PALETTE.porcelain, roughness: 0.86, metalness: 0.02 });
+  private readonly rockMaterial = new MeshStandardMaterial({ color: PALETTE.foliage, roughness: 0.96, metalness: 0 });
+  private readonly beamMaterial = new MeshStandardMaterial({ color: 0x6d4938, roughness: 0.9, metalness: 0.01 });
+  private readonly gateMaterial = new MeshStandardMaterial({ color: 0x826f48, roughness: 0.78, metalness: 0.18 });
+  private readonly columnMaterial = new MeshStandardMaterial({ color: 0x8f8874, roughness: 0.94, metalness: 0.01 });
+  private readonly dangerMaterial = new MeshStandardMaterial({ color: PALETTE.hazard, emissive: 0x3a1009, emissiveIntensity: 0.18, roughness: 0.8 });
+  private readonly gapMaterial = new MeshStandardMaterial({ color: 0x18130f, roughness: 0.98 });
+  private readonly shardMaterial = new MeshStandardMaterial({ color: PALETTE.signal, emissive: PALETTE.signal, emissiveIntensity: 1.25, roughness: 0.28, metalness: 0.08 });
   private readonly shieldMaterial = new MeshBasicMaterial({ color: PALETTE.signal, transparent: true, opacity: 0.72, wireframe: true });
   private readonly floors = this.instances(new BoxGeometry(1, 1, 1), this.floorMaterial, MAX_SECTIONS);
   private readonly rails = this.instances(new BoxGeometry(1, 1, 1), this.railMaterial, MAX_RAILS);
@@ -177,10 +199,15 @@ export class WorldRenderer {
   private readonly platforms = this.instances(new BoxGeometry(1, 1, 1), this.floorMaterial, MAX_SECTIONS + 1);
   private readonly pillars = this.instances(new CylinderGeometry(1, 1.18, 1, 7), this.porcelainMaterial, MAX_PILLARS);
   private readonly rocks = this.instances(new DodecahedronGeometry(1, 0), this.rockMaterial, MAX_ROCKS);
-  private readonly beams = this.instances(new BoxGeometry(1, 1, 1), this.hazardMaterial, MAX_EVENTS);
-  private readonly rings = this.instances(new TorusGeometry(1, 0.14, 7, 18), this.hazardMaterial, MAX_EVENTS);
-  private readonly columns = this.instances(new CylinderGeometry(0.7, 0.86, 2.4, 7), this.hazardMaterial, MAX_EVENTS);
+  private readonly beams = this.instances(new BoxGeometry(1, 1, 1), this.beamMaterial, MAX_EVENTS);
+  private readonly beamCuts = this.instances(new BoxGeometry(1, 1, 1), this.dangerMaterial, MAX_EVENTS * 2);
+  private readonly rings = this.instances(new TorusGeometry(1, 0.14, 7, 18), this.gateMaterial, MAX_EVENTS);
+  private readonly gatePosts = this.instances(new CylinderGeometry(0.12, 0.18, 1, 6), this.gateMaterial, MAX_EVENTS * 2);
+  private readonly columns = this.instances(new DodecahedronGeometry(0.76, 0), this.columnMaterial, MAX_EVENTS);
+  private readonly columnCaps = this.instances(new DodecahedronGeometry(0.64, 0), this.dangerMaterial, MAX_EVENTS);
+  private readonly columnRubble = this.instances(new DodecahedronGeometry(0.34, 0), this.columnMaterial, MAX_EVENTS * 3);
   private readonly gaps = this.instances(new BoxGeometry(1, 1, 1), this.gapMaterial, MAX_EVENTS);
+  private readonly gapLips = this.instances(new BoxGeometry(1, 1, 1), this.dangerMaterial, MAX_EVENTS * 2);
   private readonly shards = this.instances(new IcosahedronGeometry(0.26, 0), this.shardMaterial, MAX_SHARDS);
   private readonly shields = this.instances(new IcosahedronGeometry(0.72, 1), this.shieldMaterial, 16);
   private readonly wraith = this.createWraith();
@@ -195,6 +222,8 @@ export class WorldRenderer {
     presentedLanePosition: 0,
     runnerWorld: { x: 0, y: 0, z: 0, yaw: 0 },
     runnerScreen: { x: 0, y: 0, visible: false },
+    pursuerScreen: { x: 0, y: 0, visible: false, bounds: null },
+    hazardScreens: [],
     camera: { x: 0, y: 0, z: 0, fov: 47, yaw: 0 },
     lanePosition: 0,
     posture: 'run',
@@ -208,14 +237,14 @@ export class WorldRenderer {
 
   constructor() {
     this.scene.background = new Color(PALETTE.sky);
-    this.scene.fog = new FogExp2(PALETTE.sky, 0.0145);
+    this.scene.fog = new FogExp2(PALETTE.mist, 0.0115);
     this.camera.position.set(0, 4.8, 7.4);
-    this.scene.add(new HemisphereLight(0xaadcd8, 0x081116, 1.7));
-    this.scene.add(new AmbientLight(0x93bcb8, 0.5));
-    const key = new DirectionalLight(0xffdfb2, 2.1);
+    this.scene.add(new HemisphereLight(0xe3eee9, 0x31382f, 1.82));
+    this.scene.add(new AmbientLight(0xa9bdb3, 0.58));
+    const key = new DirectionalLight(0xffe1ad, 2.35);
     key.position.set(-8, 15, 6);
     this.scene.add(key);
-    const rim = new DirectionalLight(PALETTE.signal, 1.35);
+    const rim = new DirectionalLight(PALETTE.signal, 0.62);
     rim.position.set(7, 6, -12);
     this.scene.add(rim);
     this.ocean.rotation.x = -Math.PI / 2;
@@ -231,9 +260,14 @@ export class WorldRenderer {
       this.pillars,
       this.rocks,
       this.beams,
+      this.beamCuts,
       this.rings,
+      this.gatePosts,
       this.columns,
+      this.columnCaps,
+      this.columnRubble,
       this.gaps,
+      this.gapLips,
       this.shards,
       this.shields,
       this.wraith,
@@ -268,9 +302,9 @@ export class WorldRenderer {
 
   setOptions(options: Partial<RenderOptions>): void {
     this.options = { ...this.options, ...options };
-    this.scene.fog = new FogExp2(this.options.highContrast ? 0x09212a : PALETTE.sky, this.options.highContrast ? 0.011 : 0.0145);
-    this.hazardMaterial.emissiveIntensity = this.options.highContrast ? 1.65 : 0.9;
-    this.seamMaterial.emissiveIntensity = this.options.highContrast ? 2.5 : 1.7;
+    this.scene.fog = new FogExp2(this.options.highContrast ? 0x78958c : PALETTE.mist, this.options.highContrast ? 0.009 : 0.0115);
+    this.dangerMaterial.emissiveIntensity = this.options.highContrast ? 0.5 : 0.18;
+    this.seamMaterial.emissiveIntensity = this.options.highContrast ? 0.72 : 0.32;
     if (this.options.reducedMotion) {
       this.impact = 0;
       this.pickupPulse = 0;
@@ -454,7 +488,7 @@ export class WorldRenderer {
             );
           }
         }
-      } else if (event.type === 'collision' || event.type === 'run-failed') {
+      } else if (event.type === 'collision' || event.type === 'stumbled' || event.type === 'run-failed') {
         this.impact = this.options.reducedMotion ? 0 : 1;
       } else if (event.type === 'pickup-collected') {
         this.pickupPulse = this.options.reducedMotion ? 0 : 1;
@@ -557,9 +591,14 @@ export class WorldRenderer {
     let pillarCount = 0;
     let rockCount = 0;
     let beamCount = 0;
+    let beamCutCount = 0;
     let ringCount = 0;
+    let gatePostCount = 0;
     let columnCount = 0;
+    let columnCapCount = 0;
+    let columnRubbleCount = 0;
     let gapCount = 0;
+    let gapLipCount = 0;
     let shardCount = 0;
     let shieldCount = 0;
 
@@ -620,15 +659,42 @@ export class WorldRenderer {
         const sample = sampleCoursePosition(section, event.at, event.lane === 'all' ? 0 : event.lane);
         if (event.kind === 'beam') {
           const width = event.lane === 'all' ? WORLD_METRICS.roadWidth - 0.5 : 1.65;
-          this.setInstance(this.beams, beamCount++, sample.x, 0.38, sample.z, yaw, width, 0.56, 0.42);
+          this.setInstance(this.beams, beamCount++, sample.x, 0.34, sample.z, yaw, width, 0.48, 0.5);
+          const capOffset = Math.max(0.34, width / 2 - 0.14);
+          this.setInstance(this.beamCuts, beamCutCount++, sample.x + right.x * capOffset, 0.35, sample.z + right.z * capOffset, yaw, 0.22, 0.52, 0.54);
+          this.setInstance(this.beamCuts, beamCutCount++, sample.x - right.x * capOffset, 0.35, sample.z - right.z * capOffset, yaw, 0.22, 0.52, 0.54);
         } else if (event.kind === 'ring') {
           const widthScale = event.lane === 'all' ? WORLD_METRICS.roadWidth / 2.15 : 1;
-          this.setInstance(this.rings, ringCount++, sample.x, event.lane === 'all' ? 1.08 : 0.9, sample.z, yaw, widthScale, event.lane === 'all' ? 0.88 : 0.66, 1);
+          const ringY = event.lane === 'all' ? 1.12 : 0.96;
+          this.setInstance(this.rings, ringCount++, sample.x, ringY, sample.z, yaw, widthScale, event.lane === 'all' ? 0.86 : 0.68, 1);
+          const postOffset = event.lane === 'all' ? WORLD_METRICS.roadWidth / 2 - 0.48 : 0.92;
+          this.setInstance(this.gatePosts, gatePostCount++, sample.x + right.x * postOffset, 0.64, sample.z + right.z * postOffset, yaw, 1, 1.28, 1);
+          this.setInstance(this.gatePosts, gatePostCount++, sample.x - right.x * postOffset, 0.64, sample.z - right.z * postOffset, yaw, 1, 1.28, 1);
         } else if (event.kind === 'column') {
-          this.setInstance(this.columns, columnCount++, sample.x, 1.2, sample.z, yaw, 0.88, 1, 0.88);
+          this.setInstance(this.columns, columnCount++, sample.x, 0.92, sample.z, yaw + 0.12, 0.94, 1.36, 0.9);
+          this.setInstance(this.columnCaps, columnCapCount++, sample.x + right.x * 0.12, 1.83, sample.z + right.z * 0.12, yaw + event.at * 0.07, 0.58, 0.38, 0.58);
+          for (const [rubbleIndex, rubbleOffset] of [-0.52, 0.08, 0.55].entries()) {
+            const forward = headingVector(section.heading);
+            const along = (rubbleIndex - 1) * 0.23;
+            this.setInstance(
+              this.columnRubble,
+              columnRubbleCount++,
+              sample.x + right.x * rubbleOffset + forward.x * along,
+              0.2,
+              sample.z + right.z * rubbleOffset + forward.z * along,
+              yaw + rubbleIndex * 0.7,
+              0.85 + rubbleIndex * 0.08,
+              0.62,
+              0.8,
+            );
+          }
         } else if (event.kind === 'gap') {
           const width = event.lane === 'all' ? WORLD_METRICS.roadWidth - 0.5 : WORLD_METRICS.laneWidth * 0.9;
-          this.setInstance(this.gaps, gapCount++, sample.x, 0.03, sample.z, yaw, width, 0.075, Math.max(1.6, event.length));
+          const gapCenter = sampleCoursePosition(section, event.at + event.length / 2, event.lane === 'all' ? 0 : event.lane);
+          this.setInstance(this.gaps, gapCount++, gapCenter.x, 0.03, gapCenter.z, yaw, width, 0.075, Math.max(1.6, event.length));
+          const farSample = sampleCoursePosition(section, event.at + event.length, event.lane === 'all' ? 0 : event.lane);
+          this.setInstance(this.gapLips, gapLipCount++, sample.x, 0.08, sample.z, yaw, width, 0.12, 0.18);
+          this.setInstance(this.gapLips, gapLipCount++, farSample.x, 0.08, farSample.z, yaw, width, 0.12, 0.18);
         } else if (event.kind === 'shard') {
           const bob = this.options.reducedMotion ? 0 : Math.sin(this.elapsed * 3.2 + event.at) * 0.13;
           const rotation = this.options.reducedMotion ? event.at * 0.17 : this.elapsed * 1.6 + event.at;
@@ -647,9 +713,14 @@ export class WorldRenderer {
     this.finishInstances(this.pillars, pillarCount);
     this.finishInstances(this.rocks, rockCount);
     this.finishInstances(this.beams, beamCount);
+    this.finishInstances(this.beamCuts, beamCutCount);
     this.finishInstances(this.rings, ringCount);
+    this.finishInstances(this.gatePosts, gatePostCount);
     this.finishInstances(this.columns, columnCount);
+    this.finishInstances(this.columnCaps, columnCapCount);
+    this.finishInstances(this.columnRubble, columnRubbleCount);
     this.finishInstances(this.gaps, gapCount);
+    this.finishInstances(this.gapLips, gapLipCount);
     this.finishInstances(this.shards, shardCount);
     this.finishInstances(this.shields, shieldCount);
   }
@@ -671,9 +742,9 @@ export class WorldRenderer {
   private updateCamera(state: RunnerState, position: Vector3, yaw: number, deltaMs: number): void {
     const forward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
     const right = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-    const portraitFactor = this.camera.aspect < 0.7 ? 1.2 : 1;
-    const targetPosition = position.clone().addScaledVector(forward, -7.2 * portraitFactor);
-    targetPosition.y = 4.35 + (portraitFactor - 1) * 1.15 + position.y * 0.18 - (state.runner.slideTicksRemaining > 0 ? 0.1 : 0);
+    const portraitFactor = this.camera.aspect < 0.7 ? 1.42 : 1;
+    const targetPosition = position.clone().addScaledVector(forward, -8.35 * portraitFactor);
+    targetPosition.y = 5 + (portraitFactor - 1) * 1.4 + position.y * 0.18 - (state.runner.slideTicksRemaining > 0 ? 0.1 : 0);
     targetPosition.addScaledVector(right, -state.runner.lanePosition * 0.08);
     if (this.impact > 0 && !this.options.reducedMotion) {
       targetPosition.addScaledVector(right, Math.sin(this.elapsed * 95) * this.impact * 0.12);
@@ -695,17 +766,38 @@ export class WorldRenderer {
 
   private createWraith(): Object3D {
     const group = new Object3D();
-    const material = new MeshStandardMaterial({ color: PALETTE.blackTide, emissive: 0x071820, emissiveIntensity: 1.1, transparent: true, opacity: 0.9, roughness: 0.86 });
-    for (let index = 0; index < 5; index += 1) {
-      const mesh = new Mesh(new IcosahedronGeometry(0.7 + index * 0.12, 1), material);
-      mesh.position.set((index - 2) * 0.48, 0.65 + (index % 2) * 0.34, index * 0.3);
-      group.add(mesh);
-    }
-    const eyeMaterial = new MeshBasicMaterial({ color: PALETTE.hazard, blending: AdditiveBlending });
-    for (const x of [-0.18, 0.18]) {
-      const eye = new Mesh(new IcosahedronGeometry(0.065, 0), eyeMaterial);
-      eye.position.set(x, 0.96, -0.69);
-      group.add(eye);
+    group.name = 'black-tide-pursuers';
+    const material = new MeshStandardMaterial({
+      color: PALETTE.blackTide,
+      emissive: 0x182219,
+      emissiveIntensity: 0.22,
+      transparent: true,
+      opacity: 0.92,
+      roughness: 0.96,
+    });
+    const eyeMaterial = new MeshBasicMaterial({ color: PALETTE.hazard });
+    for (const [index, offset] of [-0.72, 0.72].entries()) {
+      const figure = new Object3D();
+      figure.position.set(offset, index === 0 ? 0 : -0.08, Math.abs(offset) * 0.24);
+      figure.rotation.z = offset * -0.06;
+      const torso = new Mesh(new DodecahedronGeometry(index === 0 ? 0.68 : 0.62, 0), material);
+      torso.position.y = 0.92;
+      torso.scale.set(0.72, 1.35, 0.62);
+      const head = new Mesh(new IcosahedronGeometry(index === 0 ? 0.35 : 0.32, 1), material);
+      head.position.y = 1.72;
+      const leftClaw = new Mesh(new CylinderGeometry(0.08, 0.13, 1.25, 5), material);
+      const rightClaw = leftClaw.clone();
+      leftClaw.position.set(-0.52, 0.72, -0.08);
+      rightClaw.position.set(0.52, 0.72, -0.08);
+      leftClaw.rotation.z = -0.38;
+      rightClaw.rotation.z = 0.38;
+      figure.add(torso, head, leftClaw, rightClaw);
+      for (const eyeX of [-0.11, 0.11]) {
+        const eye = new Mesh(new IcosahedronGeometry(0.052, 0), eyeMaterial);
+        eye.position.set(eyeX, 1.76, -0.29);
+        figure.add(eye);
+      }
+      group.add(figure);
     }
     return group;
   }
@@ -720,19 +812,29 @@ export class WorldRenderer {
     }
     const geometry = new BufferGeometry();
     geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
-    const material = new PointsMaterial({ color: PALETTE.signal, size: 0.055, transparent: true, opacity: 0.28, depthWrite: false, blending: AdditiveBlending });
+    const material = new PointsMaterial({ color: PALETTE.signal, size: 1.4, sizeAttenuation: false, transparent: true, opacity: 0.22, depthWrite: false, blending: AdditiveBlending });
     return new Points(geometry, material);
   }
 
   private updateWraith(state: RunnerState, position: Vector3, yaw: number): void {
     const forward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
-    const distance = state.runner.shieldCharges > 0 ? 6.2 : 4.5;
-    this.wraith.position.copy(position).addScaledVector(forward, -distance);
-    this.wraith.position.y = 0.12 + (this.options.reducedMotion ? 0 : Math.sin(this.elapsed * 3.4) * 0.12);
+    const normalizedGap = MathUtils.clamp((state.chaseGap - 0.65) / 7.35, 0, 1);
+    const visibleGap = 1.25 + normalizedGap * 4.45;
+    const danger = MathUtils.clamp((4.5 - state.chaseGap) / 3.85, 0, 1);
+    this.wraith.position.copy(position).addScaledVector(forward, -visibleGap);
+    this.wraith.position.y = 0.08 + (this.options.reducedMotion ? 0 : Math.sin(this.elapsed * (3.4 + danger * 2.2)) * 0.1);
     this.wraith.rotation.y = yaw;
+    this.wraith.scale.setScalar(0.6 + danger * 0.2);
+    for (const [index, figure] of this.wraith.children.entries()) {
+      const side = index === 0 ? -1 : 1;
+      const stride = this.options.reducedMotion ? 0 : Math.sin(this.elapsed * (7.8 + danger * 2.6) + index * Math.PI);
+      figure.position.x = side * 0.72 + stride * 0.035;
+      figure.position.y = (index === 0 ? 0 : -0.08) + Math.abs(stride) * 0.075;
+      figure.rotation.z = side * -0.043 + stride * 0.025;
+    }
     this.wraith.visible = state.status !== 'ready';
-    this.mist.position.copy(position).addScaledVector(forward, -7);
-    this.mist.visible = !this.options.reducedMotion;
+    this.mist.position.copy(position).addScaledVector(forward, -Math.min(6.4, visibleGap + 0.7));
+    this.mist.visible = !this.options.reducedMotion && state.chaseGap > 2.4;
   }
 
   private updateSnapshot(
@@ -746,9 +848,17 @@ export class WorldRenderer {
     const renderer = this.renderer;
     if (!renderer) return;
     const screen = position.clone().add(new Vector3(0, 1, 0)).project(this.camera);
+    const pursuer = this.wraith.position.clone().add(new Vector3(0, 1.05, 0)).project(this.camera);
     const size = renderer.getSize(new Vector2());
     const width = size.x;
     const height = size.y;
+    const pursuerBounds = this.clippedBounds(this.wraith.position, new Vector3(1.25, 1.25, 0.85), width, height, this.wraith.rotation.y);
+    const resolved = new Set([...state.resolvedEventIds, ...state.consumedEventIds]);
+    const hazardScreens = this.visibleSections.flatMap((section) => section.events.flatMap((event) => {
+      if (resolved.has(event.id) || !this.isSnapshotHazard(event)) return [];
+      const projected = this.hazardScreenBounds(section, event, width, height);
+      return projected ? [projected] : [];
+    }));
     this.snapshot = {
       canvas: { width, height, resolution: renderer.getPixelRatio() },
       options: { ...this.options },
@@ -757,6 +867,13 @@ export class WorldRenderer {
       presentedLanePosition,
       runnerWorld: { x: position.x, y: position.y, z: position.z, yaw },
       runnerScreen: { x: (screen.x * 0.5 + 0.5) * width, y: (-screen.y * 0.5 + 0.5) * height, visible: screen.z >= -1 && screen.z <= 1 },
+      pursuerScreen: {
+        x: (pursuer.x * 0.5 + 0.5) * width,
+        y: (-pursuer.y * 0.5 + 0.5) * height,
+        visible: this.wraith.visible && pursuerBounds !== null,
+        bounds: this.wraith.visible ? pursuerBounds : null,
+      },
+      hazardScreens,
       camera: { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z, fov: this.camera.fov, yaw },
       lanePosition: state.runner.lanePosition,
       posture: postureOf(state),
@@ -767,6 +884,76 @@ export class WorldRenderer {
       turnProgress: this.turnMotion ? this.turnMotion.override ?? this.turnMotion.progress : null,
       contextLossCount: this.contextLossCount,
     };
+  }
+
+  private isSnapshotHazard(event: CourseEvent): event is CourseEvent & { kind: HazardScreenBounds["kind"] } {
+    return event.kind === "beam" || event.kind === "ring" || event.kind === "column" || event.kind === "gap";
+  }
+
+  private hazardScreenBounds(
+    section: CourseSection,
+    event: CourseEvent & { kind: HazardScreenBounds["kind"] },
+    width: number,
+    height: number,
+  ): HazardScreenBounds | null {
+    const lane = event.lane === "all" ? 0 : event.lane;
+    const sample = sampleCoursePosition(section, event.kind === "gap" ? event.at + event.length / 2 : event.at, lane);
+    const roadWidth = event.lane === "all" ? WORLD_METRICS.roadWidth : WORLD_METRICS.laneWidth;
+    let center = new Vector3(sample.x, 0, sample.z);
+    let halfExtent = new Vector3(0.5, 0.5, 0.5);
+    switch (event.kind) {
+      case "beam":
+        center.y = 0.34;
+        halfExtent = new Vector3((event.lane === "all" ? WORLD_METRICS.roadWidth - 0.5 : 1.65) / 2, 0.3, 0.32);
+        break;
+      case "ring":
+        center.y = event.lane === "all" ? 1.12 : 0.96;
+        halfExtent = new Vector3(event.lane === "all" ? WORLD_METRICS.roadWidth / 2.15 : 1.05, event.lane === "all" ? 1.05 : 0.82, 0.42);
+        break;
+      case "column":
+        center.y = 0.98;
+        halfExtent = new Vector3(0.82, 1.18, 0.78);
+        break;
+      case "gap":
+        center.y = 0.05;
+        halfExtent = new Vector3((roadWidth - 0.5) / 2, 0.14, Math.max(1.6, event.length) / 2);
+        break;
+    }
+    const bounds = this.clippedBounds(center, halfExtent, width, height, headingYaw(section.heading));
+    return bounds ? { eventId: event.id, kind: event.kind, bounds } : null;
+  }
+
+  private clippedBounds(
+    center: Vector3,
+    halfExtent: Vector3,
+    width: number,
+    height: number,
+    yaw: number,
+  ): ClippedScreenBounds | null {
+    const points: Vector3[] = [];
+    const cosine = Math.cos(yaw);
+    const sine = Math.sin(yaw);
+    for (const x of [-halfExtent.x, halfExtent.x]) {
+      for (const y of [-halfExtent.y, halfExtent.y]) {
+        for (const z of [-halfExtent.z, halfExtent.z]) {
+          points.push(new Vector3(
+            center.x + x * cosine + z * sine,
+            center.y + y,
+            center.z - x * sine + z * cosine,
+          ));
+        }
+      }
+    }
+    const projected = points.map((point) => point.project(this.camera));
+    if (!projected.some((point) => point.z >= -1 && point.z <= 1)) return null;
+    const left = Math.max(0, Math.min(...projected.map((point) => (point.x * 0.5 + 0.5) * width)));
+    const right = Math.min(width, Math.max(...projected.map((point) => (point.x * 0.5 + 0.5) * width)));
+    const top = Math.max(0, Math.min(...projected.map((point) => (-point.y * 0.5 + 0.5) * height)));
+    const bottom = Math.min(height, Math.max(...projected.map((point) => (-point.y * 0.5 + 0.5) * height)));
+    const clippedWidth = Math.max(0, right - left);
+    const clippedHeight = Math.max(0, bottom - top);
+    const area = clippedWidth * clippedHeight;
+    return area > 0 ? { left, top, right, bottom, width: clippedWidth, height: clippedHeight, area } : null;
   }
 
   private readonly onContextLost = (event: Event): void => {

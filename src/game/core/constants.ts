@@ -10,6 +10,15 @@ export const SPEED_GAIN_PER_METER = 0.004;
 export const SHIELD_SPEED_FACTOR = 0.72;
 export const SHIELD_SPEED_PENALTY_TICKS = 45;
 
+export const INITIAL_CHASE_GAP = 4.5;
+export const MAX_CHASE_GAP = 8;
+export const CHASE_CAPTURE_GAP = 0.65;
+export const CHASE_SAFE_RECOVERY_PER_METER = 0.018;
+export const CHASE_STUMBLE_LOSS = 2.25;
+export const CHASE_STUMBLE_CLOSING_PER_METER = 0.34;
+
+export const DISTANCE_MILESTONE_METERS = 250;
+
 export const JUMP_INITIAL_VELOCITY = 12;
 export const JUMP_GRAVITY = -36;
 export const BEAM_CLEARANCE_HEIGHT = 0.82;

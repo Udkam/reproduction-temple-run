@@ -8,9 +8,12 @@
 - Slide duration and collision volume agree; rings are safe only during the active slide.
 - Columns require another lane.
 - Correct turns advance once; wrong or missing turns fail with the correct reason.
-- Shards and shields collect once; a shield absorbs exactly one hazard.
+- Shards and shields collect once; a shield absorbs exactly one non-gap obstacle and applies deterministic recovery/chase pressure.
 - Pause freezes all canonical state; restart resets clocks, input, score, consumed events, and course.
 - Generator fairness checks reject impossible patterns.
+- Safe travel opens the bounded canonical pursuer gap; shielded and unshielded non-gap stumbles close it; repeated misses can reach a command-reproducible capture at the threshold.
+- Every 250 m milestone emits once, displays the canonical whole-meter boundary, and never alters replay determinism.
+- Stored QA traces retain their accepted public-command sequence and replay hash. The milestone, close-chase, beam, ring, column, and gap records must expose that proof alongside the rendered canonical snapshot.
 
 ## Runtime and input
 
@@ -38,39 +41,25 @@
 - Runner lane endpoint error is at most 0.01 world unit.
 - Turn midpoint shows both incoming and outgoing route geometry.
 - Obstacles remain visually distinct in normal, mobile, and high-contrast contexts.
+- The HUD's structured score, floored distance, shards, and flow values exactly equal the canonical snapshot values.
+- The close-chase scenario reports clipped pursuer bounds with meaningful positive visible area, not only an in-viewport center point.
+- Beam, ring, column, and gap evidence each reports the expected canonical kind and positive clipped CSS-pixel bounds; the combined fixed desktop/mobile/high-contrast matrix proves all four silhouettes.
+- Milestone, close-chase, and hazard-preview evidence states replay from real public commands to the recorded canonical hash; direct state fabrication is a hard failure.
+- The milestone scenario visibly renders both the exact canonical score and `250 m`.
+- The articulated runner retains readable leg/arm action under normal motion and semantic jump/slide poses under reduced motion.
 - Console errors, unhandled rejections, and WebGL context loss count are zero.
 - Every screenshot has seed, tick, viewport, DPR, state/render snapshot, and SHA-256 evidence.
 - Scene-preparation CPU p95 is below 8 ms desktop and 12 ms mobile.
 
-## Verified result
+## Current result
 
-Result: **passed for the scoped single-environment vertical slice**.
+Result: **TR2 candidate verified; independent QA and coordinator acceptance pending.**
 
-- Clean install: `npm.cmd ci --no-audit --no-fund` installed 65 locked packages successfully.
-- Typecheck: passed after the clean install.
-- Tests: 9 files / 37 tests passed.
-- Production build: passed. Vite reports a non-blocking large-chunk advisory for the Three.js application bundle.
-- Browser: Chrome 150.0.7871.115, 17 evidence records.
-- Visual captures: 13/13 passed at desktop DPR1, mobile DPR3 portrait/landscape, high contrast, reduced motion, exact lane endpoint, and outgoing-turn lane change.
-- DOM: one WebGL canvas, zero gameplay DOM entities, zero horizontal overflow in every capture.
-- Runtime: zero console warnings/errors, zero page errors, and zero WebGL context losses.
-- Render budget: 28–31 draw calls and 5,390–5,914 triangles across the captured scenes.
-- Scene preparation desktop: 180 samples, 0.045 ms mean, 0.10 ms p95, 0.30 ms max on the verification machine.
-- Scene preparation mobile context: 180 samples, 0.078 ms mean, 0.20 ms p95, 0.60 ms max.
-- Input: real keyboard left/jump/pause and a real CDP-dispatched DPR3 touch swipe produced the expected canonical state and one-event semantic traces.
-- Determinism: the same fixed running scenario retained one simulation hash across desktop, portrait, landscape, and reduced-motion contexts.
-- Presentation integrity: every frozen capture records seed `1414087749`, canonical/previous distances, `presentationAlpha=1`, renderer options, safe-area rectangles, and matching canonical/presented lane values. Lane endpoint error is 0.
+- Final verification: `npm.cmd run typecheck`, `npm.cmd run test` (11 files / 47 tests), and `npm.cmd run build` passed. The build's only advisory is Vite's non-blocking 500 kB chunk warning.
+- Official Chrome 150.0.7871.115 evidence pass produced 23 records and 19 screenshots. Every capture recorded one canvas, zero gameplay DOM entities, no horizontal overflow, zero console/page errors, zero context losses, and render budgets no higher than 56 draw calls / 9,040 triangles.
+- Exact HUD comparison passed for every capture. The 250 m milestone record has replay hash `78bd1dc3`, score 5,101, distance 250.0899 m, flow 2, one shard, and a visible `250 m` callout.
+- The public-command close-chase record has replay hash `fa85830e`, canonical `chaseGap` 1.194 m, and pursuer clipped visible area 64,374.2 CSS px². Beam/ring/column/gap previews expose matching canonical kinds and positive clipped areas of 18,510.5 / 25,497.2 / 2,952.2 / 29,607.6 CSS px².
+- Desktop and mobile scene-preparation p95 values are both 0.10 ms, within the 8 ms and 12 ms limits. Keyboard and DPR3 CDP touch evidence each show one semantic input event.
+- Evidence manifest: `docs/qa/temple-browser-evidence.json`; reviewed captures: `docs/screenshots/temple/final/milestone.png`, `docs/screenshots/temple/final/chase-close.png`, `docs/screenshots/temple/final/gap-preview.png`, and `docs/screenshots/temple/final/ring-preview.png`.
 
-Evidence manifest: `docs/qa/temple-browser-evidence.json`.
-
-Representative captures:
-
-- `docs/screenshots/temple/final/ready-desktop.png`
-- `docs/screenshots/temple/final/running-desktop.png`
-- `docs/screenshots/temple/final/turn-mid.png`
-- `docs/screenshots/temple/final/turn-lane-change.png`
-- `docs/screenshots/temple/final/lane-end.png`
-- `docs/screenshots/temple/final/mobile-portrait.png`
-- `docs/screenshots/temple/final/collision.png`
-
-The result intentionally does not claim Temple Run's full commercial content set. It validates the classic third-person endless-runner grammar, a deterministic fair course, complete obstacle/turn/input rules, and the original TIDE//RELAY presentation specified by this branch.
+TR1 evidence remains historical only; this candidate's counts, screenshots, command traces, and hashes are the sole TR2 evidence. This document deliberately does not claim final acceptance.

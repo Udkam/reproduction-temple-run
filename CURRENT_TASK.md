@@ -1,14 +1,14 @@
 # Current Task
 
-## Active slice: TR1 — Complete TIDE//RELAY endless runner
+## Active slice: TR2 — Humanized runner refinement
 
 Branch: `codex/temple-run`
 
-Status: complete and ready for branch delivery.
+Status: candidate verified; independent QA and coordinator acceptance are pending. The slice is not yet accepted.
 
 ### Required outcome
 
-Deliver one polished, complete third-person endless runner with:
+Refine the existing complete third-person runner without changing its clean-room boundary:
 
 - deterministic procedural course generation and replayable simulation state
 - continuous acceleration and three-lane movement
@@ -21,6 +21,10 @@ Deliver one polished, complete third-person endless runner with:
 - responsive desktop, portrait, and landscape layouts
 - reduced motion, high contrast, audio toggle, and lifecycle cleanup
 - unit tests, deterministic replay tests, build, browser interaction, screenshots, and performance evidence
+- canonical visible pursuit pressure, 250 m milestone events, score-first HUD hierarchy, articulated gait, organic ruin palette, and distinct obstacle silhouettes
+- recoverable non-gap stumbles that deterministically close pursuit distance, with repeated misses leading to a reachable pursuer capture
+- milestone, close-chase, beam, ring, column, and gap QA states reproduced exclusively from public command traces
+- browser assertions for exact HUD values, pursuer clipped bounds/area, and per-kind obstacle clipped bounds
 
 ### Non-goals
 
@@ -31,13 +35,15 @@ Deliver one polished, complete third-person endless runner with:
 
 ### Completion gate
 
-TR1 is complete only after typecheck, the final full test suite, production build, desktop keyboard play, mobile touch/swipe play, pause/blur/visibility checks, deterministic turn/jump/slide/collision scenarios, screenshot review, console inspection, resource cleanup, and performance evidence pass.
+TR2 is complete only after typecheck, one final full test suite, production build, desktop keyboard play, mobile touch/swipe play, pause/blur/visibility checks, deterministic chase/milestone/turn/jump/slide/collision scenarios, screenshot review, console inspection, resource cleanup, and performance evidence pass.
 
 ### Completion evidence
 
-- TypeScript project references pass without diagnostics.
-- Vitest passes 9 files / 37 tests, including deterministic generation, replay, motion, turns, turn-lane presentation, reduced-motion rig behavior, runtime lifecycle, and touch classification.
-- The production build completes successfully.
-- Chrome evidence covers 13 visual states plus real desktop input, real DPR3 touch input, and separate 180-frame desktop/mobile scene-preparation benchmarks.
-- Every browser hard gate in `docs/qa/TEMPLE_ACCEPTANCE.md` passes.
-- The implementation remains clean-room and contains no Temple Run assets, branding, characters, music, interface, or source.
+- Final typecheck passed: `npm.cmd run typecheck`.
+- Final Vitest suite passed: 11 files, 47 tests.
+- Production build passed: `npm.cmd run build`. Vite emitted only its non-blocking 500 kB chunk advisory.
+- Official Chrome 150.0.7871.115 evidence pass recorded 23 records in `docs/qa/temple-browser-evidence.json`, with 19 final screenshots, zero console/page errors, zero WebGL context losses, one canvas, zero gameplay DOM entities, and no horizontal overflow.
+- The command-derived milestone state replayed to `78bd1dc3` at 250.0899 m with score 5,101, floored HUD distance 250, flow 2, one shard, and the visible `250 m` callout. The command-derived close chase replayed to `fa85830e` with `chaseGap` 1.194 m and pursuer clipped area 64,374.2 CSS px².
+- Command-derived beam/ring/column/gap previews replayed to their recorded hashes with positive clipped areas of 18,510.5 / 25,497.2 / 2,952.2 / 29,607.6 CSS px². Each record retains its full accepted public-command trace and matching replay hash.
+- Scene preparation benchmarks: desktop p95 0.10 ms (limit 8 ms), mobile p95 0.10 ms (limit 12 ms). Real keyboard left/jump/pause and real DPR3 touch swipe each produced one semantic action trace.
+- Visual review completed against `milestone.png`, `chase-close.png`, `gap-preview.png`, and `ring-preview.png` under `docs/screenshots/temple/final/`. They show the canonical HUD, visible close pursuers, readable gap lips/far edge, and mobile ring silhouette.

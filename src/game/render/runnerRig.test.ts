@@ -26,4 +26,33 @@ describe('runner reduced motion', () => {
     updateRunnerRig(rig, { ...basePose, elapsed: 2, reducedMotion: false });
     expect(rig.core.rotation.y).not.toBe(first);
   });
+
+  it('uses articulated hips, knees, feet, and counter-rotating torso during a run', () => {
+    const rig = createRunnerRig();
+    updateRunnerRig(rig, { ...basePose, elapsed: 0.05, reducedMotion: false });
+    const first = {
+      hip: rig.leftLeg.rotation.x,
+      knee: rig.leftShin.rotation.x,
+      foot: rig.leftFoot.rotation.x,
+      pelvis: rig.pelvis.rotation.y,
+      chest: rig.chest.rotation.y,
+    };
+    updateRunnerRig(rig, { ...basePose, elapsed: 0.19, reducedMotion: false });
+    expect(rig.leftLeg.rotation.x).not.toBe(first.hip);
+    expect(rig.leftShin.rotation.x).not.toBe(first.knee);
+    expect(rig.leftFoot.rotation.x).not.toBe(first.foot);
+    expect(rig.pelvis.rotation.y).not.toBe(first.pelvis);
+    expect(rig.chest.rotation.y).not.toBe(first.chest);
+    expect(Math.sign(rig.pelvis.rotation.y)).toBe(-Math.sign(rig.chest.rotation.y));
+  });
+
+  it('keeps jump and slide as distinct semantic whole-body poses', () => {
+    const rig = createRunnerRig();
+    updateRunnerRig(rig, { ...basePose, elapsed: 1, posture: 'jump', height: 1.4, reducedMotion: true });
+    const jump = [rig.body.position.y, rig.leftShin.rotation.x, rig.body.rotation.x];
+    updateRunnerRig(rig, { ...basePose, elapsed: 1, posture: 'slide', height: 0, reducedMotion: true });
+    expect([rig.body.position.y, rig.leftShin.rotation.x, rig.body.rotation.x]).not.toEqual(jump);
+    expect(rig.body.position.y).toBeLessThan(0);
+    expect(rig.body.rotation.x).toBeLessThan(-0.5);
+  });
 });

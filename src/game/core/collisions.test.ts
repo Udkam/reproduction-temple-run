@@ -37,13 +37,15 @@ function event(
 
 describe("course event collision semantics", () => {
   it("requires jump height for beams and resolves the event exactly once", () => {
-    const grounded = advanceOneTick(scenario([event("beam", "beam", "all")])).state;
-    expect(grounded.status).toBe("game-over");
-    expect(grounded.failureReason).toMatchObject({
-      kind: "hazard-collision",
-      hazard: "beam",
-      eventId: "beam",
-    });
+    const grounded = advanceOneTick(scenario([event("beam", "beam", "all")]));
+    expect(grounded.state.status).toBe("running");
+    expect(grounded.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: "collision", hazard: "beam", eventId: "beam" }),
+        expect.objectContaining({ type: "stumbled", hazard: "beam", shielded: false }),
+      ]),
+    );
+    expect(grounded.state.runner.speedPenaltyTicks).toBeGreaterThan(0);
 
     let jumping = scenario([event("beam", "beam", "all")], {
       height: 1.2,
@@ -58,8 +60,11 @@ describe("course event collision semantics", () => {
   });
 
   it("requires active slide posture for a ring", () => {
-    const upright = advanceOneTick(scenario([event("ring", "ring", "all")])).state;
-    expect(upright.status).toBe("game-over");
+    const upright = advanceOneTick(scenario([event("ring", "ring", "all")]));
+    expect(upright.state.status).toBe("running");
+    expect(upright.events).toContainEqual(
+      expect.objectContaining({ type: "stumbled", hazard: "ring", shielded: false }),
+    );
 
     const slidingCommand = dispatch(scenario([event("ring", "ring", "all")]), {
       type: "Slide",
@@ -77,8 +82,11 @@ describe("course event collision semantics", () => {
         verticalVelocity: 0,
         slideTicksRemaining: 10,
       }),
-    ).state;
-    expect(hit.status).toBe("game-over");
+    );
+    expect(hit.state.status).toBe("running");
+    expect(hit.events).toContainEqual(
+      expect.objectContaining({ type: "stumbled", hazard: "column", shielded: false }),
+    );
 
     const avoided = advanceOneTick(
       scenario([event("column", "column", 0)], {
@@ -116,6 +124,14 @@ describe("course event collision semantics", () => {
     expect(landingInside.status).toBe("game-over");
     expect(landingInside.failureReason?.kind).toBe("gap-fall");
 
+    const shieldCannotBridgeGap = advanceOneTick(
+      scenario([gap], { shieldCharges: 1 }),
+    );
+    expect(shieldCannotBridgeGap.state.status).toBe("game-over");
+    expect(shieldCannotBridgeGap.state.failureReason?.kind).toBe("gap-fall");
+    expect(shieldCannotBridgeGap.state.runner.shieldCharges).toBe(1);
+    expect(shieldCannotBridgeGap.events.some((item) => item.type === "shield-broken")).toBe(false);
+
     const clearingLip = advanceOneTick(
       scenario(
         [gap],
@@ -149,7 +165,7 @@ describe("course event collision semantics", () => {
     expect(missed.consumedEventIds).not.toContain("missed");
   });
 
-  it("collects one shield, absorbs exactly one hazard, then fails on the next", () => {
+  it("collects one shield, absorbs one impact, then lets repeated stumbles trigger pursuit capture", () => {
     const shieldThenColumn = advanceOneTick(
       scenario([
         event("shield", "shield", 0, 0.05),
@@ -159,6 +175,9 @@ describe("course event collision semantics", () => {
     expect(shieldThenColumn.state.status).toBe("running");
     expect(shieldThenColumn.state.runner.shieldCharges).toBe(0);
     expect(shieldThenColumn.events.filter((item) => item.type === "shield-broken")).toHaveLength(1);
+    expect(shieldThenColumn.events).toContainEqual(
+      expect.objectContaining({ type: "stumbled", hazard: "column", shielded: true }),
+    );
     expect(shieldThenColumn.state.consumedEventIds).toEqual(["shield", "first-column"]);
 
     const twoHazards = advanceOneTick(
@@ -172,7 +191,11 @@ describe("course event collision semantics", () => {
     );
     expect(twoHazards.events.filter((item) => item.type === "shield-broken")).toHaveLength(1);
     expect(twoHazards.events.filter((item) => item.type === "collision")).toHaveLength(1);
+    expect(twoHazards.events.filter((item) => item.type === "stumbled")).toHaveLength(2);
     expect(twoHazards.state.status).toBe("game-over");
-    expect(twoHazards.state.failureReason).toMatchObject({ eventId: "second" });
+    expect(twoHazards.state.failureReason).toEqual({
+      kind: "pursuer-caught",
+      hazard: "black-tide",
+    });
   });
 });

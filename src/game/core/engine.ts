@@ -1,11 +1,18 @@
 import {
   BEAM_CLEARANCE_HEIGHT,
+  CHASE_CAPTURE_GAP,
+  CHASE_SAFE_RECOVERY_PER_METER,
+  CHASE_STUMBLE_CLOSING_PER_METER,
+  CHASE_STUMBLE_LOSS,
   COLLISION_LANE_TOLERANCE,
+  DISTANCE_MILESTONE_METERS,
   FIXED_TICK_SECONDS,
   GAP_CLEARANCE_HEIGHT,
   JUMP_GRAVITY,
   JUMP_INITIAL_VELOCITY,
   LANE_TRANSITION_TICKS,
+  INITIAL_CHASE_GAP,
+  MAX_CHASE_GAP,
   PICKUP_LANE_TOLERANCE,
   SHIELD_SPEED_FACTOR,
   SHIELD_SPEED_PENALTY_TICKS,
@@ -60,11 +67,13 @@ export function createInitialState(seed = DEFAULT_SEED): RunnerState {
     sectionIndex: 0,
     sectionDistance: 0,
     speed: speedForDistance(0),
+    chaseGap: INITIAL_CHASE_GAP,
     score: 0,
     shards: 0,
     multiplier: 1,
     queuedTurn: null,
     failureReason: null,
+    lastDistanceMilestone: 0,
     runner: initialBody(),
     course: createCourse(normalizedSeed),
     resolvedEventIds: [],
@@ -279,21 +288,6 @@ interface EventResolution {
   readonly failureReason: FailureReason | null;
 }
 
-function collisionFailure(
-  section: CourseSection,
-  event: CourseEvent & { kind: HazardKind },
-): FailureReason {
-  if (event.kind === "gap") {
-    return { kind: "gap-fall", sectionId: section.id, eventId: event.id };
-  }
-  return {
-    kind: "hazard-collision",
-    sectionId: section.id,
-    eventId: event.id,
-    hazard: event.kind,
-  };
-}
-
 function resolveCourseEvents(
   state: RunnerState,
   section: CourseSection,
@@ -386,12 +380,30 @@ function resolveCourseEvents(
     }
     if (!collides) continue;
 
-    if (runner.shieldCharges > 0) {
-      runner = {
-        ...runner,
-        shieldCharges: 0,
-        speedPenaltyTicks: SHIELD_SPEED_PENALTY_TICKS,
+    if (courseEvent.kind === "gap") {
+      failureReason = {
+        kind: "gap-fall",
+        sectionId: section.id,
+        eventId: courseEvent.id,
       };
+      events.push({
+        type: "collision",
+        tick: nextTick,
+        sectionId: section.id,
+        eventId: courseEvent.id,
+        hazard: courseEvent.kind,
+      });
+      events.push({ type: "run-failed", tick: nextTick, reason: failureReason });
+      continue;
+    }
+
+    const shielded = runner.shieldCharges > 0;
+    runner = {
+      ...runner,
+      shieldCharges: shielded ? 0 : runner.shieldCharges,
+      speedPenaltyTicks: SHIELD_SPEED_PENALTY_TICKS,
+    };
+    if (shielded) {
       consumed.add(courseEvent.id);
       events.push({
         type: "shield-broken",
@@ -400,18 +412,23 @@ function resolveCourseEvents(
         eventId: courseEvent.id,
         hazard: courseEvent.kind,
       });
-      continue;
+    } else {
+      events.push({
+        type: "collision",
+        tick: nextTick,
+        sectionId: section.id,
+        eventId: courseEvent.id,
+        hazard: courseEvent.kind,
+      });
     }
-
-    failureReason = collisionFailure(section, courseEvent);
     events.push({
-      type: "collision",
+      type: "stumbled",
       tick: nextTick,
       sectionId: section.id,
       eventId: courseEvent.id,
       hazard: courseEvent.kind,
+      shielded,
     });
-    events.push({ type: "run-failed", tick: nextTick, reason: failureReason });
   }
 
   return {
@@ -490,6 +507,35 @@ export function advanceOneTick(state: RunnerState): CommandResult {
   const finalSpeed =
     runner.speedPenaltyTicks > 0 ? finalBaseSpeed * SHIELD_SPEED_FACTOR : finalBaseSpeed;
 
+  const stumbleCount = resolution.events.filter((event) => event.type === "stumbled").length;
+  const stumbleActive = resolution.runner.speedPenaltyTicks > 0;
+  const chaseTravelDelta = travel * (
+    stumbleActive ? -CHASE_STUMBLE_CLOSING_PER_METER : CHASE_SAFE_RECOVERY_PER_METER
+  );
+  const chaseImpactDelta = -stumbleCount * CHASE_STUMBLE_LOSS;
+  const chaseGap = Math.max(
+    0,
+    Math.min(MAX_CHASE_GAP, state.chaseGap + chaseTravelDelta + chaseImpactDelta),
+  );
+
+  if (!failureReason && chaseGap <= CHASE_CAPTURE_GAP) {
+    failureReason = { kind: "pursuer-caught", hazard: "black-tide" };
+    status = "game-over";
+    tickEvents.push({ type: "run-failed", tick: nextTick, reason: failureReason });
+  }
+
+  let lastDistanceMilestone = state.lastDistanceMilestone;
+  if (!failureReason) {
+    while (lastDistanceMilestone + DISTANCE_MILESTONE_METERS <= distance) {
+      lastDistanceMilestone += DISTANCE_MILESTONE_METERS;
+      tickEvents.push({
+        type: "distance-milestone",
+        tick: nextTick,
+        meters: lastDistanceMilestone,
+      });
+    }
+  }
+
   const nextState: RunnerState = {
     ...state,
     status,
@@ -499,11 +545,13 @@ export function advanceOneTick(state: RunnerState): CommandResult {
     sectionIndex,
     sectionDistance,
     speed: finalSpeed,
+    chaseGap,
     score: scoreFor(distance, resolution.shards, multiplier),
     shards: resolution.shards,
     multiplier,
     queuedTurn,
     failureReason,
+    lastDistanceMilestone,
     runner,
     course,
     resolvedEventIds: resolution.resolvedEventIds,

@@ -24,6 +24,16 @@ Public commands are `Start`, `StepLeft`, `StepRight`, `Jump`, `Slide`, `Pause`, 
 - Slide lasts 31 ticks. A second slide input does not extend it.
 - Lane target changes are discrete; lane position approaches the target deterministically for collision checks.
 
+## Pursuit pressure
+
+- `chaseGap` is canonical meters between the courier and the black-tide pack. It begins at `4.5 m`, cannot exceed `8 m`, and capture occurs at or below `0.65 m`.
+- Safe forward travel opens the gap gradually. This recovery is distance based and therefore independent of frame rate.
+- A non-gap obstacle miss is a deterministic stumble: the event resolves once, applies a 45-tick recovery at 72% of the normal speed, closes the gap by 2.25 m immediately, then closes it by 0.34 m for every recovery meter travelled. The run continues while the gap remains above capture threshold.
+- A shielded obstacle impact removes exactly one shield and emits `shield-broken`; it does not duplicate the collision event, but it applies the same 45-tick recovery and chase pressure as an unshielded stumble. A shield never absorbs a gap, wrong turn, or missed turn.
+- Repeated stumbles, or one stumble while already sufficiently close, can cross the capture threshold and end the run through the pursuer.
+- Reaching the capture threshold emits one deterministic `run-failed` event with `pursuer-caught` and ends the run.
+- Rendering maps this value to pursuer position and scale but cannot write pressure back into the simulation.
+
 ## Turn rules
 
 - Each section exposes a visible warning and an input window before its end.
@@ -42,7 +52,7 @@ Public commands are `Start`, `StepLeft`, `StepRight`, `Jump`, `Slide`, `Pause`, 
 - `shard`: collected once when lane and longitudinal windows overlap.
 - `shield`: collected once and grants one collision absorption.
 
-When a shield absorbs a hazard, the event is consumed, speed is reduced briefly, one shield-break event is emitted, and the run continues. Otherwise a hazard collision ends the run. Collected/consumed event IDs remain in canonical state so replay and rendering cannot collect them twice.
+When a shield absorbs a non-gap hazard, the event is consumed, speed is reduced briefly, one shield-break event is emitted, chase pressure is applied, and the run continues unless the pursuer reaches the capture threshold. Without a shield, a beam/ring/column miss emits one `collision` and one typed `stumbled` event, applies the same recovery pressure, and continues unless capture occurs. A gap collision always ends immediately with `gap-fall`; wrong and missed turns also remain immediate failures. Collected/consumed/resolved event IDs remain canonical so replay and rendering cannot process them twice.
 
 ## Fair generation
 
@@ -58,6 +68,7 @@ When a shield absorbs a hazard, the event is consumed, speed is reduced briefly,
 
 - Distance is measured in meters from canonical progress.
 - Flow multiplier starts at 1 and increases every 250 m to a maximum of 5.
+- Crossing each 250 m boundary emits exactly one `distance-milestone` event and stores the last emitted boundary in canonical state.
 - Score is derived from distance, collected shards, and flow multiplier; it never depends on frame time.
 - Speed and pattern density increase with distance but never shorten reaction time below the contract minimum.
 - Best score and best distance are presentation persistence, not canonical simulation inputs.
@@ -72,3 +83,9 @@ When a shield absorbs a hazard, the event is consumed, speed is reduced briefly,
 ## Determinism
 
 The same initial seed and command/tick sequence must produce byte-equivalent canonical state, course sections, consumed event IDs, score, and state hash. Renderer state, local storage, audio, and wall-clock timing are excluded.
+
+## QA trace contract
+
+- Milestone, close-chase, beam, ring, column, and gap evidence states start from `createInitialState(seed)` and are produced only by accepted public commands and fixed ticks.
+- Every stored QA trace must replay to the same canonical state hash; direct mutation of distance, section progress, score, chase gap, resolved IDs, or body state is forbidden.
+- A preview trace stops before its named unresolved hazard, so the renderer can prove the canonical kind and clipped bounds without changing gameplay truth.

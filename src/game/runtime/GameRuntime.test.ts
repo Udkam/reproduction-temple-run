@@ -93,6 +93,8 @@ class FakeRenderer implements RuntimeRenderer {
       presentedLanePosition: state?.runner.lanePosition ?? 0,
       runnerWorld: { x: 0, y: state?.runner.height ?? 0, z: 0, yaw: 0 },
       runnerScreen: { x: 720, y: 612, visible: true },
+      pursuerScreen: { x: 720, y: 780, visible: state?.status === "running", bounds: state?.status === "running" ? { left: 680, top: 720, right: 760, bottom: 800, width: 80, height: 80, area: 6_400 } : null },
+      hazardScreens: [],
       camera: { x: 0, y: 4, z: 7, fov: 47, yaw: 0 },
       lanePosition: state?.runner.lanePosition ?? 0,
       posture: state?.runner.slideTicksRemaining

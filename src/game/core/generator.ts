@@ -20,6 +20,9 @@ import type {
 } from "./types";
 
 const ALL_LANES: readonly Lane[] = [-1, 0, 1];
+// All generated sections are at most 132 m. Authoring against this upper bound
+// keeps reaction-time validation conservative even though sections vary in length.
+const MAX_PROCEDURAL_SECTION_METERS = 132;
 
 interface CandidateBuild {
   readonly section: CourseSection;
@@ -283,7 +286,9 @@ export function buildFallbackSection(
 
 export function generateNextSection(
   generator: CourseGeneratorState,
-  authoredSpeed = speedForDistance(generator.nextSectionIndex * 120),
+  authoredSpeed = speedForDistance(
+    generator.nextSectionIndex * MAX_PROCEDURAL_SECTION_METERS,
+  ),
 ): { readonly section: CourseSection; readonly generator: CourseGeneratorState } {
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt += 1) {
     const candidate = buildCandidate(generator, authoredSpeed, attempt);
