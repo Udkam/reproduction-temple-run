@@ -172,6 +172,69 @@
           "bottom": 60
         }
       ],
+      "hudMetrics": {
+        "score": {
+          "text": "5,101",
+          "visible": true,
+          "bounds": {
+            "left": 16,
+            "top": 70,
+            "right": 136.46875,
+            "bottom": 140,
+            "width": 120.46875,
+            "height": 70,
+            "area": 8432.8125
+          }
+        },
+        "distance": {
+          "text": "250",
+          "visible": true,
+          "bounds": {
+            "left": 148.46875,
+            "top": 70,
+            "right": 255.234375,
+            "bottom": 140,
+            "width": 106.765625,
+            "height": 70,
+            "area": 7473.59375
+          }
+        },
+        "flow": {
+          "text": "×2",
+          "visible": true,
+          "bounds": {
+            "left": 267.234375,
+            "top": 70,
+            "right": 374,
+            "bottom": 107.84375,
+            "width": 106.765625,
+            "height": 37.84375,
+            "area": 4040.41162109375
+          }
+        },
+        "shards": {
+          "text": "1",
+          "visible": true,
+          "bounds": {
+            "left": 267.234375,
+            "top": 96.921875,
+            "right": 374,
+            "bottom": 140,
+            "width": 106.765625,
+            "height": 43.078125,
+            "area": 4599.262939453125
+          }
+        }
+      },
+      "pauseBounds": {
+        "left": 330,
+        "top": 16,
+        "right": 374,
+        "bottom": 60,
+        "width": 44,
+        "height": 44,
+        "area": 1936
+      },
       "runner": {
         "left": 146.64,
         "top": 519.04,
@@ -203,6 +266,51 @@
           "area": 1620.678096959454
         }
       },
+      "milestone": {
+        "visible": true,
+        "bounds": {
+          "left": 255,
+          "top": 320.71875,
+          "right": 337.71875,
+          "bottom": 344.125,
+          "width": 82.71875,
+          "height": 23.40625,
+          "area": 1936.1357421875
+        },
+        "rightRoadEdgeDistance": 56.38,
+        "intersections": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0,
+          "score": 0,
+          "distance": 0,
+          "flow": 0,
+          "shards": 0,
+          "pause": 0
+        }
+      },
+      "landscapeWorldIntersections": {
+        "score": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0
+        },
+        "distance": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0
+        },
+        "flow": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0
+        },
+        "shards": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0
+        }
+      },
       "contrast": {
         "hudOnSky": 11.54,
         "scarOnTide": 12.82,
@@ -210,7 +318,7 @@
       },
       "reducedMotion": false,
       "screenshot": "mobile-milestone.png",
-      "sha256": "6750fdb198ec21e87052844d0bff75ec369bec26435ae440871e7a34d66e1367"
+      "sha256": "7df5ff170039bd3dab8e6b5c8a0a19e18be055059d30602c0410f9bfc8ef0a6d"
     },
     {
       "state": "normal-run",
@@ -650,19 +758,82 @@
       "hud": [
         {
           "selector": "hud",
-          "left": 22,
-          "top": 18,
-          "right": 822,
-          "bottom": 104
+          "left": 14,
+          "top": 10,
+          "right": 830,
+          "bottom": 54
         },
         {
           "selector": "pause-button",
-          "left": 778,
-          "top": 18,
-          "right": 822,
-          "bottom": 62
+          "left": 785.984375,
+          "top": 10,
+          "right": 829.984375,
+          "bottom": 54
         }
       ],
+      "hudMetrics": {
+        "score": {
+          "text": "1,280",
+          "visible": true,
+          "bounds": {
+            "left": 14,
+            "top": 10,
+            "right": 274.625,
+            "bottom": 54,
+            "width": 260.625,
+            "height": 44,
+            "area": 11467.5
+          }
+        },
+        "distance": {
+          "text": "186",
+          "visible": true,
+          "bounds": {
+            "left": 282.625,
+            "top": 10,
+            "right": 582.34375,
+            "bottom": 54,
+            "width": 299.71875,
+            "height": 44,
+            "area": 13187.625
+          }
+        },
+        "flow": {
+          "text": "×1",
+          "visible": true,
+          "bounds": {
+            "left": 590.34375,
+            "top": 10,
+            "right": 777.984375,
+            "bottom": 27,
+            "width": 187.640625,
+            "height": 17,
+            "area": 3189.890625
+          }
+        },
+        "shards": {
+          "text": "7",
+          "visible": true,
+          "bounds": {
+            "left": 590.34375,
+            "top": 37,
+            "right": 777.984375,
+            "bottom": 54,
+            "width": 187.640625,
+            "height": 17,
+            "area": 3189.890625
+          }
+        }
+      },
+      "pauseBounds": {
+        "left": 785.984375,
+        "top": 10,
+        "right": 829.984375,
+        "bottom": 54,
+        "width": 44,
+        "height": 44,
+        "area": 1936
+      },
       "runner": {
         "left": 390.566,
         "top": 218.55600000000004,
@@ -694,6 +865,51 @@
           "area": 6381.815855402021
         }
       },
+      "milestone": {
+        "visible": false,
+        "bounds": {
+          "left": 486.140625,
+          "top": 120.890625,
+          "right": 486.140625,
+          "bottom": 120.890625,
+          "width": 0,
+          "height": 0,
+          "area": 0
+        },
+        "rightRoadEdgeDistance": 0.01,
+        "intersections": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0,
+          "score": 0,
+          "distance": 0,
+          "flow": 0,
+          "shards": 0,
+          "pause": 0
+        }
+      },
+      "landscapeWorldIntersections": {
+        "score": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0
+        },
+        "distance": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0
+        },
+        "flow": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0
+        },
+        "shards": {
+          "runner": 0,
+          "pursuer": 0,
+          "obstacle": 0
+        }
+      },
       "contrast": {
         "hudOnSky": 11.54,
         "scarOnTide": 12.82,
@@ -701,7 +917,7 @@
       },
       "reducedMotion": false,
       "screenshot": "mobile-landscape.png",
-      "sha256": "9cf0670400319af9630e3e32332f4327d167d095bf06793ae98654f3fa2613b7"
+      "sha256": "d869fbc1f578ade8870ccf76b4dda2e478e29746ccf95d4847eab9c3d827a38f"
     },
     {
       "state": "normal-run",
@@ -774,5 +990,9 @@
       "sha256": "6f530ee3a9cd93b3d2ba025dc7327e2db66942221129d4ce6592c2abb917dd97"
     }
   ],
-  "consoleProblems": []
+  "consoleProblems": [],
+  "lastDirectedLabels": [
+    "mobile-landscape",
+    "mobile-milestone"
+  ]
 }

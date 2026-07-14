@@ -267,6 +267,17 @@ function clippedBounds(box, width, height) {
   return { left, top, right, bottom, width: Math.max(0, right-left), height: Math.max(0, bottom-top), area: Math.max(0, right-left) * Math.max(0, bottom-top) };
 }
 
+function intersectionArea(a, b) {
+  const width = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+  const height = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+  return Number((width * height).toFixed(2));
+}
+
+function elementBounds(element, width, height) {
+  const rect = element.getBoundingClientRect();
+  return clippedBounds(rect, width, height);
+}
+
 function luminance(hex) {
   const channels = hex.match(/[a-f0-9]{2}/gi).map(value => parseInt(value, 16) / 255).map(value => value <= .04045 ? value / 12.92 : Math.pow((value + .055) / 1.055, 2.4));
   return .2126 * channels[0] + .7152 * channels[1] + .0722 * channels[2];
@@ -277,8 +288,19 @@ function diagnostics() {
   const closeT = Math.max(0, Math.min(1, (5.7 - activeState.chaseGap) / 5.05)); const pursuerY = lerp(height*(portrait ? .95 : .94),height*(portrait ? .90 : .915),closeT); const pursuerSize = lerp(Math.min(width,height)*(portrait ? .13 : .10),Math.min(width,height)*(portrait ? .20 : .16),closeT); const obstacleY = height * (height / width > 1.35 ? .45 : .43); const p = pointOnRoad((obstacleY-height*.255)/(height*.825), width, height);
   const obstacle = activeState.obstacle === 'beam' ? { left:p.center-p.half*.78, top:obstacleY-Math.max(12,height*.018)*1.2, right:p.center+p.half*.78, bottom:obstacleY+Math.max(12,height*.018) } : activeState.obstacle === 'ring' ? { left:p.center-p.half*.82, top:obstacleY-Math.max(18,height*.048), right:p.center+p.half*.82, bottom:obstacleY+Math.max(18,height*.048) } : activeState.obstacle === 'column' ? { left:p.center-p.half*.35, top:obstacleY-p.half*.7, right:p.center+p.half*.35, bottom:obstacleY+2 } : { left:p.center-p.half, top:obstacleY-height*.005, right:p.center+p.half, bottom:obstacleY+height*.085 };
   const contrast = (a,b) => { const [high,low] = [luminance(a),luminance(b)].sort((x,y)=>y-x); return Number(((high+.05)/(low+.05)).toFixed(2)); };
-  const runner = clippedBounds({left:width*.5-unit*.62,top:runnerY-unit*.92,right:width*.5+unit*.62,bottom:runnerY+unit*.75},width,height); const pursuer = clippedBounds({left:width*.5-pursuerSize*.65,top:pursuerY-pursuerSize*.82,right:width*.5+pursuerSize*.65,bottom:pursuerY+pursuerSize*.38},width,height);
-  return { state: activeKey, mockState:{...activeState}, canvasCount:1, gameplayDomEntities:document.querySelectorAll('[data-world-entity]').length, overflowX:Math.max(0, document.documentElement.scrollWidth-window.innerWidth), hud:Array.from(document.querySelectorAll('.hud, .pause-button')).map(item => { const r=item.getBoundingClientRect(); return { selector:item.className || item.id, left:r.left,top:r.top,right:r.right,bottom:r.bottom }; }), runner, pursuer, pursuerGapPx:Number((pursuer.top-runner.bottom).toFixed(2)), obstacle:{kind:activeState.obstacle,bounds:clippedBounds(obstacle,width,height)}, contrast:{hudOnSky:contrast('#14202b','#e7d6b4'), scarOnTide:contrast('#f4ecd8','#10283c'), coralOnSand:contrast('#b84432','#e7d6b4')}, reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches };
+  const runner = clippedBounds({left:width*.5-unit*.62,top:runnerY-unit*.92,right:width*.5+unit*.62,bottom:runnerY+unit*.75},width,height); const pursuer = clippedBounds({left:width*.5-pursuerSize*.65,top:pursuerY-pursuerSize*.82,right:width*.5+pursuerSize*.65,bottom:pursuerY+pursuerSize*.38},width,height); const obstacleBounds = clippedBounds(obstacle,width,height);
+  const metricIds = ['score', 'distance', 'flow', 'shards'];
+  const hudMetrics = Object.fromEntries(metricIds.map(id => {
+    const value = document.querySelector(`#${id}`); const metric = value.closest('.metric'); const style = getComputedStyle(metric); const bounds = elementBounds(metric, width, height);
+    return [id, { text:value.textContent, visible:style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && bounds.area > 0, bounds }];
+  }));
+  const pauseBounds = elementBounds(pauseButton, width, height);
+  const markerBounds = elementBounds(message, width, height); const markerCenter = { x:(markerBounds.left+markerBounds.right)/2, y:(markerBounds.top+markerBounds.bottom)/2 };
+  const markerT = Math.max(0, Math.min(1, (markerCenter.y-height*.255)/(height*.825))); const rightRoadEdge = roadPoint(markerT, 1, width, height);
+  const markerTargets = { runner, pursuer, obstacle:obstacleBounds, score:hudMetrics.score.bounds, distance:hudMetrics.distance.bounds, flow:hudMetrics.flow.bounds, shards:hudMetrics.shards.bounds, pause:pauseBounds };
+  const milestone = { visible:message.classList.contains('visible') && Number(getComputedStyle(message).opacity) > 0, bounds:markerBounds, rightRoadEdgeDistance:Number(Math.hypot(markerCenter.x-rightRoadEdge.x, markerCenter.y-rightRoadEdge.y).toFixed(2)), intersections:Object.fromEntries(Object.entries(markerTargets).map(([name,bounds]) => [name, intersectionArea(markerBounds,bounds)])) };
+  const landscapeWorldIntersections = Object.fromEntries(Object.entries(hudMetrics).map(([name, metric]) => [name, { runner:intersectionArea(metric.bounds, runner), pursuer:intersectionArea(metric.bounds, pursuer), obstacle:intersectionArea(metric.bounds, obstacleBounds) }]));
+  return { state: activeKey, mockState:{...activeState}, canvasCount:1, gameplayDomEntities:document.querySelectorAll('[data-world-entity]').length, overflowX:Math.max(0, document.documentElement.scrollWidth-window.innerWidth), hud:Array.from(document.querySelectorAll('.hud, .pause-button')).map(item => { const r=item.getBoundingClientRect(); return { selector:item.className || item.id, left:r.left,top:r.top,right:r.right,bottom:r.bottom }; }), hudMetrics, pauseBounds, runner, pursuer, pursuerGapPx:Number((pursuer.top-runner.bottom).toFixed(2)), obstacle:{kind:activeState.obstacle,bounds:obstacleBounds}, milestone, landscapeWorldIntersections, contrast:{hudOnSky:contrast('#14202b','#e7d6b4'), scarOnTide:contrast('#f4ecd8','#10283c'), coralOnSand:contrast('#b84432','#e7d6b4')}, reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches };
 }
 
 function updateHud() {

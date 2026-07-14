@@ -41,9 +41,9 @@ button { font: inherit; }
 .pause-button { grid-area: pause; justify-self: end; width: 44px; height: 44px; border: 0; border-left: 1px solid rgba(20,32,43,.72); background: transparent; color: var(--ink-950); cursor: pointer; font-size: 16px; font-weight: 800; line-height: 1; pointer-events: auto; }
 .pause-button:focus-visible, .state-dock button:focus-visible { outline: 3px solid var(--scar-100); outline-offset: 3px; }
 
-.world-message { position: absolute; top: 34%; left: 50%; margin: 0; color: var(--scar-100); font-family: var(--display); font-size: clamp(24px, 5vw, 44px); font-weight: 900; letter-spacing: .04em; opacity: 0; pointer-events: none; transform: translateX(-50%); }
+.world-message { position: absolute; top: clamp(318px, 38vh, 346px); left: calc(50% + clamp(60px, 7.6vw, 130px)); margin: 0; color: var(--scar-100); font-family: var(--display); font-size: clamp(20px, 6vw, 36px); font-weight: 900; letter-spacing: .04em; line-height: 1; opacity: 0; pointer-events: none; transform: translateY(0); }
 .world-message.visible { animation: message-in 750ms cubic-bezier(.2,.8,.2,1) both; }
-@keyframes message-in { 0% { opacity: 0; transform: translate(-50%, 8px); } 17% { opacity: 1; transform: translate(-50%, 0); } 82% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes message-in { 0% { opacity: 0; transform: translateY(8px); } 17% { opacity: 1; transform: translateY(0); } 82% { opacity: 1; } 100% { opacity: 0; } }
 
 .state-dock { position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; max-width: calc(100% - 28px); }
 .state-dock button { min-width: 44px; min-height: 34px; border: 1px solid rgba(244,236,216,.82); background: rgba(13,30,45,.76); color: var(--scar-100); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .04em; padding: 7px 9px; }
@@ -66,15 +66,26 @@ button { font: inherit; }
 }
 
 @media (max-height: 470px) and (orientation: landscape) {
-  .hud { display: grid; grid-template-columns: 1fr 170px 170px 1fr; grid-template-rows: 44px; grid-template-areas: "mark score distance pause"; gap: 10px; inset-top: max(10px, env(safe-area-inset-top)); }
-  .wordmark, .metric-score, .metric-distance, .pause-button { position: static; }
-  .metric-flow, .metric-shards { display: none; }
-  .wordmark { font-size: 18px; }
-  .metric dd { font-size: 30px; }
+  .hud { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(118px, 1.15fr) minmax(104px, .72fr) 44px; grid-template-rows: 22px 22px; grid-template-areas: "score distance flow pause" "score distance shards pause"; gap: 0 8px; inset: max(10px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) auto max(14px, env(safe-area-inset-left)); min-height: 44px; }
+  .wordmark { display: none; }
+  .metric-score, .metric-distance, .metric-flow, .metric-shards, .pause-button { position: static; }
+  .metric-score, .metric-distance { align-self: stretch; }
+  .metric-score { grid-area: score; }
+  .metric-distance { grid-area: distance; }
+  .metric-flow { grid-area: flow; align-self: start; }
+  .metric-shards { grid-area: shards; align-self: end; }
+  .metric-score dt, .metric-distance dt { font-size: 9px; line-height: 1; }
+  .metric-score dd { margin-top: 2px; font-size: 26px; }
+  .metric-distance dd { margin-top: 1px; font-size: 28px; }
+  .metric-flow, .metric-shards { display: grid; grid-template-columns: auto auto; align-items: baseline; column-gap: 5px; justify-content: end; text-align: right; }
+  .metric-flow dt, .metric-shards dt { font-size: 9px; line-height: 1; }
+  .metric-flow dd, .metric-shards dd { margin: 0; font-size: 17px; line-height: 1; }
+  .metric-flow::after { display: none; }
   .pause-button { width: 44px; height: 44px; }
   .gesture-hint { display: none; }
   .state-dock { bottom: 9px; right: 9px; max-width: 52%; }
   .state-dock button { min-width: 40px; min-height: 28px; padding: 5px 7px; font-size: 10px; }
+  .world-message { top: clamp(116px, 31vh, 138px); left: calc(50% + clamp(60px, 7.6vw, 130px)); font-size: 22px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

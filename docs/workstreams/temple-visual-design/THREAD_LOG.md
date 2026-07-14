@@ -69,3 +69,14 @@ The authoritative machine-readable records and current SHA-256 values are in `pr
 - Do not translate this candidate into production without a new bounded coordinator authorization.
 - Video keyframes are unavailable in this environment due to documented 412 access block.
 - Production adoption must preserve continuous interpolation across all eight gait phases and a non-capture positive `chaseGap` screen interval across FOV / viewport changes.
+
+## Conditional-reject P1 repair (2026-07-14)
+
+- Independent design QA conditionally rejected `913ff46` only for two P1 layout issues: low-height landscape hid `flow` / `shards`, and the 250m marker sat in a central position that could compete with a column.
+- Scope stayed within this directory. Changed only `tide-scar.css`, `tide-scar.js`, `verify_tide_scar.py`, `STATE_LAYOUT_SPEC.md`, `DESIGN_REVIEW.md`, this log, `prototype-acceptance.json`, and the two affected formal PNGs. No production path, root document, package/config, existing QA evidence, or unrelated mockup was edited.
+- P1-A: 844x390 now has a compact 44 px rail with complete score, distance, flow, and shards labels/values plus the 44 px pause target. The wordmark and gesture hint yield space; canonical metrics do not.
+- P1-B: `250 m` now uses a right road-edge / tide-scar anchor instead of a centered message. The 390x844 marker bounds are `(255,320.7,82.7,23.4)` and its calculated right-road-edge distance is `56.38 CSS px` (acceptance interval `18–96`). Its intersection areas with score, distance, flow, shards, pause, runner, pursuer, and column are all `0`.
+- Targeted commands (no project install/test/build): `node --check docs/workstreams/temple-visual-design/tide-scar.js`; `python -u docs/workstreams/temple-visual-design/verify_tide_scar.py --base-url http://127.0.0.1:4173 --labels mobile-landscape mobile-milestone`.
+- Result: **2 directed captures verified; 9 untouched formal records preserved; 0 console/page errors.** Both targeted captures retain `canvasCount=1`, `gameplayDomEntities=0`, and `overflowX=0`.
+- Updated evidence: `mockups/mobile-landscape.png` SHA-256 `d869fbc1f578ade8870ccf76b4dda2e478e29746ccf95d4847eab9c3d827a38f`; `mockups/mobile-milestone.png` SHA-256 `7df5ff170039bd3dab8e6b5c8a0a19e18be055059d30602c0410f9bfc8ef0a6d`.
+- A temporary user-approved north-star image was inspected only for high-level Tide Scar language (high bridge, warm stone, deep-water canyon, haze, restrained white scar/coral, rear pursuer). It was not copied, embedded, or used as a runtime asset; no visual expansion beyond these two P1 repairs occurred.
