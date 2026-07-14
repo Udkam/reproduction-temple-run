@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <title>TIDE//RELAY — Tide Scar prototype</title>
+    <link rel="stylesheet" href="tide-scar.css" />
+  </head>
+  <body>
+    <main class="relay-shell" aria-labelledby="prototype-title">
+      <h1 id="prototype-title" class="sr-only">TIDE RELAY Tide Scar visual motion prototype</h1>
+      <canvas id="world" aria-label="Original Tide Scar runner visual prototype"></canvas>
+      <header class="hud" aria-label="Canonical state visualisation">
+        <div class="wordmark" aria-label="TIDE RELAY">TIDE<span>//</span>RELAY</div>
+        <dl class="metric metric-score"><dt>score</dt><dd id="score">1,280</dd></dl>
+        <dl class="metric metric-distance"><dt>distance</dt><dd><span id="distance">186</span><small>m</small></dd></dl>
+        <dl class="metric metric-flow"><dt>flow</dt><dd id="flow">×1</dd></dl>
+        <dl class="metric metric-shards"><dt>shards</dt><dd id="shards">7</dd></dl>
+        <button class="pause-button" id="pause" type="button" aria-pressed="false" aria-label="Pause visual timeline">Ⅱ</button>
+      </header>
+      <p class="world-message" id="world-message" aria-live="polite"></p>
+      <nav class="state-dock" aria-label="Prototype states">
+        <button type="button" data-state="normal-run" aria-pressed="true">Run</button>
+        <button type="button" data-state="close-chase" aria-pressed="false">Chase</button>
+        <button type="button" data-state="milestone" aria-pressed="false">250 m</button>
+        <button type="button" data-state="paused" aria-pressed="false">Pause</button>
+        <button type="button" data-obstacle="beam" aria-pressed="true">Beam</button>
+        <button type="button" data-obstacle="ring" aria-pressed="false">Ring</button>
+        <button type="button" data-obstacle="column" aria-pressed="false">Column</button>
+        <button type="button" data-obstacle="gap" aria-pressed="false">Gap</button>
+      </nav>
+      <p class="gesture-hint">Swipe to steer · up to clear · down to slip</p>
+      <p class="sr-only" id="state-reader" aria-live="polite"></p>
+    </main>
+    <script type="module" src="tide-scar.js"></script>
+  </body>
+</html>

@@ -1,0 +1,778 @@
+{
+  "baseUrl": "http://127.0.0.1:4173",
+  "records": [
+    {
+      "state": "normal-run",
+      "mockState": {
+        "score": 1280,
+        "distance": 186,
+        "shards": 7,
+        "flow": 1,
+        "chaseGap": 5.7,
+        "obstacle": "beam",
+        "label": "Normal run"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 16,
+          "top": 16,
+          "right": 374,
+          "bottom": 140
+        },
+        {
+          "selector": "pause-button",
+          "left": 330,
+          "top": 16,
+          "right": 374,
+          "bottom": 60
+        }
+      ],
+      "runner": {
+        "left": 146.64,
+        "top": 519.04,
+        "right": 243.36,
+        "bottom": 649.3,
+        "width": 96.72000000000003,
+        "height": 130.26,
+        "area": 12598.747200000003
+      },
+      "pursuer": {
+        "left": 162.045,
+        "top": 760.226,
+        "right": 227.955,
+        "bottom": 821.0659999999999,
+        "width": 65.91000000000003,
+        "height": 60.83999999999992,
+        "area": 4009.964399999996
+      },
+      "pursuerGapPx": 110.93,
+      "obstacle": {
+        "kind": "beam",
+        "bounds": {
+          "left": 151.24192809916764,
+          "top": 361.56960000000004,
+          "right": 238.75807190083236,
+          "bottom": 394.992,
+          "width": 87.51614380166473,
+          "height": 33.42239999999998,
+          "area": 2924.9995645967574
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "mobile-normal.png",
+      "sha256": "ddc67871fe38018f47eac243d667bb795c08ec775ad0001969a6e8f2280fd47e"
+    },
+    {
+      "state": "close-chase",
+      "mockState": {
+        "score": 1484,
+        "distance": 242,
+        "shards": 8,
+        "flow": 1,
+        "chaseGap": 1.35,
+        "obstacle": "ring",
+        "label": "Close chase"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 16,
+          "top": 16,
+          "right": 374,
+          "bottom": 140
+        },
+        {
+          "selector": "pause-button",
+          "left": 330,
+          "top": 16,
+          "right": 374,
+          "bottom": 60
+        }
+      ],
+      "runner": {
+        "left": 146.64,
+        "top": 519.04,
+        "right": 243.36,
+        "bottom": 649.3,
+        "width": 96.72000000000003,
+        "height": 130.26,
+        "area": 12598.747200000003
+      },
+      "pursuer": {
+        "left": 146.75970297029704,
+        "top": 704.5925148514852,
+        "right": 243.24029702970296,
+        "bottom": 793.6515247524753,
+        "width": 96.48059405940592,
+        "height": 89.05900990099008,
+        "area": 8592.466181590036
+      },
+      "pursuerGapPx": 55.29,
+      "obstacle": {
+        "kind": "ring",
+        "bounds": {
+          "left": 148.99792441194546,
+          "top": 339.288,
+          "right": 241.00207558805454,
+          "bottom": 420.312,
+          "width": 92.00415117610908,
+          "height": 81.024,
+          "area": 7454.544344893062
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "mobile-close-chase.png",
+      "sha256": "bc342d32948c1175e3dd2d9420f18c21f710ab3ddc546392cc24c73b35ab8e6a"
+    },
+    {
+      "state": "milestone",
+      "mockState": {
+        "score": 5101,
+        "distance": 250,
+        "shards": 1,
+        "flow": 2,
+        "chaseGap": 4.2,
+        "obstacle": "column",
+        "milestone": true,
+        "label": "250 metre milestone"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 16,
+          "top": 16,
+          "right": 374,
+          "bottom": 140
+        },
+        {
+          "selector": "pause-button",
+          "left": 330,
+          "top": 16,
+          "right": 374,
+          "bottom": 60
+        }
+      ],
+      "runner": {
+        "left": 146.64,
+        "top": 519.04,
+        "right": 243.36,
+        "bottom": 649.3,
+        "width": 96.72000000000003,
+        "height": 130.26,
+        "area": 12598.747200000003
+      },
+      "pursuer": {
+        "left": 156.77420792079207,
+        "top": 741.0420396039603,
+        "right": 233.22579207920793,
+        "bottom": 811.6127326732673,
+        "width": 76.45158415841587,
+        "height": 70.57069306930691,
+        "area": 5395.241280305853
+      },
+      "pursuerGapPx": 91.74,
+      "obstacle": {
+        "kind": "column",
+        "bounds": {
+          "left": 175.364967736806,
+          "top": 340.529935473612,
+          "right": 214.635032263194,
+          "bottom": 381.8,
+          "width": 39.27006452638801,
+          "height": 41.27006452638801,
+          "area": 1620.678096959454
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "mobile-milestone.png",
+      "sha256": "6750fdb198ec21e87052844d0bff75ec369bec26435ae440871e7a34d66e1367"
+    },
+    {
+      "state": "normal-run",
+      "mockState": {
+        "score": 1280,
+        "distance": 186,
+        "shards": 7,
+        "flow": 1,
+        "chaseGap": 5.7,
+        "obstacle": "beam",
+        "label": "Normal run"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 22,
+          "top": 18,
+          "right": 1418,
+          "bottom": 104
+        },
+        {
+          "selector": "pause-button",
+          "left": 1374,
+          "top": 18,
+          "right": 1418,
+          "bottom": 62
+        }
+      ],
+      "runner": {
+        "left": 647.46,
+        "top": 504.36,
+        "right": 792.54,
+        "bottom": 699.75,
+        "width": 145.07999999999993,
+        "height": 195.39,
+        "area": 28347.181199999985
+      },
+      "pursuer": {
+        "left": 661.5,
+        "top": 772.2,
+        "right": 778.5,
+        "bottom": 880.2,
+        "width": 117,
+        "height": 108,
+        "area": 12636
+      },
+      "pursuerGapPx": 72.45,
+      "obstacle": {
+        "kind": "beam",
+        "bounds": {
+          "left": 570.0133950225945,
+          "top": 367.56,
+          "right": 869.9866049774055,
+          "bottom": 403.2,
+          "width": 299.97320995481095,
+          "height": 35.639999999999986,
+          "area": 10691.045202789459
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "desktop-run.png",
+      "sha256": "4a10047aa4f49b8129e885c5bb91bd1b083ad8c9ce2b89088eee57247a425d4f"
+    },
+    {
+      "state": "normal-run",
+      "mockState": {
+        "score": 1280,
+        "distance": 186,
+        "shards": 7,
+        "flow": 1,
+        "chaseGap": 5.7,
+        "obstacle": "beam",
+        "label": "Normal run"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 22,
+          "top": 18,
+          "right": 1418,
+          "bottom": 104
+        },
+        {
+          "selector": "pause-button",
+          "left": 1374,
+          "top": 18,
+          "right": 1418,
+          "bottom": 62
+        }
+      ],
+      "runner": {
+        "left": 647.46,
+        "top": 504.36,
+        "right": 792.54,
+        "bottom": 699.75,
+        "width": 145.07999999999993,
+        "height": 195.39,
+        "area": 28347.181199999985
+      },
+      "pursuer": {
+        "left": 661.5,
+        "top": 772.2,
+        "right": 778.5,
+        "bottom": 880.2,
+        "width": 117,
+        "height": 108,
+        "area": 12636
+      },
+      "pursuerGapPx": 72.45,
+      "obstacle": {
+        "kind": "beam",
+        "bounds": {
+          "left": 570.0133950225945,
+          "top": 367.56,
+          "right": 869.9866049774055,
+          "bottom": 403.2,
+          "width": 299.97320995481095,
+          "height": 35.639999999999986,
+          "area": 10691.045202789459
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "desktop-beam.png",
+      "sha256": "6139ec003d5b260c624b4b8435bd5cab76249b8e51419b8577f6e28ed226b866"
+    },
+    {
+      "state": "normal-run",
+      "mockState": {
+        "score": 1280,
+        "distance": 186,
+        "shards": 7,
+        "flow": 1,
+        "chaseGap": 5.7,
+        "obstacle": "ring",
+        "label": "Normal run"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 22,
+          "top": 18,
+          "right": 1418,
+          "bottom": 104
+        },
+        {
+          "selector": "pause-button",
+          "left": 1374,
+          "top": 18,
+          "right": 1418,
+          "bottom": 62
+        }
+      ],
+      "runner": {
+        "left": 647.46,
+        "top": 504.36,
+        "right": 792.54,
+        "bottom": 699.75,
+        "width": 145.07999999999993,
+        "height": 195.39,
+        "area": 28347.181199999985
+      },
+      "pursuer": {
+        "left": 661.5,
+        "top": 772.2,
+        "right": 778.5,
+        "bottom": 880.2,
+        "width": 117,
+        "height": 108,
+        "area": 12636
+      },
+      "pursuerGapPx": 72.45,
+      "obstacle": {
+        "kind": "ring",
+        "bounds": {
+          "left": 562.3217742545224,
+          "top": 343.8,
+          "right": 877.6782257454776,
+          "bottom": 430.2,
+          "width": 315.3564514909551,
+          "height": 86.39999999999998,
+          "area": 27246.797408818515
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "desktop-ring.png",
+      "sha256": "d497f3e38701d4c46c847d3f1e2aa01b82678bcc539163966799b1ade45c9b41"
+    },
+    {
+      "state": "normal-run",
+      "mockState": {
+        "score": 1280,
+        "distance": 186,
+        "shards": 7,
+        "flow": 1,
+        "chaseGap": 5.7,
+        "obstacle": "column",
+        "label": "Normal run"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 22,
+          "top": 18,
+          "right": 1418,
+          "bottom": 104
+        },
+        {
+          "selector": "pause-button",
+          "left": 1374,
+          "top": 18,
+          "right": 1418,
+          "bottom": 62
+        }
+      ],
+      "runner": {
+        "left": 647.46,
+        "top": 504.36,
+        "right": 792.54,
+        "bottom": 699.75,
+        "width": 145.07999999999993,
+        "height": 195.39,
+        "area": 28347.181199999985
+      },
+      "pursuer": {
+        "left": 661.5,
+        "top": 772.2,
+        "right": 778.5,
+        "bottom": 880.2,
+        "width": 117,
+        "height": 108,
+        "area": 12636
+      },
+      "pursuerGapPx": 72.45,
+      "obstacle": {
+        "kind": "column",
+        "bounds": {
+          "left": 652.6983182793693,
+          "top": 252.3966365587387,
+          "right": 787.3016817206307,
+          "bottom": 389,
+          "width": 134.6033634412613,
+          "height": 136.6033634412613,
+          "area": 18387.272176582803
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "desktop-column.png",
+      "sha256": "db8db2b98a38b35c23cb16959a6917e7ad0e1181b42d28b791fce944ef88fb6e"
+    },
+    {
+      "state": "normal-run",
+      "mockState": {
+        "score": 1280,
+        "distance": 186,
+        "shards": 7,
+        "flow": 1,
+        "chaseGap": 5.7,
+        "obstacle": "gap",
+        "label": "Normal run"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 22,
+          "top": 18,
+          "right": 1418,
+          "bottom": 104
+        },
+        {
+          "selector": "pause-button",
+          "left": 1374,
+          "top": 18,
+          "right": 1418,
+          "bottom": 62
+        }
+      ],
+      "runner": {
+        "left": 647.46,
+        "top": 504.36,
+        "right": 792.54,
+        "bottom": 699.75,
+        "width": 145.07999999999993,
+        "height": 195.39,
+        "area": 28347.181199999985
+      },
+      "pursuer": {
+        "left": 661.5,
+        "top": 772.2,
+        "right": 778.5,
+        "bottom": 880.2,
+        "width": 117,
+        "height": 108,
+        "area": 12636
+      },
+      "pursuerGapPx": 72.45,
+      "obstacle": {
+        "kind": "gap",
+        "bounds": {
+          "left": 527.7094807981981,
+          "top": 382.5,
+          "right": 912.2905192018019,
+          "bottom": 463.5,
+          "width": 384.58103840360377,
+          "height": 81,
+          "area": 31151.064110691907
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "desktop-gap.png",
+      "sha256": "d234f3d548bd2621a797cc81951f14835fa52387468f7714d170303bcc5aea30"
+    },
+    {
+      "state": "paused",
+      "mockState": {
+        "score": 1484,
+        "distance": 242,
+        "shards": 8,
+        "flow": 1,
+        "chaseGap": 1.35,
+        "obstacle": "gap",
+        "paused": true,
+        "label": "Paused run"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 22,
+          "top": 18,
+          "right": 1418,
+          "bottom": 104
+        },
+        {
+          "selector": "pause-button",
+          "left": 1374,
+          "top": 18,
+          "right": 1418,
+          "bottom": 62
+        }
+      ],
+      "runner": {
+        "left": 647.46,
+        "top": 504.36,
+        "right": 792.54,
+        "bottom": 699.75,
+        "width": 145.07999999999993,
+        "height": 195.39,
+        "area": 28347.181199999985
+      },
+      "pursuer": {
+        "left": 631.2653465346534,
+        "top": 714.6766336633664,
+        "right": 808.7346534653466,
+        "bottom": 878.4944554455445,
+        "width": 177.46930693069316,
+        "height": 163.81782178217816,
+        "area": 29072.63529457897
+      },
+      "pursuerGapPx": 14.93,
+      "obstacle": {
+        "kind": "gap",
+        "bounds": {
+          "left": 527.7094807981981,
+          "top": 382.5,
+          "right": 912.2905192018019,
+          "bottom": 463.5,
+          "width": 384.58103840360377,
+          "height": 81,
+          "area": 31151.064110691907
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "desktop-paused.png",
+      "sha256": "b79becf4007b7497b574088ae3127539092b3cb0e04fedcd3ecff5a7802bc53f"
+    },
+    {
+      "state": "normal-run",
+      "mockState": {
+        "score": 1280,
+        "distance": 186,
+        "shards": 7,
+        "flow": 1,
+        "chaseGap": 5.7,
+        "obstacle": "column",
+        "label": "Normal run"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 22,
+          "top": 18,
+          "right": 822,
+          "bottom": 104
+        },
+        {
+          "selector": "pause-button",
+          "left": 778,
+          "top": 18,
+          "right": 822,
+          "bottom": 62
+        }
+      ],
+      "runner": {
+        "left": 390.566,
+        "top": 218.55600000000004,
+        "right": 453.434,
+        "bottom": 303.225,
+        "width": 62.86800000000005,
+        "height": 84.66899999999998,
+        "area": 5322.9706920000035
+      },
+      "pursuer": {
+        "left": 396.65,
+        "top": 334.61999999999995,
+        "right": 447.35,
+        "bottom": 381.41999999999996,
+        "width": 50.700000000000045,
+        "height": 46.80000000000001,
+        "area": 2372.7600000000025
+      },
+      "pursuerGapPx": 31.39,
+      "obstacle": {
+        "kind": "column",
+        "bounds": {
+          "left": 382.55373654707483,
+          "top": 88.80747309414963,
+          "right": 461.44626345292517,
+          "bottom": 169.7,
+          "width": 78.89252690585033,
+          "height": 80.89252690585036,
+          "area": 6381.815855402021
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": false,
+      "screenshot": "mobile-landscape.png",
+      "sha256": "9cf0670400319af9630e3e32332f4327d167d095bf06793ae98654f3fa2613b7"
+    },
+    {
+      "state": "normal-run",
+      "mockState": {
+        "score": 1280,
+        "distance": 186,
+        "shards": 7,
+        "flow": 1,
+        "chaseGap": 5.7,
+        "obstacle": "beam",
+        "label": "Normal run"
+      },
+      "canvasCount": 1,
+      "gameplayDomEntities": 0,
+      "overflowX": 0,
+      "hud": [
+        {
+          "selector": "hud",
+          "left": 16,
+          "top": 16,
+          "right": 374,
+          "bottom": 140
+        },
+        {
+          "selector": "pause-button",
+          "left": 330,
+          "top": 16,
+          "right": 374,
+          "bottom": 60
+        }
+      ],
+      "runner": {
+        "left": 146.64,
+        "top": 519.04,
+        "right": 243.36,
+        "bottom": 649.3,
+        "width": 96.72000000000003,
+        "height": 130.26,
+        "area": 12598.747200000003
+      },
+      "pursuer": {
+        "left": 162.045,
+        "top": 760.226,
+        "right": 227.955,
+        "bottom": 821.0659999999999,
+        "width": 65.91000000000003,
+        "height": 60.83999999999992,
+        "area": 4009.964399999996
+      },
+      "pursuerGapPx": 110.93,
+      "obstacle": {
+        "kind": "beam",
+        "bounds": {
+          "left": 151.24192809916764,
+          "top": 361.56960000000004,
+          "right": 238.75807190083236,
+          "bottom": 394.992,
+          "width": 87.51614380166473,
+          "height": 33.42239999999998,
+          "area": 2924.9995645967574
+        }
+      },
+      "contrast": {
+        "hudOnSky": 11.54,
+        "scarOnTide": 12.82,
+        "coralOnSand": 3.75
+      },
+      "reducedMotion": true,
+      "screenshot": "mobile-reduced-motion.png",
+      "sha256": "6f530ee3a9cd93b3d2ba025dc7327e2db66942221129d4ce6592c2abb917dd97"
+    }
+  ],
+  "consoleProblems": []
+}
