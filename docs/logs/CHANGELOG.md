@@ -30,3 +30,14 @@
 - Final implementation verification passed: typecheck, 11 Vitest files / 47 tests, and production build; the only build advisory remains Vite's non-blocking chunk-size warning.
 - Independent QA accepted candidate `c5b3db041175c19c71bd0086baf1e034fc97caf0` in log-only commit `b974810fc4b0ba93fb5ed7d6012e22c67b0606a5`. QA independently reproduced the clean install and code gates and matched every committed screenshot hash. A fresh isolated browser capture did not produce artifacts after one safe retry, so that limitation remains explicitly documented rather than hidden.
 - Opened a separate design-only visual-restart study for a more distinctive mobile-first presentation. TR2 acceptance freezes the current rules and engine; it does not pre-approve those future visual changes.
+
+## 2026-07-17 — Bounded commit policy adopted
+
+- Added an authoritative small-checkpoint policy so source, assets, generated evidence,
+  QA verdicts, and coordinator records are no longer accumulated into one large commit.
+- Set a default source checkpoint budget of 10 product/test paths, 500 hand-authored
+  changed lines, and one subsystem or user-visible claim, with explicit pre-authorization
+  required for any atomic exception.
+- Froze the inherited dirty set at `52ae9ae` as preservation-only backlog. Temple may not
+  add new product scope until the current paths are inventoried and split into an ordered,
+  independently reviewable commit chain.

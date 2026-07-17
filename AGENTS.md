@@ -5,7 +5,8 @@ These rules apply to every worker on the `codex/temple-run` branch.
 ## Coordinator and workstream boundary
 
 - The primary Codex task is the coordinator. It owns scope, sequencing, final acceptance,
-  `docs/logs/CHANGELOG.md`, commit, and push.
+  `docs/logs/CHANGELOG.md`, integration, and push. A writer may create only the bounded
+  local checkpoint commits authorized by `docs/COMMIT_POLICY.md`.
 - The Temple implementation owner may edit only the paths named in `CURRENT_TASK.md` and
   must keep `DESIGN.md`, rules, tests, and QA contracts synchronized with behavior.
 - Independent QA is read-only and starts only after a candidate SHA exists. It must not
@@ -29,6 +30,23 @@ These rules apply to every worker on the `codex/temple-run` branch.
    that candidate without modifying production files.
 7. Only the coordinator may resolve final documentation, update the changelog, push, and
    claim the slice accepted.
+
+## Bounded commit discipline
+
+- `docs/COMMIT_POLICY.md` is authoritative for commit size, checkpoint order, staging,
+  candidate ranges, and push ownership.
+- A candidate is normally a short linear range of reviewable commits, not one giant
+  commit made after source, assets, evidence, and logs have accumulated.
+- Commit the first green, reviewable claim before editing the next subsystem or concern.
+  Do not wait for the entire stage, visual pass, or evidence matrix to be finished.
+- Never combine product source, generated browser/Blender evidence, and independent QA
+  disposition in one commit.
+- Never use `git add .`, `git add -A`, wildcard staging, or a commit command that captures
+  paths outside the declared checkpoint. Stage exact paths and inspect the cached path
+  list before every commit.
+- The inherited Temple dirty set at `52ae9ae` is frozen backlog. It may be inventoried and
+  split into dependency-ordered checkpoint commits, but no worker may add new product
+  scope to it before that split is recorded and authorized.
 
 ## Product boundary
 
