@@ -42,7 +42,7 @@ GENERATOR_SHA256 = "d71d225bbaef3a2d9527b63916973cd9c4c77891ba9aa29672053ef12226
 CONSTRUCTION_SHA256 = "6a9735277c29ec32b3e22432b240385bc33993325aaf3422c60ac4f82e0dbd45"
 DIAGNOSTIC_RELATIVE = Path("docs/workstreams/temple-tr4-asset/diagnostic-007")
 AUTHORIZATION_RELATIVE = Path("docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_007_AUTHORIZATION.md")
-CURRENT_TASK_RELATIVE = Path("CURRENT_TASK.md")
+CURRENT_TASK_RELATIVE = Path("docs/CURRENT_TASK.md")
 COORDINATION_LOG_RELATIVE = Path("docs/workstreams/temple-tr4-coordination/THREAD_LOG.md")
 DIAGNOSTIC_ID = "007"
 CAMERA_BINDING_PROFILE_KEYS = [
@@ -1072,7 +1072,7 @@ def verify_c7_authorization(repo_root: Path) -> None:
         raise PrecheckBlocked("diagnostic-007 independent contract verdicts are missing")
     current_task_text = current_task.read_text(encoding="utf-8")
     if current_task_text.splitlines().count("C7 task authorization token: `TEMPLE-TR4-C7-TASK-SOURCE-CHAIN-AUTHORIZED`.") != 1:
-        raise PrecheckBlocked("CURRENT_TASK.md does not retain C7-T1/T2 source authorization")
+        raise PrecheckBlocked("docs/CURRENT_TASK.md does not retain C7-T1/T2 source authorization")
     coordination_text = coordination_log.read_text(encoding="utf-8")
     if "REPORT TEMPLE-TR4-DIAGNOSTIC-007 C7-D4-SOURCE-REAUTHORIZED" not in coordination_text:
         raise PrecheckBlocked("coordination THREAD_LOG lacks diagnostic-007 C7-D4 reauthorization")
