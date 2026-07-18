@@ -1,0 +1,416 @@
+{
+  "schema": "temple-tr3-a0-asset-proof-v1",
+  "stage": "final",
+  "createdAt": "2026-07-14T08:12:56.218065+00:00",
+  "cleanRoom": "Generated locally from versioned Blender Python; no reference or commercial pixels/models are input.",
+  "source": {
+    "schema": "temple-tr3-a0-blender-scene-v1",
+    "stage": "final",
+    "generator": "generate_tide_scar_hero.py",
+    "seed": 731943,
+    "units": "metres",
+    "axes": {
+      "forward": "+Y",
+      "up": "+Z"
+    },
+    "stableRoots": [
+      "Causeway_Root",
+      "Canyon_Root",
+      "Runner_Root",
+      "Pursuer_Root",
+      "Obstacle_Ring_Root",
+      "TideScar_Ribbon_Editable"
+    ],
+    "cameraNames": [
+      "HeroCamera_Portrait",
+      "HeroCamera_Desktop"
+    ],
+    "materialNames": [
+      "M_Basalt_Deep",
+      "M_Basalt_Lit",
+      "M_Contact_Shadow",
+      "M_Coral_Dark",
+      "M_Coral_Mineral",
+      "M_Courier_Ink",
+      "M_Courier_Skin",
+      "M_Courier_Slate",
+      "M_Deep_Canyon_Water",
+      "M_Panorama_Procedural",
+      "M_Sandstone_Cliff",
+      "M_Sandstone_Stratum",
+      "M_Sandstone_Sun",
+      "M_Tide_Scar_Lime",
+      "Material"
+    ],
+    "trianglesBeforeExport": 6906,
+    "tideScar": {
+      "object": "TideScar_Ribbon_Editable",
+      "curve": true,
+      "emissive": false,
+      "bakedIntoRoad": false
+    },
+    "renderRepair": {
+      "panoramaEndCaps": false,
+      "panoramaCastsShadow": false,
+      "mistBandCount": 0,
+      "exposure": 1.0,
+      "look": "AgX - Medium Low Contrast",
+      "eeveeRenderSamples": 96
+    },
+    "cleanRoom": "No external model, image, commercial asset, or reference pixel is imported by this generator."
+  },
+  "tools": {
+    "blender": "C:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe",
+    "gltfTransform": "C:\\Users\\Alex Chen\\AppData\\Roaming\\npm\\gltf-transform.cmd",
+    "toktx": "C:\\Program Files\\KTX-Software\\bin\\toktx.exe",
+    "ktx": "C:\\Program Files\\KTX-Software\\bin\\ktx.exe"
+  },
+  "glbValidation": {
+    "unoptimized": "passed",
+    "meshopt": "passed",
+    "meshoptCompression": true
+  },
+  "glbMetrics": {
+    "unoptimized": {
+      "triangles": 51764,
+      "meshes": 208,
+      "nodes": 220,
+      "materials": 14,
+      "textures": 0,
+      "extensionsUsed": [
+        "KHR_lights_punctual"
+      ],
+      "namedRootsPresent": [
+        "Canyon_Root",
+        "Causeway_Root",
+        "Obstacle_Ring_Root",
+        "Pursuer_Root",
+        "Runner_Root",
+        "TideScar_Ribbon_Editable"
+      ]
+    },
+    "meshopt": {
+      "triangles": 41174,
+      "meshes": 2,
+      "nodes": 6,
+      "materials": 2,
+      "textures": 1,
+      "extensionsUsed": [
+        "EXT_meshopt_compression",
+        "KHR_lights_punctual",
+        "KHR_mesh_quantization"
+      ],
+      "namedRootsPresent": [
+        "TideScar_Ribbon_Editable"
+      ]
+    }
+  },
+  "pixelEvidence": {
+    "schema": "temple-tr3-a1-pixel-evidence-v1",
+    "mode": "final",
+    "thresholds": {
+      "globalP50": 0.12,
+      "globalP95": 0.55,
+      "nearBlackFraction": 0.1,
+      "roadP50": 0.25,
+      "semanticP95": 0.18
+    },
+    "images": {
+      "portrait": {
+        "file": "portrait-hero.png",
+        "width": 900,
+        "height": 1600,
+        "global": {
+          "p50": 0.5369490196078431,
+          "p95": 0.6580345098039215,
+          "nearBlackFraction": 0.0
+        },
+        "rois": {
+          "road": {
+            "fraction": [
+              0.32,
+              0.3,
+              0.69,
+              0.98
+            ],
+            "bounds": [
+              288,
+              480,
+              621,
+              1568
+            ],
+            "p50": 0.635606274509804,
+            "p95": 0.6619560784313725
+          },
+          "runner": {
+            "fraction": [
+              0.4,
+              0.48,
+              0.6,
+              0.76
+            ],
+            "bounds": [
+              360,
+              768,
+              540,
+              1216
+            ],
+            "p50": 0.6434494117647058,
+            "p95": 0.6608392156862746
+          },
+          "pursuer": {
+            "fraction": [
+              0.27,
+              0.65,
+              0.73,
+              0.99
+            ],
+            "bounds": [
+              243,
+              1040,
+              657,
+              1584
+            ],
+            "p50": 0.6288643137254902,
+            "p95": 0.6658776470588235
+          },
+          "ring": {
+            "fraction": [
+              0.35,
+              0.28,
+              0.65,
+              0.56
+            ],
+            "bounds": [
+              315,
+              448,
+              585,
+              896
+            ],
+            "p50": 0.6392603921568627,
+            "p95": 0.6608549019607843
+          }
+        }
+      },
+      "desktop": {
+        "file": "desktop-hero.png",
+        "width": 1600,
+        "height": 900,
+        "global": {
+          "p50": 0.35156392156862737,
+          "p95": 0.6499082352941176,
+          "nearBlackFraction": 0.0
+        },
+        "rois": {
+          "road": {
+            "fraction": [
+              0.33,
+              0.27,
+              0.67,
+              0.99
+            ],
+            "bounds": [
+              528,
+              243,
+              1072,
+              891
+            ],
+            "p50": 0.5353286274509803,
+            "p95": 0.6602886274509804
+          },
+          "runner": {
+            "fraction": [
+              0.4,
+              0.48,
+              0.6,
+              0.76
+            ],
+            "bounds": [
+              640,
+              432,
+              960,
+              684
+            ],
+            "p50": 0.6398109803921569,
+            "p95": 0.6608549019607843
+          },
+          "pursuer": {
+            "fraction": [
+              0.28,
+              0.63,
+              0.72,
+              0.99
+            ],
+            "bounds": [
+              448,
+              567,
+              1152,
+              891
+            ],
+            "p50": 0.4926101960784314,
+            "p95": 0.6600211764705882
+          },
+          "ring": {
+            "fraction": [
+              0.36,
+              0.25,
+              0.64,
+              0.56
+            ],
+            "bounds": [
+              576,
+              225,
+              1024,
+              504
+            ],
+            "p50": 0.494398431372549,
+            "p95": 0.6583176470588236
+          }
+        }
+      },
+      "closeup": {
+        "file": "runner-pursuer-obstacle-closeup.png",
+        "width": 1200,
+        "height": 900,
+        "global": {
+          "p50": 0.5694698039215687,
+          "p95": 0.6770917647058824,
+          "nearBlackFraction": 0.0
+        },
+        "rois": {
+          "road": {
+            "fraction": [
+              0.12,
+              0.57,
+              0.98,
+              0.99
+            ],
+            "bounds": [
+              144,
+              513,
+              1176,
+              891
+            ],
+            "p50": 0.6625066666666667,
+            "p95": 0.6812964705882352
+          },
+          "runner": {
+            "fraction": [
+              0.66,
+              0.05,
+              0.98,
+              0.5
+            ],
+            "bounds": [
+              792,
+              45,
+              1176,
+              450
+            ],
+            "p50": 0.6400784313725489,
+            "p95": 0.6639427450980393
+          },
+          "pursuer": {
+            "fraction": [
+              0.16,
+              0.14,
+              0.78,
+              0.88
+            ],
+            "bounds": [
+              192,
+              126,
+              936,
+              792
+            ],
+            "p50": 0.5396282352941176,
+            "p95": 0.6768086274509804
+          }
+        }
+      }
+    },
+    "combined": {
+      "p50": 0.4627450980392157,
+      "p95": 0.6745098039215687,
+      "nearBlackFraction": 0.0
+    },
+    "gates": {
+      "globalP50": true,
+      "globalP95": true,
+      "nearBlackFraction": true,
+      "roadP50": true,
+      "semanticReadability": true,
+      "mistBands": true
+    },
+    "passed": true
+  },
+  "files": [
+    {
+      "file": "tide-scar-hero.meshopt.glb",
+      "bytes": 416812,
+      "sha256": "cbbf261f2c204c7a3acb176086dddc2baaff43a3413808d89e9c822adc9a9703"
+    },
+    {
+      "file": "tide-scar-hero.unoptimized.glb",
+      "bytes": 2889112,
+      "sha256": "5a59fb36d116e63187941598ee3f921b0d4a058a64f4993fdec50b49ed5c82cb"
+    },
+    {
+      "file": "tide-scar-hero.blend",
+      "bytes": 2449315,
+      "sha256": "f9022230b2f9a4f197d6c1b6cf9621b5289740407c1318ee9b2ee9654b6f65f9"
+    },
+    {
+      "file": "portrait-hero.png",
+      "bytes": 1502788,
+      "sha256": "147ec1111e97b046933941e059c0375ce1faca98aaedd786b80333bbc70135e6"
+    },
+    {
+      "file": "desktop-hero.png",
+      "bytes": 1431793,
+      "sha256": "a54fa6cd89478c83e548942f6bb3e086b54603ac88239f7e25a82a05097dc8f9"
+    },
+    {
+      "file": "runner-pursuer-obstacle-closeup.png",
+      "bytes": 1162177,
+      "sha256": "a6673560193b1bd35c8901dd8140bff1cfeae2bd163725c5d5bd124d55cb796f"
+    }
+  ],
+  "proofTextures": [
+    {
+      "png": "proof-basalt-base.png",
+      "ktx2": "proof-basalt-base.ktx2",
+      "bytes": 87856,
+      "sha256": "602a559d454bf7aa2b7cbd82695dfaa642c5ab24a1df5ece6d27001efb4b976b",
+      "validation": "passed"
+    },
+    {
+      "png": "proof-sandstone-ao.png",
+      "ktx2": "proof-sandstone-ao.ktx2",
+      "bytes": 87856,
+      "sha256": "8de8d3177cc4b48524a248fe8ad37914ad870060357e8482f208dac4e3ad97f0",
+      "validation": "passed"
+    },
+    {
+      "png": "proof-sandstone-base.png",
+      "ktx2": "proof-sandstone-base.ktx2",
+      "bytes": 87856,
+      "sha256": "fb6265a76a056d9b60e8d022b419614029628ef781c737399ed7d19b7bc109a4",
+      "validation": "passed"
+    },
+    {
+      "png": "proof-sandstone-normal.png",
+      "ktx2": "proof-sandstone-normal.ktx2",
+      "bytes": 87856,
+      "sha256": "7be04b1ffcc40a0a536a28f6c64bd0487236c5c331bd16ea7c04d8a405d1ac88",
+      "validation": "passed"
+    },
+    {
+      "png": "proof-sandstone-roughness.png",
+      "ktx2": "proof-sandstone-roughness.ktx2",
+      "bytes": 87856,
+      "sha256": "d2164cd755366430adddcdffb47cedbca683d6e96a3cfaf5601411dc2120f92d",
+      "validation": "passed"
+    }
+  ]
+}

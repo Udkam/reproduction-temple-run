@@ -1,0 +1,24 @@
+> dedup
+√ dedup                13ms
+> instance
+√ instance             1ms
+> palette
+√ palette              21ms
+> flatten
+√ flatten              4ms
+> join
+√ join                 59ms
+> weld
+√ weld                 32ms
+> simplify
+√ simplify             45ms
+> resample
+√ resample             0ms
+> prune
+√ prune                2ms
+> sparse
+√ sparse               14ms
+> meshopt
+√ meshopt              64ms
+
+info: tide-scar-hero.unoptimized.glb (2.89 MB) → tide-scar-hero.meshopt.glb (416.81 KB)

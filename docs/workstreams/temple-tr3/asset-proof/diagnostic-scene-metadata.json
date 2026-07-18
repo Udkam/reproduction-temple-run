@@ -1,0 +1,56 @@
+{
+  "schema": "temple-tr3-a0-blender-scene-v1",
+  "stage": "diagnostic",
+  "generator": "generate_tide_scar_hero.py",
+  "seed": 731943,
+  "units": "metres",
+  "axes": {
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "stableRoots": [
+    "Causeway_Root",
+    "Canyon_Root",
+    "Runner_Root",
+    "Pursuer_Root",
+    "Obstacle_Ring_Root",
+    "TideScar_Ribbon_Editable"
+  ],
+  "cameraNames": [
+    "HeroCamera_Portrait",
+    "HeroCamera_Desktop"
+  ],
+  "materialNames": [
+    "M_Basalt_Deep",
+    "M_Basalt_Lit",
+    "M_Contact_Shadow",
+    "M_Coral_Dark",
+    "M_Coral_Mineral",
+    "M_Courier_Ink",
+    "M_Courier_Skin",
+    "M_Courier_Slate",
+    "M_Deep_Canyon_Water",
+    "M_Panorama_Procedural",
+    "M_Sandstone_Cliff",
+    "M_Sandstone_Stratum",
+    "M_Sandstone_Sun",
+    "M_Tide_Scar_Lime",
+    "Material"
+  ],
+  "trianglesBeforeExport": 6726,
+  "tideScar": {
+    "object": "TideScar_Ribbon_Editable",
+    "curve": true,
+    "emissive": false,
+    "bakedIntoRoad": false
+  },
+  "renderRepair": {
+    "panoramaEndCaps": false,
+    "panoramaCastsShadow": false,
+    "mistBandCount": 0,
+    "exposure": 1.0,
+    "look": "AgX - Medium Low Contrast",
+    "eeveeRenderSamples": 16
+  },
+  "cleanRoom": "No external model, image, commercial asset, or reference pixel is imported by this generator."
+}

@@ -1,0 +1,67 @@
+{
+  "schema": "temple-tr3-a2-structural-proof-v1",
+  "stage": "clay",
+  "generator": "generate_tide_scar_hero_a2.py",
+  "seed": 270731,
+  "units": "metres",
+  "axes": {
+    "forward": "+Y",
+    "up": "+Z",
+    "right": "+X"
+  },
+  "stableRoots": [
+    "Causeway_Root",
+    "Canyon_Root",
+    "Runner_Root",
+    "Pursuer_Root",
+    "Obstacle_Ring_Root",
+    "TideScar_Ribbon_Editable"
+  ],
+  "trianglesBeforeExport": 4787,
+  "materials": [
+    "M_A2_Clay",
+    "M_A2_Clay_Abyss",
+    "M_Bounded_Mist_Volume"
+  ],
+  "textureMapping": {},
+  "semanticHandoff": {
+    "Causeway_Root": {
+      "pivot": "road origin",
+      "proxy": "Collision_Causeway_Corridor"
+    },
+    "Canyon_Root": {
+      "pivot": "world origin",
+      "proxy": "presentation only"
+    },
+    "Runner_Root": {
+      "pivot": "ground at courier",
+      "sockets": [
+        "Socket_Runner_LeftLeg_Contact",
+        "Socket_Runner_RightLeg_Contact"
+      ]
+    },
+    "Pursuer_Root": {
+      "pivot": "ground at pursuer",
+      "proxy": "Collision_Pursuer_Body"
+    },
+    "Obstacle_Ring_Root": {
+      "pivot": "ring ground center",
+      "proxy": "Collision_Ring_Opening"
+    },
+    "TideScar_Ribbon_Editable": {
+      "pivot": "curve world coordinates",
+      "curve": true,
+      "emissive": false,
+      "bakedIntoRoad": false
+    }
+  },
+  "structure": {
+    "directionChanges": 4,
+    "noWaterPlane": true,
+    "panoramaEndCaps": false,
+    "mistCards": 0,
+    "causewayPrism": true,
+    "sideStrataChunked": true
+  },
+  "cleanRoom": "Generated locally from deterministic Blender Python; no source image, external model, commercial asset, or reference pixel is read."
+}
