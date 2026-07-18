@@ -125,7 +125,7 @@ These are actual world coordinates. `geometryBinding.tideScar.loopControlPoints`
 
 The validator constructs these objects itself and deep-compares normalized input by key set, type, order, and frozen value before accepting `constructionHash` or `READY_FOR_BLENDER`.
 
-Every output except the external reference must resolve inside `E:\Proj\Game-1-temple`. The three script paths must resolve to their exact authorized filenames. The diagnostic root must be exactly `docs\workstreams\temple-tr4-asset\diagnostic-001`, must not exist before successful in-memory validation, and is then created once to atomically write `preflight.json` and `planned-manifest.json`. Existing output, symlink/reparse escape, path traversal, unwritable parent, reference mismatch, unsupported version, unknown field, non-finite number, hash mismatch, or construction mismatch is `PRECHECK_BLOCKED` before Blender.
+Every output except the external reference must resolve inside `E:\Proj\reproduction-temple-run`. The three script paths must resolve to their exact authorized filenames. The diagnostic root must be exactly `docs\workstreams\temple-tr4-asset\diagnostic-001`, must not exist before successful in-memory validation, and is then created once to atomically write `preflight.json` and `planned-manifest.json`. Existing output, symlink/reparse escape, path traversal, unwritable parent, reference mismatch, unsupported version, unknown field, non-finite number, hash mismatch, or construction mismatch is `PRECHECK_BLOCKED` before Blender.
 
 ## Frozen cameras and projection
 

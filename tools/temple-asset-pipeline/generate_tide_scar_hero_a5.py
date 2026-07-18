@@ -537,11 +537,11 @@ def curve_mask_evidence(scene: bpy.types.Scene, camera: bpy.types.Object, curve:
 def main() -> None:
     args = arguments()
     output = Path(args.output).resolve()
-    expected = Path(r"E:\Proj\Game-1-temple\docs\workstreams\temple-tr3\asset-proof\a5").resolve()
+    expected = Path(r"E:\Proj\reproduction-temple-run\docs\workstreams\temple-tr3\asset-proof\a5").resolve()
     if output != expected:
         raise SystemExit("A5 output must be the exact scoped a5 directory")
     output.mkdir(parents=True, exist_ok=True)
-    root_dir = Path(r"E:\Proj\Game-1-temple")
+    root_dir = Path(r"E:\Proj\reproduction-temple-run")
     source_paths = {
         "a3Generator": root_dir / "tools/temple-asset-pipeline/generate_tide_scar_hero_a3.py",
         "a3Metadata": root_dir / "docs/workstreams/temple-tr3/asset-proof/a3/a3-clay-metadata.json",

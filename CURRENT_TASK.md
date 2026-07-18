@@ -106,7 +106,7 @@ Must not change `src/game/core/**`, `src/game/runtime/**`, rules, generator, can
 
 - copied Temple Run branding, characters, monsters, art, music, UI, screenshots, or source
 - shops, ads, accounts, purchases, online leaderboards, unlock trees, or multiple environments
-- importing implementation from `codex/tetris`
+- importing implementation from the standalone `reproduction-tetris` repository
 - shipping another game mode, rule change, or fake gameplay entity
 
 ### Completion gate

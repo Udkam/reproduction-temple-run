@@ -1781,7 +1781,7 @@ def write_text_atomic(path: Path, text: str) -> None:
 
 def prepare_diagnostic() -> tuple[Path, Path, dict[str, Path], dict[str, str], dict[str, str], str, dict[str, Any]]:
     repo_root = Path(__file__).resolve().parents[2]
-    expected_repo = Path(r"E:\Proj\Game-1-temple").resolve(strict=True)
+    expected_repo = Path(r"E:\Proj\reproduction-temple-run").resolve(strict=True)
     if repo_root != expected_repo:
         raise PrecheckBlocked(f"repository root mismatch: {repo_root}")
     if platform.python_version() != PYTHON_VERSION:

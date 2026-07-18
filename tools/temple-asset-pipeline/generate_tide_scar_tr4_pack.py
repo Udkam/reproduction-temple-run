@@ -354,7 +354,7 @@ def validate_matrix_probe_input(plan_path: Path, output_root: Path) -> dict[str,
     if plan["schemaId"] != "tide-relay.temple-tr4.matrix-probe-plan" or plan["schemaVersion"] != 1 or plan["probeId"] != "001":
         raise RuntimeError("matrix probe plan identity mismatch")
     repo_root = Path(plan["repoRoot"]).resolve(strict=True)
-    if repo_root != Path(r"E:\Proj\Game-1-temple").resolve(strict=True):
+    if repo_root != Path(r"E:\Proj\reproduction-temple-run").resolve(strict=True):
         raise RuntimeError("matrix probe repository root mismatch")
     blender_path = Path(plan["blenderExecutable"]).resolve(strict=True)
     if blender_path != Path(r"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe").resolve(strict=True):

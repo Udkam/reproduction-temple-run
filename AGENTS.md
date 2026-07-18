@@ -53,7 +53,8 @@ These rules apply to every worker on the `main` branch.
 - Build one complete clean-room third-person endless-runner game named `TIDE//RELAY`.
 - Reproduce the interaction grammar and tension of classic endless runners, not Temple Run branding, characters, monsters, art, music, icons, text, or screen composition.
 - Do not copy assets or source from commercial games or public clones.
-- Do not import work from `codex/tetris` or the archived recursive-puzzle branch.
+- Do not import work from the standalone `reproduction-tetris` repository or
+  the archived `reproduction-patricks-parabox` repository.
 - React owns the shell, menus, accessibility, and lifecycle. Three.js owns the only gameplay canvas and all world entities.
 - The deterministic simulation core must not import React, Three.js, DOM, storage, WebAudio, or wall-clock APIs.
 

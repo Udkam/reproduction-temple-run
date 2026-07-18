@@ -51,3 +51,7 @@
   repository and its `main` branch.
 - The historical `Udkam/Game-1` remote was not rewritten or deleted. Four
   pre-existing untracked local paths remain preserved locally and were not pushed.
+- Updated the active TR4 preflight path contract and tracked asset-pipeline root
+  guards for `E:\Proj\reproduction-temple-run`; historical evidence paths remain
+  unchanged. The untracked material-socket probe remains uncommitted, with only
+  its local repository-root and branch guards migrated.
