@@ -71,3 +71,12 @@
   the output root; only the later final-hash launch checkpoint may add that line.
 - Source authorization remains limited to two scripts. Blender and diagnostic `008`
   remain blocked pending independent review of this hardening.
+
+## 2026-07-18 process-token review blocked and coordination-line closure
+
+- Independent review of exact commit `0964ec5` found no P0/P2 and one P1: the future
+  coordination process-authorization report had no frozen full-line literal.
+- The contract now freezes a uniquely reconstructable future REPORT line in addition to
+  the process token. Both exact line counts remain zero during source work and must become
+  exactly one together in the final-hash launch checkpoint.
+- Source and Blender remain blocked pending fresh independent review.

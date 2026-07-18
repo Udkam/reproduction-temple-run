@@ -54,7 +54,7 @@
 
 ## Current result
 
-Result: **TEMPLE-TR4 in progress; material-socket-probe-001 process-token hardening under review, no source/process authority and no visual acceptance.** Diagnostic `007` remains immutable at `3937ef6` with zero PNG. Contract `b530556` received independent readiness, but a conservative pre-source correction now freezes a separate process-token line that is absent until the final-hash launch checkpoint. The runner must reject count zero or duplicates and require the matching coordination launch record before creating `probe-001`. Fresh review is required before source authority resumes; diagnostic `008` remains unauthorized and the probe cannot satisfy a visual gate. TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 and C1-C6 are historical, unintegrated or blocked visual attempts and do not supply TR4 acceptance evidence.
+Result: **TEMPLE-TR4 in progress; material-socket-probe-001 process-token/report hardening under review, no source/process authority and no visual acceptance.** Diagnostic `007` remains immutable at `3937ef6` with zero PNG. Review of `0964ec5` accepted the future token but required an equally exact future coordination REPORT literal. Both are now frozen, absent, and must become exact-count one only in the final-hash launch checkpoint before runner may create `probe-001`. Fresh review is required before source authority resumes; diagnostic `008` remains unauthorized and the probe cannot satisfy a visual gate. TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 and C1-C6 are historical, unintegrated or blocked visual attempts and do not supply TR4 acceptance evidence.
 
 ## TEMPLE-TR4 visual and lifecycle gates
 

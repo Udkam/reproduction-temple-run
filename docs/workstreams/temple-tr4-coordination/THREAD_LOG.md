@@ -335,3 +335,17 @@ GATES reviewed contract ready at b530556; conservative coordinator audit found s
 EVIDENCE frozen future process-token full-line literal; current exact line count zero; runner requirement exact count one plus process-authorization coordination record before output root
 BLOCKER hardening lacks fresh independent review; source/Blender/process/diagnostic-008 blocked
 NEXT commit docs-only hardening, obtain fresh independent verdict, then separately restore exact two-script source authority if ready
+
+REPORT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 PROCESS-TOKEN-CONTRACT-BLOCKED-REVIEW-001-CORRECTED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T22:25:00+08:00
+BASE 0964ec5
+PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 PROCESS-TOKEN-HARDENING-REVIEW-REQUESTED
+HEAD pending process-report literal correction checkpoint
+CANDIDATE none
+WRITE_SCOPE probe contract/log, CURRENT_TASK.md, acceptance, coordination progress/log
+DIRTY five declared never-stage backup/cache paths; staged zero before correction
+GATES independent review P0 none; P1 future coordination REPORT full-line literal absent; P2 none; process-token full literal accepted and exact count zero
+EVIDENCE uniquely reconstructable future REPORT line; process token and REPORT exact line counts both zero before launch
+BLOCKER hardening lacks fresh independent ready verdict; source/Blender/process/diagnostic-008 blocked
+NEXT commit minimal docs correction and obtain fresh independent verdict before restoring source authority

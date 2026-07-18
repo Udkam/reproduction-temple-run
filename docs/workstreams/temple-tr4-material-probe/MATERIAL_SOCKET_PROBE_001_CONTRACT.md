@@ -10,6 +10,12 @@ literal is `Probe process authorization token: ` followed by
 The runner must require exactly one complete matching line before output-root creation;
 the later launch checkpoint, and no earlier commit, may add it.
 
+The future coordination launch record is also intentionally absent. Its frozen full-line
+literal is `REPORT TEMPLE-TR4` followed by one space and
+`MATERIAL-SOCKET-PROBE-001 PROCESS-AUTHORIZED`. The runner must require exactly one
+complete matching line in the coordination `THREAD_LOG.md`; the final-hash launch
+checkpoint adds it together with the process-token line.
+
 This is a new zero-render evidence identity after immutable diagnostic `007` stopped with
 zero PNGs at Blender material readback. It is not a retry of diagnostic `007`, does not
 authorize diagnostic `008`, and cannot claim material, model, render, or visual quality.
