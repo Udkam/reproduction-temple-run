@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -6,18 +7,225 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright-core');
 
-const baseUrl = process.argv[2] ?? 'http://127.0.0.1:5173/';
-const root = process.cwd();
-const screenshotDir = path.join(root, 'docs', 'screenshots', 'temple', 'final');
-const evidencePath = path.join(root, 'docs', 'qa', 'temple-browser-evidence.json');
-const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-await mkdir(screenshotDir, { recursive: true });
+const DEFAULT_BASE_URL = 'http://127.0.0.1:5173/';
 
-const browser = await chromium.launch({ headless: true, executablePath: chromePath });
+export function parseCaptureCli(argv) {
+  let explicitBaseUrl = null;
+  let labels = [];
+  let selfTest = false;
+  let d4Dev = false;
+  for (let index = 0; index < argv.length; index += 1) {
+    const argument = argv[index];
+    if (argument === '--labels') {
+      const value = argv[index + 1];
+      if (!value || value.startsWith('--')) throw new Error('--labels requires a comma-separated value');
+      labels = value.split(',').map((label) => label.trim()).filter(Boolean);
+      index += 1;
+      continue;
+    }
+    if (argument === '--self-test-cli') {
+      selfTest = true;
+      continue;
+    }
+    if (argument === '--d4-dev') {
+      d4Dev = true;
+      continue;
+    }
+    if (argument.startsWith('--')) throw new Error(`Unknown capture flag: ${argument}`);
+    if (explicitBaseUrl !== null) throw new Error(`Only one baseUrl is allowed; received ${argument}`);
+    explicitBaseUrl = argument;
+  }
+  return {
+    resolvedBaseUrl: explicitBaseUrl ?? DEFAULT_BASE_URL,
+    explicitBaseUrl: explicitBaseUrl !== null,
+    labels,
+    selfTest,
+    d4Dev,
+  };
+}
+
+function runCliRegression() {
+  const cases = [
+    { args: ['http://127.0.0.1:5193/'], labels: [] },
+    { args: ['http://127.0.0.1:5193/', '--labels', 'desktop-normal'], labels: ['desktop-normal'] },
+    { args: ['--labels', 'desktop-normal', 'http://127.0.0.1:5193/'], labels: ['desktop-normal'] },
+  ];
+  for (const testCase of cases) {
+    const parsed = parseCaptureCli(testCase.args);
+    if (parsed.resolvedBaseUrl !== 'http://127.0.0.1:5193/' || JSON.stringify(parsed.labels) !== JSON.stringify(testCase.labels)) {
+      throw new Error(`CLI regression failed for ${JSON.stringify(testCase.args)}`);
+    }
+  }
+  console.log('capture CLI regression passed (3 cases)');
+}
+
+const cli = parseCaptureCli(process.argv.slice(2));
+const baseUrl = cli.resolvedBaseUrl;
+const selectedLabels = new Set(cli.labels);
+const root = process.cwd();
+const diagnosticMode = selectedLabels.size > 0;
+const d4DevMode = cli.d4Dev;
+if (d4DevMode && !diagnosticMode) throw new Error('--d4-dev requires explicit --labels');
+const d4DevDir = path.join(root, 'docs', 'screenshots', 'temple', 'tr3-d4-dev');
+const screenshotDir = d4DevMode
+  ? d4DevDir
+  : path.join(root, 'docs', 'screenshots', 'temple', diagnosticMode ? 'tr3-diagnostic' : 'tr3');
+const evidencePath = path.join(root, 'docs', 'qa', 'temple-tr3-browser-evidence.json');
+const diagnosticPath = d4DevMode
+  ? path.join(d4DevDir, 'summary.json')
+  : path.join(root, 'docs', 'qa', 'temple-tr3-browser-diagnostic.json');
+const failurePath = d4DevMode
+  ? path.join(d4DevDir, 'failure.json')
+  : path.join(root, 'docs', 'qa', 'temple-tr3-browser-failure.json');
+const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const records = [];
+let browser = null;
+let currentPhase = 'bootstrap';
+let activeScenario = null;
+let activeLabel = null;
+const head = (() => {
+  try {
+    return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+  } catch {
+    return 'unavailable';
+  }
+})();
+
+function verifyResolvedBaseUrl() {
+  let url;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    throw new Error(`Invalid resolvedBaseUrl: ${baseUrl}`);
+  }
+  if (cli.explicitBaseUrl && !['5193', '5194', '5195', '5196', '5197', '5198', '5199'].includes(url.port)) {
+    throw new Error(`Resolved baseUrl must use an authorized dev port 5193-5199, received ${baseUrl}`);
+  }
+}
+
+function shouldRun(label) {
+  return selectedLabels.size === 0 || selectedLabels.has(label);
+}
+
+async function writeFailure(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  const assertion = message.startsWith('Temple evidence gate failed:')
+    ? message.split('\n- ').slice(1)
+    : [];
+  const completedScreenshots = records.filter((record) => record.screenshot).length;
+  await writeFile(failurePath, `${JSON.stringify({
+    status: 'failed',
+    generatedAt: new Date().toISOString(),
+    head,
+    resolvedBaseUrl: baseUrl,
+    diagnosticMode,
+    d4DevMode,
+    labels: [...selectedLabels],
+    phase: currentPhase,
+    scenario: activeScenario,
+    label: activeLabel,
+    assertion,
+    message,
+    stack: error instanceof Error ? error.stack ?? null : null,
+    completedRecords: records.length,
+    completedScreenshots,
+    // Preserve the actual browser console/page errors and measurement payloads
+    // that led to a fail-closed run; do not leave a later correction blind.
+    records: records.map((record) => ({
+      id: record.id,
+      screenshot: record.screenshot ?? null,
+      consoleProblems: record.consoleProblems ?? [],
+      render: record.render ?? null,
+      viewport: record.viewport ?? null,
+      ui: record.ui ?? null,
+    })),
+  }, null, 2)}\n`, 'utf8');
+}
+
+async function clearFailure() {
+  await writeFile(failurePath, `${JSON.stringify({
+    status: 'cleared',
+    generatedAt: new Date().toISOString(),
+    head,
+    resolvedBaseUrl: baseUrl,
+    diagnosticMode,
+    d4DevMode,
+    labels: [...selectedLabels],
+  }, null, 2)}\n`, 'utf8');
+}
 
 function assertEvidence(condition, message, failures) {
   if (!condition) failures.push(message);
+}
+
+function boundsOverlap(first, second) {
+  if (!first || !second) return false;
+  return first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top;
+}
+
+function pointInRect(point, rect) {
+  return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+}
+
+function pointInPolygon(point, polygon) {
+  let inside = false;
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
+    const a = polygon[index];
+    const b = polygon[previous];
+    const crosses = (a.y > point.y) !== (b.y > point.y)
+      && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x;
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
+
+function orientation(a, b, c) {
+  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+}
+
+function segmentsIntersect(a, b, c, d) {
+  const abC = orientation(a, b, c);
+  const abD = orientation(a, b, d);
+  const cdA = orientation(c, d, a);
+  const cdB = orientation(c, d, b);
+  return abC * abD <= 0 && cdA * cdB <= 0;
+}
+
+/** Exact screen polygon / visible-content-rect intersection; no HUD hull shortcut. */
+function polygonIntersectsRect(polygon, rect) {
+  if (!polygon || polygon.length < 3 || !rect) return false;
+  const bounds = {
+    left: Math.min(...polygon.map((point) => point.x)), right: Math.max(...polygon.map((point) => point.x)),
+    top: Math.min(...polygon.map((point) => point.y)), bottom: Math.max(...polygon.map((point) => point.y)),
+  };
+  if (!boundsOverlap(bounds, rect)) return false;
+  if (polygon.some((point) => pointInRect(point, rect))) return true;
+  const corners = [
+    { x: rect.left, y: rect.top }, { x: rect.right, y: rect.top },
+    { x: rect.right, y: rect.bottom }, { x: rect.left, y: rect.bottom },
+  ];
+  if (corners.some((corner) => pointInPolygon(corner, polygon))) return true;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const a = polygon[index];
+    const b = polygon[(index + 1) % polygon.length];
+    for (let edge = 0; edge < corners.length; edge += 1) {
+      if (segmentsIntersect(a, b, corners[edge], corners[(edge + 1) % corners.length])) return true;
+    }
+  }
+  return false;
+}
+
+function expectedD4Profile(viewport) {
+  const aspect = viewport.width / viewport.height;
+  if (viewport.height <= 520 && aspect > 1.5) return { name: 'landscape', fov: 46, mobile: true };
+  if (aspect < 0.72) return { name: 'portrait', fov: 40, mobile: true };
+  return { name: 'desktop', fov: 43, mobile: false };
+}
+
+function expectedD4Assets(mobile) {
+  return mobile
+    ? ['tide-sandstone-base-mobile-512.webp', 'tide-basalt-base-mobile-512.webp', 'tide-distant-canyon-mobile-1024x512.webp', 'tide-coral-mask-512.png']
+    : ['tide-sandstone-base-1024.webp', 'tide-basalt-base-1024.webp', 'tide-distant-canyon-2048x1024.webp', 'tide-coral-mask-512.png'];
 }
 
 function validateEvidence(entries) {
@@ -44,6 +252,18 @@ function validateEvidence(entries) {
     'mobile-portrait': 'running',
     'mobile-landscape': 'running',
     'reduced-motion': 'running',
+    'desktop-normal': 'running',
+    'desktop-close-chase': 'running',
+    'desktop-milestone': 'running',
+    'desktop-paused': 'paused',
+    'desktop-beam': 'running',
+    'desktop-ring': 'running',
+    'desktop-column': 'running',
+    'desktop-gap': 'running',
+    'mobile-normal': 'running',
+    'mobile-close-chase': 'running',
+    'mobile-milestone': 'running',
+    'landscape-running': 'running',
   };
 
   for (const entry of captures) {
@@ -71,6 +291,10 @@ function validateEvidence(entries) {
     assertEvidence(entry.ui.hud.distance === Math.floor(entry.simulation.distance), `${entry.id}: HUD distance differs from canonical state`, failures);
     assertEvidence(entry.ui.hud.shards === entry.simulation.shards, `${entry.id}: HUD shards differ from canonical state`, failures);
     assertEvidence(entry.ui.hud.flow === entry.simulation.multiplier, `${entry.id}: HUD flow differs from canonical state`, failures);
+    assertEvidence(entry.ui.hudText.score === entry.simulation.score.toLocaleString('en-US'), `${entry.id}: score text differs from canonical state`, failures);
+    assertEvidence(entry.ui.hudText.distance === `${Math.floor(entry.simulation.distance).toLocaleString('en-US')} m`, `${entry.id}: distance text differs from canonical state`, failures);
+    assertEvidence(entry.ui.hudText.flow === `×${entry.simulation.multiplier}`, `${entry.id}: flow text differs from canonical state`, failures);
+    assertEvidence(entry.ui.hudText.shards === String(entry.simulation.shards), `${entry.id}: shards text differs from canonical state`, failures);
     for (const area of entry.safeAreas) {
       assertEvidence(area.insideViewport, `${entry.id}: ${area.selector} leaves the safe viewport`, failures);
     }
@@ -87,9 +311,54 @@ function validateEvidence(entries) {
         failures,
       );
     }
-    if (entry.id.startsWith('mobile-')) {
+    if (entry.viewport.width <= 900) {
       assertEvidence(entry.render.canvas.resolution <= 1.750_001, `${entry.id}: DPR cap exceeded`, failures);
     }
+    const isPursuerCapture = entry.simulation.failureReason?.kind === 'pursuer-caught';
+    if (entry.simulation.status !== 'ready' && !isPursuerCapture) {
+      assertEvidence(entry.render.pursuerScreen?.bounds?.area > 0, `${entry.id}: pursuer bounds are unavailable`, failures);
+      assertEvidence(entry.render.pursuerGapPx !== null && entry.render.pursuerGapPx !== undefined, `${entry.id}: pursuer gap is unavailable`, failures);
+      assertEvidence(entry.render.pursuerGapPx >= Math.max(6, Math.round(entry.viewport.height * 0.015)), `${entry.id}: pursuer gap below D4 minimum`, failures);
+    }
+    if (d4DevMode) {
+      const expected = expectedD4Profile(entry.viewport);
+      assertEvidence(entry.render.d4?.profile === expected.name, `${entry.id}: D4 profile mismatch`, failures);
+      assertEvidence(Math.abs((entry.render.camera?.fov ?? 0) - expected.fov) < 0.001, `${entry.id}: D4 fixed FOV mismatch`, failures);
+      assertEvidence(entry.render.d4?.assetTier !== 'loading' && entry.render.d4?.assetTier !== 'fallback', `${entry.id}: D4 assets not loaded`, failures);
+      assertEvidence(JSON.stringify(entry.render.d4?.requestedAssets ?? []) === JSON.stringify(expectedD4Assets(expected.mobile)), `${entry.id}: D4 requested asset set is not the selected tier`, failures);
+      const textureBudget = expected.mobile ? 18 : 38;
+      assertEvidence((entry.render.d4?.textureBytes ?? Number.POSITIVE_INFINITY) <= textureBudget * 1024 * 1024, `${entry.id}: D4 texture estimate exceeds ${textureBudget} MiB`, failures);
+      assertEvidence(entry.render.drawCalls <= (expected.mobile ? 38 : 46), `${entry.id}: D4 draw-call budget exceeded`, failures);
+      assertEvidence(entry.render.triangles <= (expected.mobile ? 115_000 : 190_000), `${entry.id}: D4 triangle budget exceeded`, failures);
+      assertEvidence((entry.render.tideScarSegments ?? []).some((segment) => segment.visibleAreaPx > 0) && (entry.render.d4?.tideScarVertices ?? 0) > 0, `${entry.id}: analytic Tide Scar is not visible`, failures);
+      assertEvidence(entry.render.d4?.pursuerPlacementError === null, `${entry.id}: ${entry.render.d4?.pursuerPlacementError ?? 'pursuer placement failed'}`, failures);
+      const intersectsHudContent = (bounds) => (entry.ui.hudContent ?? []).some((area) => boundsOverlap(bounds, area));
+      const scarIntersects = (rect) => (entry.render.tideScarSegments ?? []).some((segment) => polygonIntersectsRect(segment.polygonCss, rect));
+      assertEvidence(!intersectsHudContent(entry.render.runnerScreen?.bounds), `${entry.id}: runner overlaps HUD content`, failures);
+      assertEvidence(!intersectsHudContent(entry.render.pursuerScreen?.bounds), `${entry.id}: pursuer overlaps HUD content`, failures);
+      assertEvidence(!(entry.ui.hudContent ?? []).some(scarIntersects), `${entry.id}: Tide Scar overlaps HUD content`, failures);
+      for (const hazard of entry.render.hazardScreens ?? []) {
+        assertEvidence(!intersectsHudContent(hazard.bounds), `${entry.id}: ${hazard.kind} overlaps HUD content`, failures);
+        assertEvidence(!scarIntersects(hazard.bounds), `${entry.id}: Tide Scar overlaps ${hazard.kind}`, failures);
+      }
+      const composition = entry.render.d4?.composition;
+      const profileBands = expected.name === 'desktop'
+        ? { pitch: [21, 23], horizon: [0.20, 0.25], road: [0.54, 0.62], runner: 0.67 }
+        : expected.name === 'portrait'
+          ? { pitch: [24, 26], horizon: [0.27, 0.32], road: [0.82, 0.92], runner: 0.64 }
+          : { pitch: [18, 20], horizon: [0.27, 0.32], road: [0.50, 0.58], runner: 0.70 };
+      assertEvidence(composition?.pitchDegrees >= profileBands.pitch[0] && composition?.pitchDegrees <= profileBands.pitch[1], `${entry.id}: D4 camera pitch outside profile band`, failures);
+      assertEvidence(Number.isFinite(composition?.horizonY) && composition.horizonY >= 0 && composition.horizonY <= entry.viewport.height, `${entry.id}: D4 horizon measurement unavailable`, failures);
+      assertEvidence(Number.isFinite(composition?.bottomRoadWidth) && composition.bottomRoadWidth > 0, `${entry.id}: D4 bottom road width measurement unavailable`, failures);
+      assertEvidence(Math.abs((composition?.runnerCenterY ?? -1) - profileBands.runner) <= 0.03, `${entry.id}: D4 runner band mismatch`, failures);
+    }
+  }
+
+  if (diagnosticMode) {
+    if (failures.length > 0) {
+      throw new Error(`Temple evidence gate failed:\n- ${failures.join('\n- ')}`);
+    }
+    return;
   }
 
   const turn = byId.get('turn-mid');
@@ -160,6 +429,12 @@ function validateEvidence(entries) {
   const reduced = byId.get('reduced-motion');
   assertEvidence(reduced?.appearance.reducedMotion === true, 'reduced-motion media query not active', failures);
   assertEvidence(reduced?.render.options.reducedMotion === true, 'renderer reduced motion not active', failures);
+
+  const landscape = byId.get('landscape-running');
+  for (const metric of landscape?.ui.hudMetrics ?? []) {
+    assertEvidence(metric.insideViewport, `landscape-running: ${metric.selector} is outside the viewport`, failures);
+  }
+  assertEvidence((landscape?.ui.hudMetrics?.length ?? 0) === 4, 'landscape-running: a canonical HUD metric is hidden', failures);
 
   const desktop = byId.get('real-desktop-input');
   assertEvidence(desktop?.state.status === 'paused', 'desktop input: Escape did not pause', failures);
@@ -248,6 +523,10 @@ async function capture({
   advanceTicks = 0,
   keys = [],
 }) {
+  if (!shouldRun(id)) return;
+  currentPhase = 'capture';
+  activeLabel = id;
+  activeScenario = scenario ?? id;
   const context = await browser.newContext({
     viewport,
     deviceScaleFactor,
@@ -344,6 +623,20 @@ async function capture({
             flow: Number(hud?.getAttribute('data-flow')),
           };
         })(),
+        hudText: {
+          score: document.querySelector('.metric--score strong')?.textContent?.trim() ?? '',
+          distance: document.querySelector('.metric--distance strong')?.textContent?.replace(/\s+/g, ' ').trim() ?? '',
+          flow: document.querySelector('.metric--flow strong')?.textContent?.trim() ?? '',
+          shards: document.querySelector('.metric--shards strong')?.textContent?.trim() ?? '',
+        },
+        hudMetrics: ['.metric--score', '.metric--distance', '.metric--flow', '.metric--shards']
+          .map(visibleSafeArea)
+          .filter(Boolean),
+        // The HUD wrapper has intentionally translucent empty space: evidence
+        // protects only visible copy/actions, never that full background hull.
+        hudContent: ['.brandbar', '.metric--score', '.metric--distance', '.metric--flow', '.metric--shards', '.pause-control', '.gesture-hint', '.distance-milestone', '.turn-cue']
+          .map(visibleSafeArea)
+          .filter(Boolean),
         milestone: document.querySelector('.distance-milestone')?.textContent ?? null,
       },
       safeAreas: ['.brandbar', '.hud', '.pause-control', '.turn-cue', '.gesture-hint', '.touch-controls', '.settings']
@@ -369,9 +662,14 @@ async function capture({
     consoleProblems: problems,
   });
   await context.close();
+  currentPhase = 'captured';
 }
 
 async function realDesktopInput() {
+  if (!shouldRun('real-desktop-input')) return;
+  currentPhase = 'real-desktop-input';
+  activeLabel = 'real-desktop-input';
+  activeScenario = 'interactive-input';
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   const page = await context.newPage();
   const problems = [];
@@ -416,6 +714,10 @@ async function realDesktopInput() {
 }
 
 async function realTouchInput() {
+  if (!shouldRun('real-touch-input')) return;
+  currentPhase = 'real-touch-input';
+  activeLabel = 'real-touch-input';
+  activeScenario = 'interactive-input';
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 3,
@@ -465,6 +767,10 @@ async function realTouchInput() {
 }
 
 async function benchmarkScene(id, contextOptions, iterations, limitMs) {
+  if (!shouldRun(id)) return;
+  currentPhase = 'benchmark';
+  activeLabel = id;
+  activeScenario = 'fixed-workload';
   const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
   const problems = [];
@@ -480,7 +786,13 @@ async function benchmarkScene(id, contextOptions, iterations, limitMs) {
   await context.close();
 }
 
-try {
+async function main() {
+  try {
+  currentPhase = 'browser-launch';
+  verifyResolvedBaseUrl();
+  await mkdir(screenshotDir, { recursive: true });
+  browser = await chromium.launch({ headless: true, executablePath: chromePath });
+  currentPhase = 'capture-plan';
   await capture({ id: 'ready-desktop', scenario: 'ready' });
   await capture({ id: 'running-desktop', scenario: 'running' });
   await capture({ id: 'lane-mid', scenario: 'lane-mid' });
@@ -533,6 +845,47 @@ try {
     hasTouch: true,
   });
   await capture({ id: 'reduced-motion', scenario: 'running', reducedMotion: 'reduce' });
+  // Formal TR3 matrix: each screenshot is the real command-derived production runtime.
+  await capture({ id: 'desktop-normal', scenario: 'running' });
+  await capture({ id: 'desktop-close-chase', scenario: 'chase-close' });
+  await capture({ id: 'desktop-milestone', scenario: 'milestone' });
+  await capture({ id: 'desktop-paused', scenario: 'running', pause: true });
+  await capture({ id: 'desktop-beam', scenario: 'beam-preview' });
+  await capture({ id: 'desktop-ring', scenario: 'ring-preview' });
+  await capture({ id: 'desktop-column', scenario: 'column-preview' });
+  await capture({ id: 'desktop-gap', scenario: 'gap-preview' });
+  await capture({
+    id: 'mobile-normal',
+    scenario: 'running',
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+  });
+  await capture({
+    id: 'mobile-close-chase',
+    scenario: 'chase-close',
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+  });
+  await capture({
+    id: 'mobile-milestone',
+    scenario: 'milestone',
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+  });
+  await capture({
+    id: 'landscape-running',
+    scenario: 'running',
+    viewport: { width: 844, height: 390 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+  });
   await realDesktopInput();
   await realTouchInput();
   await benchmarkScene(
@@ -553,14 +906,35 @@ try {
     12,
   );
 
+  currentPhase = 'validate';
+  activeLabel = diagnosticMode ? [...selectedLabels].join(',') : 'full-matrix';
+  activeScenario = diagnosticMode ? 'diagnostic-validation' : 'full-validation';
   validateEvidence(records);
-  await writeFile(evidencePath, `${JSON.stringify({
+  currentPhase = diagnosticMode ? 'write-diagnostic' : 'write-manifest';
+  const outputPath = diagnosticMode ? diagnosticPath : evidencePath;
+  await writeFile(outputPath, `${JSON.stringify({
     generatedAt: new Date().toISOString(),
-    baseUrl,
+    head,
+    resolvedBaseUrl: baseUrl,
     browser: await browser.version(),
+    diagnosticMode,
+    d4DevMode,
+    labels: [...selectedLabels],
     records,
   }, null, 2)}\n`, 'utf8');
-  console.log(`Captured ${records.length} evidence records to ${evidencePath}`);
-} finally {
-  await browser.close();
+  await clearFailure();
+  console.log(`Captured ${records.length} evidence records to ${outputPath}`);
+  } catch (error) {
+  await writeFailure(error);
+  console.error(error);
+  process.exitCode = 1;
+  } finally {
+  await browser?.close();
+  }
+}
+
+if (cli.selfTest) {
+  runCliRegression();
+} else {
+  await main();
 }
