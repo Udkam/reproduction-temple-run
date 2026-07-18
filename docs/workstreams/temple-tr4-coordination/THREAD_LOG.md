@@ -251,3 +251,17 @@ GATES standard runner invoked exactly once; runner exit 1; Blender 4.5.5 exit 1;
 EVIDENCE diagnostic-007 exactly preflight.json 24054/4086c7394c54cf6b8ac9f41e4512a74113232547540035f288d55672b7caaf35; planned-manifest.json 3791/fe43f335001de5441df71ff43e8c3c2dae9451f238d6e50a0a347204b1d229dc; blender.log 1774/70ed1b44c0bf46edb99d7b41a7334ec24d6bab68ae8459bfd8de895b166f2177; diagnostic-status.json 363/029549ce684c45d93d42524b3aaf2bc173adb102b9a55d23750a9244d1f5373f; evidence commit 3937ef6
 BLOCKER first material readback unconditionally indexed absent dynamic Voronoi Smoothness socket; diagnostic-007 immutable and no retry
 NEXT independent read-only root-cause review; if evidence requires it, draft a new-ID zero-render material-socket schema probe contract before any diagnostic-008 source or process authority
+
+REPORT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-REVIEW-REQUESTED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T20:25:00+08:00
+BASE 735c143
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 TERMINAL-DIAGNOSTIC-BLOCKED
+HEAD pending probe contract review-request checkpoint
+CANDIDATE none
+WRITE_SCOPE new docs/workstreams/temple-tr4-material-probe/{MATERIAL_SOCKET_PROBE_001_CONTRACT.md,MATERIAL_SOCKET_PROBE_001_INPUT.json,THREAD_LOG.md};CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;coordination progress/log
+DIRTY five declared never-stage backup/cache paths; staged zero before contract draft
+GATES independent diagnostic-007 evidence/root-cause review P0 none, P1 material socket contract blocked, P2 none; official Blender contract states Voronoi inputs are dynamic by node properties
+EVIDENCE diagnostic-007 evidence commit 3937ef6; exact frozen node/property/25-target canonical probe input; proposed one Blender process, zero render/evaluator/export, four-file closure
+BLOCKER contract lacks independent READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT and separate coordinator authorization; source/process/diagnostic-008 blocked
+NEXT commit this docs/input-only review request, obtain fresh independent review of the exact SHA, then either close findings or record separate source authorization
