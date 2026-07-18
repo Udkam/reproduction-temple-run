@@ -139,3 +139,17 @@ GATES independent review found no P0/P1 and returned READY_FOR_DIAGNOSTIC_007_CO
 EVIDENCE CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_007_AUTHORIZATION.md;TR4_VISUAL_CONTRACT.md;TR4_PREFLIGHT_SCHEMA.md;reviewed contract SHA 614d280
 BLOCKER C7-T1 and C7-T2 source checkpoints plus non-writing dry preflight do not yet exist; Blender remains blocked
 NEXT single asset writer implements C7-T1 generator only, performs exact non-writing checks, appends the asset THREAD_LOG, and commits that checkpoint before C7-T2
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 C7-D3-LOOP-CONTRACT-REVIEW-REQUESTED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T17:13:12+08:00
+BASE 844ec843289252fbecb2ff0c960d702331d2f1a5
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 AUTHORIZED
+HEAD pending C7-D3 docs-only checkpoint
+CANDIDATE none
+WRITE_SCOPE CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md;TR4_PREFLIGHT_SCHEMA.md;DIAGNOSTIC_007_AUTHORIZATION.md;progress.md;THREAD_LOG.md
+DIRTY uncommitted C7-T1 generator WIP plus five declared never-stage backup/cache paths; staged zero before C7-D3
+GATES static frozen-portrait projection only; old center X=.8817599105873106-1.0471892051751452 and full tube X=.876288018535559-1.0526610972268966; replacement center X=.8817599105873106-.9830895106526318 and full tube X=.876288018535559-.9886556545320699; no Blender/evaluator/test/build/browser execution
+EVIDENCE immutable diagnostic-006 portrait view/projection matrices; exact C7-D3 actual-world loop controls; world inner edge X=2.957m > safety bound 2.92m
+BLOCKER C7-D3 lacks independent READY_FOR_DIAGNOSTIC_007_LOOP_CONTRACT and C7-D4 coordinator reauthorization; generator may not be staged or expanded
+NEXT commit this docs-only review request, obtain independent read-only review of the exact SHA, then either correct P0/P1 or record separate C7-D4 reauthorization

@@ -1,6 +1,6 @@
 # TEMPLE-TR4 executable preflight and diagnostic schema
 
-This file is the immutable C1 baseline first made normative for diagnostic `001`. Later diagnostic authorizations inherit every unchanged closed field and state their exact schema/ID/root/value deltas. C5 and C6 are frozen `DIAGNOSTIC_BLOCKED`; `DIAGNOSTIC_006_AUTHORIZATION.md` is the consumed historical overlay that governed the immutable 27-file C6 result. `DIAGNOSTIC_007_AUTHORIZATION.md` is the active schema-version-7 overlay after independent readiness at `614d280` and coordinator authorization. It permits the exact C7-T1/T2 source checkpoints; `READY_FOR_BLENDER` becomes executable only after their hashes are committed and the non-writing dry preflight passes.
+This file is the immutable C1 baseline first made normative for diagnostic `001`. Later diagnostic authorizations inherit every unchanged closed field and state their exact schema/ID/root/value deltas. C5 and C6 are frozen `DIAGNOSTIC_BLOCKED`; `DIAGNOSTIC_006_AUTHORIZATION.md` is the consumed historical overlay that governed the immutable 27-file C6 result. `DIAGNOSTIC_007_AUTHORIZATION.md` is the active schema-version-7 overlay. Its earlier readiness at `614d280` is superseded only for the exact Tide Scar near-loop coordinates while C7-D3 receives fresh independent review; C7-T1/T2 checkpoint authority and `READY_FOR_BLENDER` remain inactive until separate C7-D4 reauthorization, committed source hashes, and a green non-writing dry preflight.
 
 ## Canonical JSON
 
@@ -37,7 +37,7 @@ Required records:
 - `surfaceY=0.0`, `width=6.4`, `bounds=[-3.2,3.2]`, `visualSafetyBounds=[-2.92,2.92]`;
 - `moduleCount=16`, `moduleLengthRange=[6.0,11.0]`, `thicknessRange=[0.55,1.2]`, `sideDepthRange=[2.5,8.0]`;
 - `signatureOrder=["terrace-fracture","buttress-recess","collapsed-lip","strata-undercut","rubble-shoulder","split-ledge"]`, `maxConsecutiveSignatureRepeats=2`, `strataEventsPerModule=2`, `rubbleEventsPerModule=1`;
-- `nearLoopShoulder={"rightOuterX":4.45,"zRange":[2.8,5.2]}`. This is decorative support outside the gameplay lip and never changes the `6.4m` canonical deck.
+- `nearLoopShoulder={"rightOuterX":4.45,"zRange":[-5.2,-2.8]}`. This is decorative support outside the gameplay lip and never changes the `6.4m` canonical deck.
 
 `canyon` has exactly `bandOrder=["near","mid","far"]`, `near`, `mid`, `far`, `negativeSpaceCount=3`, `occlusionBoundaryCount=2`, and `fullWidthWaterVisible=false`. Band records have exactly `count`, `absXRange`, `yRange`, `zRange`, `saturation`, and `contrast`, with values:
 
@@ -51,7 +51,9 @@ Required records:
 
 Ordered `loopControlPoints` are a separate editable spline supported by the near right shoulder:
 
-`[[3.00,0.035,4.00],[3.09,0.035,4.33],[3.33,0.035,4.56],[3.65,0.035,4.65],[3.98,0.035,4.56],[4.22,0.035,4.33],[4.30,0.035,4.00],[4.22,0.035,3.68],[3.98,0.035,3.44],[3.65,0.035,3.35],[3.33,0.035,3.44],[3.09,0.035,3.68],[3.00,0.035,4.00]]`.
+`[[3.000,0.035,-3.20],[3.054,0.035,-2.87],[3.198,0.035,-2.64],[3.390,0.035,-2.55],[3.588,0.035,-2.64],[3.732,0.035,-2.87],[3.780,0.035,-3.20],[3.732,0.035,-3.52],[3.588,0.035,-3.76],[3.390,0.035,-3.85],[3.198,0.035,-3.76],[3.054,0.035,-3.52],[3.000,0.035,-3.20]]`.
+
+These are actual world coordinates. `geometryBinding.tideScar.loopControlPoints` is read back from evaluated world geometry and must deep-equal this exact list. The semantic root and curve object retain identity translation, rotation, and scale for this binding; undeclared object transforms or local/world remapping are `PRECHECK_BLOCKED`.
 
 `runner` has exactly `partOrder`, `contactSocketOrder`, `poseOrder`, `root`, `height`, `maxGroundError`, and `triangleCeiling`. Values are:
 
