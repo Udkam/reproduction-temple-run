@@ -14,3 +14,15 @@
   Source, Blender, diagnostic-008, render, evaluator, PNG, export, runtime, browser,
   tests/build, staging, push, and visual acceptance remain blocked pending independent
   `READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT` and separate coordinator authority.
+
+## 2026-07-18 contract review 001 blocked and closure correction
+
+- Independent review of exact commit `733f4d1` found no P0/P2 and three P1 gaps: no
+  implementable unique contract token, descriptive rather than closed evidence/status
+  schemas, and incomplete stage/provenance closure. Verdict: `CONTRACT_BLOCKED`.
+- The corrected review request adds one complete labelled token line; exact evidence and
+  status JSON Schemas with unknown-field rejection; input-bound array identities; exact
+  Blender properties for RNA/enabled/hidden/linked evidence; numeric normalization; exact
+  stage-to-file closures; and contract/input/schema/runner/generator/Blender hashes.
+- Source, Blender, diagnostic-008, render/evaluator/export, runtime, browser, tests/build,
+  staging, push, and visual acceptance remain blocked pending a fresh independent review.

@@ -265,3 +265,17 @@ GATES independent diagnostic-007 evidence/root-cause review P0 none, P1 material
 EVIDENCE diagnostic-007 evidence commit 3937ef6; exact frozen node/property/25-target canonical probe input; proposed one Blender process, zero render/evaluator/export, four-file closure
 BLOCKER contract lacks independent READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT and separate coordinator authorization; source/process/diagnostic-008 blocked
 NEXT commit this docs/input-only review request, obtain fresh independent review of the exact SHA, then either close findings or record separate source authorization
+
+REPORT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-BLOCKED-REVIEW-001-CORRECTED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T20:50:00+08:00
+BASE 733f4d1fda9ac6d9eb9bd7620ef6a2a2ed475e3b
+PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-REVIEW-REQUESTED
+HEAD pending corrected probe contract review-request checkpoint
+CANDIDATE none
+WRITE_SCOPE probe contract/input/evidence-schema/status-schema/log plus CURRENT_TASK.md, acceptance, coordination progress/log
+DIRTY five declared never-stage backup/cache paths; staged zero before correction
+GATES independent review P0 none; P1 unique token absent; P1 evidence schema descriptive; P1 failure/provenance closure incomplete; P2 none; verdict CONTRACT_BLOCKED
+EVIDENCE exact reviewed SHA 733f4d1; corrected complete labelled token; two Draft 2020-12 JSON Schemas; exact stage closures; contract/input/schema/runner/generator/Blender hashes
+BLOCKER corrected contract lacks fresh READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT and separate source authorization; Blender/process/diagnostic-008 blocked
+NEXT commit corrected docs/schema-only review request and obtain a fresh independent read-only verdict before any source edit

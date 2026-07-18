@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tide-relay.temple-tr4.material-socket-probe-status.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaId", "schemaVersion", "probeId", "stage", "verdict", "reason", "contractSha256", "inputSha256", "evidenceSchemaSha256", "statusSchemaSha256", "runnerSha256", "generatorSha256", "blenderExecutableSha256", "blenderReturnCode", "renderInvocationCount", "terminalFile", "siblingFiles"],
+  "properties": {
+    "schemaId": {"const": "tide-relay.temple-tr4.material-socket-probe-status"},
+    "schemaVersion": {"const": 1},
+    "probeId": {"const": "001"},
+    "stage": {"enum": ["blender", "schema-validation", "complete"]},
+    "verdict": {"enum": ["PROBE_BLOCKED", "SOCKET_SCHEMA_OBSERVED"]},
+    "reason": {"type": "string", "minLength": 1},
+    "contractSha256": {"$ref": "#/$defs/sha256"},
+    "inputSha256": {"$ref": "#/$defs/sha256"},
+    "evidenceSchemaSha256": {"$ref": "#/$defs/sha256"},
+    "statusSchemaSha256": {"$ref": "#/$defs/sha256"},
+    "runnerSha256": {"$ref": "#/$defs/sha256"},
+    "generatorSha256": {"$ref": "#/$defs/sha256"},
+    "blenderExecutableSha256": {"const": "597f600e625f24e4f542906702b5a7dd33f6c6ff166e106b03ef4b1c3fb3921c"},
+    "blenderReturnCode": {"type": ["integer", "null"]},
+    "renderInvocationCount": {"type": ["integer", "null"], "minimum": 0, "maximum": 0},
+    "terminalFile": {"const": "probe-status.json"},
+    "siblingFiles": {"type": "array", "minItems": 2, "maxItems": 3, "items": {"$ref": "#/$defs/file"}}
+  },
+  "allOf": [
+    {"if": {"properties": {"stage": {"const": "blender"}}}, "then": {"properties": {"verdict": {"const": "PROBE_BLOCKED"}, "blenderReturnCode": {"type": "integer", "not": {"const": 0}}, "renderInvocationCount": {"const": null}, "siblingFiles": {"minItems": 2, "maxItems": 2, "prefixItems": [{"properties": {"name": {"const": "probe-input.json"}}}, {"properties": {"name": {"const": "blender.log"}}}]}}}},
+    {"if": {"properties": {"stage": {"const": "schema-validation"}}}, "then": {"properties": {"verdict": {"const": "PROBE_BLOCKED"}, "blenderReturnCode": {"const": 0}, "renderInvocationCount": {"const": 0}, "siblingFiles": {"minItems": 3, "maxItems": 3, "prefixItems": [{"properties": {"name": {"const": "probe-input.json"}}}, {"properties": {"name": {"const": "material-socket-schema.json"}}}, {"properties": {"name": {"const": "blender.log"}}}]}}}},
+    {"if": {"properties": {"stage": {"const": "complete"}}}, "then": {"properties": {"verdict": {"const": "SOCKET_SCHEMA_OBSERVED"}, "reason": {"const": "SOCKET_SCHEMA_OBSERVED"}, "blenderReturnCode": {"const": 0}, "renderInvocationCount": {"const": 0}, "siblingFiles": {"minItems": 3, "maxItems": 3, "prefixItems": [{"properties": {"name": {"const": "probe-input.json"}}}, {"properties": {"name": {"const": "material-socket-schema.json"}}}, {"properties": {"name": {"const": "blender.log"}}}]}}}}
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "bytes", "sha256"],
+      "properties": {
+        "name": {"enum": ["probe-input.json", "material-socket-schema.json", "blender.log"]},
+        "bytes": {"type": "integer", "minimum": 0},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

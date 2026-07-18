@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tide-relay.temple-tr4.material-socket-schema.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaId", "schemaVersion", "probeId", "blenderVersion", "contractSha256", "inputSha256", "evidenceSchemaSha256", "statusSchemaSha256", "runnerSha256", "generatorSha256", "blenderExecutableSha256", "renderInvocationCount", "propertyAssignments", "nodes", "targets", "artifacts", "verdict"],
+  "properties": {
+    "schemaId": {"const": "tide-relay.temple-tr4.material-socket-schema"},
+    "schemaVersion": {"const": 1},
+    "probeId": {"const": "001"},
+    "blenderVersion": {"const": "4.5.5 LTS"},
+    "contractSha256": {"$ref": "#/$defs/sha256"},
+    "inputSha256": {"$ref": "#/$defs/sha256"},
+    "evidenceSchemaSha256": {"$ref": "#/$defs/sha256"},
+    "statusSchemaSha256": {"$ref": "#/$defs/sha256"},
+    "runnerSha256": {"$ref": "#/$defs/sha256"},
+    "generatorSha256": {"$ref": "#/$defs/sha256"},
+    "blenderExecutableSha256": {"const": "597f600e625f24e4f542906702b5a7dd33f6c6ff166e106b03ef4b1c3fb3921c"},
+    "renderInvocationCount": {"const": 0},
+    "propertyAssignments": {"type": "array", "minItems": 19, "maxItems": 19, "items": {"$ref": "#/$defs/propertyAssignment"}},
+    "nodes": {"type": "array", "minItems": 11, "maxItems": 11, "items": {"$ref": "#/$defs/node"}},
+    "targets": {"type": "array", "minItems": 25, "maxItems": 25, "items": {"$ref": "#/$defs/target"}},
+    "artifacts": {"$ref": "#/$defs/artifacts"},
+    "verdict": {"const": "SOCKET_SCHEMA_OBSERVED"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "value": {"oneOf": [{"type": "null"}, {"type": "boolean"}, {"type": "string"}, {"type": "number"}, {"type": "array", "items": {"type": ["boolean", "string", "number"]}}]},
+    "propertyAssignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "node", "property", "before", "requested", "after", "matchesRequested"],
+      "properties": {
+        "index": {"type": "integer", "minimum": 0, "maximum": 18},
+        "node": {"type": "string", "minLength": 1},
+        "property": {"type": "string", "minLength": 1},
+        "before": {"$ref": "#/$defs/value"},
+        "requested": {"$ref": "#/$defs/value"},
+        "after": {"$ref": "#/$defs/value"},
+        "matchesRequested": {"const": true}
+      }
+    },
+    "socket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "name", "identifier", "nameOccurrenceCount", "socketRnaIdentifier", "enabled", "hidden", "linked", "supportsDefaultValue", "defaultValueType", "defaultValue"],
+      "properties": {
+        "index": {"type": "integer", "minimum": 0},
+        "name": {"type": "string"},
+        "identifier": {"type": "string"},
+        "nameOccurrenceCount": {"type": "integer", "minimum": 1},
+        "socketRnaIdentifier": {"type": "string", "minLength": 1},
+        "enabled": {"type": "boolean"},
+        "hidden": {"type": "boolean"},
+        "linked": {"type": "boolean"},
+        "supportsDefaultValue": {"type": "boolean"},
+        "defaultValueType": {"enum": ["NONE", "BOOLEAN", "INTEGER", "NUMBER", "STRING", "BOOLEAN_ARRAY", "INTEGER_ARRAY", "NUMBER_ARRAY", "STRING_ARRAY"]},
+        "defaultValue": {"$ref": "#/$defs/value"}
+      },
+      "allOf": [
+        {"if": {"properties": {"supportsDefaultValue": {"const": false}}}, "then": {"properties": {"defaultValueType": {"const": "NONE"}, "defaultValue": {"const": null}}}},
+        {"if": {"properties": {"supportsDefaultValue": {"const": true}}}, "then": {"properties": {"defaultValueType": {"not": {"const": "NONE"}}}}}
+      ]
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "name", "nodeType", "inputs"],
+      "properties": {
+        "index": {"type": "integer", "minimum": 0, "maximum": 10},
+        "name": {"type": "string", "minLength": 1},
+        "nodeType": {"type": "string", "minLength": 1},
+        "inputs": {"type": "array", "items": {"$ref": "#/$defs/socket"}}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "key", "node", "nodeType", "socket", "requested", "occurrenceCount", "present", "enabled", "hidden", "linked", "supportsDefaultValue", "before", "assignmentAttempted", "assignmentSucceeded", "assignmentError", "after", "matchesRequested"],
+      "properties": {
+        "index": {"type": "integer", "minimum": 0, "maximum": 24},
+        "key": {"type": "string", "minLength": 1},
+        "node": {"type": "string", "minLength": 1},
+        "nodeType": {"type": "string", "minLength": 1},
+        "socket": {"type": "string", "minLength": 1},
+        "requested": {"$ref": "#/$defs/value"},
+        "occurrenceCount": {"type": "integer", "minimum": 0},
+        "present": {"type": "boolean"},
+        "enabled": {"type": ["boolean", "null"]},
+        "hidden": {"type": ["boolean", "null"]},
+        "linked": {"type": ["boolean", "null"]},
+        "supportsDefaultValue": {"type": ["boolean", "null"]},
+        "before": {"$ref": "#/$defs/value"},
+        "assignmentAttempted": {"type": "boolean"},
+        "assignmentSucceeded": {"type": "boolean"},
+        "assignmentError": {"type": ["string", "null"]},
+        "after": {"$ref": "#/$defs/value"},
+        "matchesRequested": {"type": ["boolean", "null"]}
+      },
+      "allOf": [
+        {"if": {"properties": {"occurrenceCount": {"const": 0}}}, "then": {"properties": {"present": {"const": false}, "enabled": {"const": null}, "hidden": {"const": null}, "linked": {"const": null}, "supportsDefaultValue": {"const": null}, "before": {"const": null}, "assignmentAttempted": {"const": false}, "assignmentSucceeded": {"const": false}, "assignmentError": {"const": "ABSENT"}, "after": {"const": null}, "matchesRequested": {"const": null}}}},
+        {"if": {"properties": {"occurrenceCount": {"minimum": 2}}}, "then": {"properties": {"present": {"const": true}, "enabled": {"const": null}, "hidden": {"const": null}, "linked": {"const": null}, "supportsDefaultValue": {"const": null}, "before": {"const": null}, "assignmentAttempted": {"const": false}, "assignmentSucceeded": {"const": false}, "assignmentError": {"const": "AMBIGUOUS_OCCURRENCE_COUNT"}, "after": {"const": null}, "matchesRequested": {"const": null}}}},
+        {"if": {"properties": {"occurrenceCount": {"const": 1}, "supportsDefaultValue": {"const": false}}, "required": ["occurrenceCount", "supportsDefaultValue"]}, "then": {"properties": {"present": {"const": true}, "before": {"const": null}, "assignmentAttempted": {"const": false}, "assignmentSucceeded": {"const": false}, "assignmentError": {"const": "NO_DEFAULT_VALUE"}, "after": {"const": null}, "matchesRequested": {"const": null}}}},
+        {"if": {"properties": {"occurrenceCount": {"const": 1}, "supportsDefaultValue": {"const": true}}, "required": ["occurrenceCount", "supportsDefaultValue"]}, "then": {"properties": {"present": {"const": true}, "assignmentAttempted": {"const": true}, "assignmentSucceeded": {"const": true}, "assignmentError": {"const": null}, "matchesRequested": {"const": true}}}}
+      ]
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["renderCalls", "evaluatorCalls", "exportCalls", "pngFiles", "glbFiles", "gltfFiles", "blendFiles"],
+      "properties": {
+        "renderCalls": {"const": 0},
+        "evaluatorCalls": {"const": 0},
+        "exportCalls": {"const": 0},
+        "pngFiles": {"const": 0},
+        "glbFiles": {"const": 0},
+        "gltfFiles": {"const": 0},
+        "blendFiles": {"const": 0}
+      }
+    }
+  }
+}
