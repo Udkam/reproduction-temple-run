@@ -2,7 +2,7 @@
 
 ## In-progress slice: TEMPLE-TR4 — high-fidelity canyon reconstruction
 
-Branch: `codex/temple-run`
+Branch: `main`
 Required checkpoint baseline: `ecd5de640362a6e30c5d0157ecd1590be7673318`
 Frozen inherited-backlog anchor: `52ae9ae631fa3761f8f8737978af1840ba2df8a4`
 Status: **in progress — material-socket-probe-001 source paused at WIP_UNCOMMITTED pending an atomic runner-checkpoint exception review; Blender process blocked by two absent launch lines.** Diagnostic `007` remains immutable at `3937ef6`, with zero PNG and no retry. Static inspection found the fail-closed runner needs more than the default 500 hand-authored lines while the active task named no exact exception. The two untracked probe scripts remain unexecuted, unstaged, and uncommitted until fresh independent contract readiness plus separate coordinator reauthorization. The future process-token and coordination REPORT exact counts remain zero. Diagnostic `008` is not authorized.
@@ -58,7 +58,7 @@ The runner may exceed 500 changed lines only after a fresh independent verdict `
 
 ### TR3-005C — Tide Scar root-cause visual/render correction
 
-Branch: `codex/temple-run`
+Historical branch: `codex/temple-run` (migrated to standalone `main`)
 Required baseline: `52ae9ae631fa3761f8f8737978af1840ba2df8a4`
 Status: **in progress**. D4A design chain `c75621be9f2216791571b2daaa799587bb65050b -> 76097083d062c3454b5478037ec074fd12e96436` is read-only direction; 005C preserves the existing dirty TR3 work, corrects renderer-only composition/material/evidence roots, and does not grant an intermediate candidate, full matrix, full suite, build, commit, or push.
 

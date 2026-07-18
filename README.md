@@ -9,7 +9,7 @@ The project recreates the control grammar and escalating tension of a classic
 mobile endless runner without copying commercial branding, characters, art,
 music, interface, or source.
 
-The scoped vertical slice is complete on `codex/temple-run`.
+The scoped vertical slice is preserved on `main`.
 
 ## Run locally
 

@@ -1,6 +1,6 @@
 # Bounded Commit Policy
 
-Status: authoritative for every task and worker in `E:\Proj\Game-1-temple`.
+Status: authoritative for every task and worker in `E:\Proj\reproduction-temple-run`.
 
 This policy prevents a workstream from accumulating an entire feature, visual pass,
 asset pipeline, evidence matrix, and QA history into one opaque commit. It complements

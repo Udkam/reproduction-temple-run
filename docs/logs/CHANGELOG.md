@@ -41,3 +41,13 @@
 - Froze the inherited dirty set at `52ae9ae` as preservation-only backlog. Temple may not
   add new product scope until the current paths are inventoried and split into an ordered,
   independently reviewable commit chain.
+
+## 2026-07-18 — Standalone repository migration
+
+- Published the current Temple Run clean-room study as the sole `main` branch of
+  `https://github.com/Udkam/reproduction-temple-run` from exact source
+  `be8bcd439646656e98319c647f62ac7e11f5aa3f`.
+- Repointed `origin` and the active repository contracts to the standalone
+  repository and its `main` branch.
+- The historical `Udkam/Game-1` remote was not rewritten or deleted. Four
+  pre-existing untracked local paths remain preserved locally and were not pushed.

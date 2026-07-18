@@ -1,6 +1,6 @@
 # TIDE//RELAY Collaboration Agreement
 
-These rules apply to every worker on the `codex/temple-run` branch.
+These rules apply to every worker on the `main` branch.
 
 ## Coordinator and workstream boundary
 
@@ -11,7 +11,7 @@ These rules apply to every worker on the `codex/temple-run` branch.
   must keep `DESIGN.md`, rules, tests, and QA contracts synchronized with behavior.
 - Independent QA is read-only and starts only after a candidate SHA exists. It must not
   repair production code or rewrite the implementation owner's evidence.
-- Tetris work lives only in `E:\Proj\Game-1` on `codex/tetris`; do not read its dirty
+- Tetris work lives only in `E:\Proj\reproduction-tetris` on `main`; do not read its dirty
   files as inputs, copy its implementation, or commit its artifacts here.
 - A design or QA recommendation is not production authority. The coordinator must open
   a bounded implementation slice first.
