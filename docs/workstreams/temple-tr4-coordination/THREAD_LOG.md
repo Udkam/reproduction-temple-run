@@ -293,3 +293,17 @@ GATES independent review P0 none; P1 tuple file objects underconstrained; P1 val
 EVIDENCE full tuple item refs and items:false; exact default-value JSON type branches; non-null unique target evidence; new launch stage with null return/render counts
 BLOCKER corrected schema lacks fresh READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT and separate source authorization; Blender/process/diagnostic-008 blocked
 NEXT commit corrected docs/schema-only review request and obtain another fresh independent read-only verdict before source
+
+REPORT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-BLOCKED-REVIEW-003-CORRECTED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T21:35:00+08:00
+BASE ec2fbdc016611d90629ddba138ff145a76fd3bab
+PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-BLOCKED-REVIEW-002-CORRECTED
+HEAD pending unique-target closure review-request checkpoint
+CANDIDATE none
+WRITE_SCOPE evidence schema, probe contract/log, CURRENT_TASK.md, acceptance, coordination progress/log
+DIRTY five declared never-stage backup/cache paths; staged zero before correction
+GATES independent review P0 none; P1 unique target supportsDefaultValue null bypass; P2 none; all tuple/type/stage/provenance checks otherwise closed
+EVIDENCE occurrenceCount one now forces supportsDefaultValue boolean before existing true/false branches
+BLOCKER corrected schema lacks fresh READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT and separate source authorization; Blender/process/diagnostic-008 blocked
+NEXT commit this minimal schema/docs correction and obtain fresh independent read-only verdict before source

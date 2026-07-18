@@ -39,3 +39,13 @@
   unique writable targets.
 - Source, Blender, diagnostic-008, render/evaluator/export, runtime, browser, tests/build,
   staging, push, and visual acceptance remain blocked pending another fresh review.
+
+## 2026-07-18 contract review 003 blocked and unique-target closure
+
+- Independent review of exact commit `ec2fbdc` found no P0/P2 and one P1: a unique target
+  could retain `supportsDefaultValue:null` and bypass both boolean disposition branches.
+- The evidence schema now requires boolean `supportsDefaultValue` whenever
+  `occurrenceCount` is exactly one. Combined with the existing true/false branches, the
+  four target dispositions are exhaustive and null cannot pass for a unique socket.
+- Source, Blender, diagnostic-008, render/evaluator/export, runtime, browser, tests/build,
+  staging, push, and visual acceptance remain blocked pending fresh review.

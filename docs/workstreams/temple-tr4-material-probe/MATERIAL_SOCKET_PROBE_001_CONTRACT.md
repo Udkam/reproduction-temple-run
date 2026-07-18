@@ -109,7 +109,8 @@ close every corresponding null, boolean, and error field. Socket records use
 `defaultValueType: NONE` plus null only when `supportsDefaultValue` is false; every other
 type label is bound to the matching scalar or homogeneous array JSON type. A unique target
 always records non-null enabled/hidden/linked booleans and, when `default_value` exists,
-non-null before/after values.
+non-null before/after values. `occurrenceCount: 1` also forces
+`supportsDefaultValue` to a boolean, so null cannot bypass both unique-socket branches.
 
 Comparable values are null, booleans, strings, finite JSON numbers, or flat arrays of
 those scalar types. Negative zero normalizes to zero; tuples and Blender arrays normalize
