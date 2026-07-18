@@ -855,3 +855,19 @@ HASHES generator `d71d...26f26e`; runner `ef99...e5d58`; evaluator `f6ee...590a0
 AUTHORITY coordinator commit `9352606` authorizes exactly one standard diagnostic invocation
 PROCESS_GATE one Blender 4.5.5 process, exactly 20 ordered PNG writes, at most one evaluator, no retry, and maximum verdict `READY_FOR_MANUAL_REVIEW`
 BLOCKER the visual/manual gate remains a hard blocker on acceptance
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 TERMINAL
+DATE 2026-07-18
+ROLE Temple asset implementation owner
+LAUNCH_BASE f584643
+COMMAND standard diagnostic command invoked exactly once
+RUNNER exit 1; verdict `DIAGNOSTIC_BLOCKED`; stage `blender`
+BLENDER Blender 4.5.5 exit 1
+EVALUATOR null; not started
+RENDER_COUNT 0; PNG_COUNT 0
+FIRST_ERROR generator line 528: `KeyError: 'bpy_prop_collection[key]: key "Smoothness" not found'` during `actual_material_graph_record` fixedSocketValues readback
+EVIDENCE_COMMIT 3937ef6; diagnostic-007 directory is exactly four committed files
+EVIDENCE_HASHES preflight `4086c...af35` size 24054; plan `fe43...29dc` size 3791; blender.log `70ed...2177` size 1774; status `0295...5373` size 363
+VISUAL_REVIEW not performed because the render set is incomplete
+IMMUTABILITY diagnostic-007 is immutable; no retry
+BLOCKER export, runtime integration, browser, tests, and build remain blocked
