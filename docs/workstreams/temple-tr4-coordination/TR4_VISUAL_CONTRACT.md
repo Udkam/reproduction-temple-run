@@ -1,8 +1,8 @@
 # TEMPLE-TR4 visual reconstruction contract
 
-Status: **IN PROGRESS — BACKLOG RECOVERY; NO DIAGNOSTIC AUTHORIZED.** This coordinator contract opens a new clean-room visual stage from the user-approved reference and gameplay grammar. It does not accept any A3/A4/A5/A6 proof, and it does not permit those historical files to be rewritten.
+Status: **DRAFT / C7 CONTRACT REVIEW REQUESTED; NO DIAGNOSTIC AUTHORIZED.** This coordinator contract opens a new clean-room visual stage from the user-approved reference and gameplay grammar. It does not accept any A3/A4/A5/A6/C1-C6 proof, and it does not permit those historical files to be rewritten.
 
-Diagnostic status: C1/`001` through C6/`006` plus both probes are immutable. C4 wrote all 20 PNGs but failed its scene-metric runner gate and independent manual review. C5 stopped before scene construction with zero PNG because generator validation compared a canonical JSON child object's insertion order instead of its exact key set; evaluator was not invoked. C6 wrote all 20 PNGs but stopped before evaluator when runner directly compared two valid near-zero landscape axis angles at `1e-12`; independent inspection also returned `MANUAL_BLOCKED` for black beauty frames, a flat strip road, repeated low-poly canyon masses, primitive semantic models, a cropped Scar loop, and white depth output. `DIAGNOSTIC_006_AUTHORIZATION.md` is consumed historical authority only. `BACKLOG_SPLIT_PLAN.md` must complete before a future C7 contract; export and runtime remain blocked.
+Diagnostic status: C1/`001` through C6/`006` plus both probes are immutable. C4 wrote all 20 PNGs but failed its scene-metric runner gate and independent manual review. C5 stopped before scene construction with zero PNG because generator validation compared a canonical JSON child object's insertion order instead of its exact key set; evaluator was not invoked. C6 wrote all 20 PNGs but stopped before evaluator when runner directly compared two valid near-zero landscape axis angles at `1e-12`; independent inspection also returned `MANUAL_BLOCKED` for black beauty frames, a flat strip road, repeated low-poly canyon masses, primitive semantic models, a cropped Scar loop, and white depth output. `DIAGNOSTIC_006_AUTHORIZATION.md` is consumed historical authority only. Backlog recovery completed at `ecd5de640362a6e30c5d0157ecd1590be7673318`; `DIAGNOSTIC_007_AUTHORIZATION.md` is a draft overlay awaiting independent review. Export and runtime remain blocked.
 
 ## Source boundary
 
@@ -42,6 +42,7 @@ Portrait gates: horizon `y=.17-.31H` with analytic target near `.23H`, runner ce
 - Every module has a real top, `0.55-1.20m` structural thickness, `2.5-8m` downward side mass, broken lips, undercuts, and at least two strata/debris events. It cannot be a thin plane or an unbroken rectangular extrusion.
 - Module lengths are `6-11m`. At least six signatures combine terrace, fracture, buttress, recess, collapsed lip, and rubble-cluster events; no signature repeats more than twice consecutively.
 - Cracks, edge wear, dust, aggregate, and stone response are geometry, normal/roughness response, or bounded decals. Texture noise alone cannot substitute for medium-scale structure.
+- C7 rebuilds the cap as a subdivided irregular surface with real fracture boundaries rather than a planar strip. A far-vista bend may begin only beyond the frozen `gap` proof distance, so it cannot displace or hide the straight canonical near-course hazards used by the diagnostic.
 
 ### Canyon
 
@@ -56,7 +57,8 @@ Portrait gates: horizon `y=.17-.31H` with analytic target near `.23H`, runner ce
 - Tide Scar: chalk `#f2ead7`, roughness `.82-.96`, no emissive glow, width `.075-.11m`, with the main spline centre `X=3.00-3.06m` (`.14-.20m` inward from the true right lip). Its inner edge remains outside `X=2.92m`. One separate editable near loop may occupy the contract's widened right shoulder at `X=3.00-4.30m`; it remains wholly outside the gameplay safety corridor and does not alter the canonical deck width.
 - Coral/mineral deposit: `#b44a38`, sparse coverage below `4%` of road pixels.
 - Beauty uses AgX with `AgX - Medium High Contrast`, exposure `0`, gamma `1`, and no emissive/exposure shortcut. The warm key has source surface-to-light vector `(-.51966,.77949,.34977)`, energy `4.2`, color `#FFD7A3`, and shadows on; the cool fill source vector is `(.48019,.62025,-.62025)`, energy `1.1`, color `#7EA6C4`, and shadows off. Each source vector is finite and is normalized before use; each normalized record is unit within `5e-7`, has `Y>=.75/.55` respectively, and the X signs oppose. A sun's actual local `-Z` direction must align with the negative normalized surface-to-light vector within `1e-5` radians. The contact bounce remains a shadowless `430`-energy, size-`9` disk at `(0,7.5,4.0)`, explicitly aimed from local `-Z` at road target `(0,0,-4.0)` within `1e-5` radians.
-- Beauty world color is `#6E8294` at strength `.55`; fog is `#9AA7A8`, density `.0035`, anisotropy `.18`. Static Beer-Lambert transmittance must be `>=.90` at `20m`, `.55-.72` at `120m`, and `>=.12` at `520m` (nominal `.932/.657/.162`). There is no translucent card, panorama shadow cap, shadow disabling, emission lift, or threshold lowering.
+- Every C7 stone/cloth/armour procedural material must explicitly connect Object or Generated coordinates through a Mapping node into bounded macro and micro Noise/Voronoi fields, then into colour-ramp, roughness, and bump response. An unconnected texture vector, constant-colour surface, external texture file, or noise-only substitute for geometry is a hard failure.
+- Beauty world surface is `#6E8294` at strength `.55`; no world volume is used. The raw PBR scene remains AgX / Medium High Contrast at exposure `0`. The beauty compositor applies depth-derived Beer-Lambert atmosphere with `T(d)=exp(-.0035*d)` and mixes fog colour `#9AA7A8` by `1-T`; background uses the fog colour. Static transmittance must be `>=.90` at `20m`, `.55-.72` at `120m`, and `>=.12` at `520m` (nominal `.932/.657/.162`). There is no translucent fog card, panorama shadow cap, emission lift, exposure shortcut, or threshold lowering.
 
 ## Character contract
 
@@ -79,11 +81,11 @@ Canonical event types and collision rules remain unchanged; only their original 
 
 | Canonical kind | Required action | TR4 original modeling language |
 | --- | --- | --- |
-| `beam` | jump | fractured low threshold/root-like mineral rib with supported mass, broken caps, dust, and readable top clearance |
-| `ring` | slide | double-supported low-clearance arch/lintel with a real negative-space opening and restrained heated mineral vents, never copied fire statues |
-| `column` | change lane | asymmetrical collapsed buttress with grounded rubble and a lane-contained collision silhouette |
-| `gap` | jump | missing causeway span with fractured near/far lips, visible thickness, abyss depth, and no hidden collision floor |
-| turn window | turn | route-end cliff and clearly authored outgoing branch; no decorative geometry may imply a false branch |
+| `beam` | jump | **Fault Lip / 断层门槛**: a fractured, grounded stone threshold with lifted strata, broken caps, dust, and readable top clearance |
+| `ring` | slide | **Coral Throat / 珊瑚喉门**: a double-supported mineral arch/lintel with a real negative-space opening, never copied statues or fire gates |
+| `column` | change lane | **Basalt Splitter / 玄武岩劈齿**: an asymmetrical grounded rock tooth with rubble and a lane-contained collision silhouette |
+| `gap` | jump | **Tidebreak Gap / 潮裂断阶**: a genuinely missing causeway span with fractured near/far lips, visible thickness, abyss depth, and no hidden collision floor |
+| turn window | turn | **Sundered Elbow / 断峡折角**: a route-end cliff and clearly authored outgoing branch; no decorative geometry may imply a false branch |
 
 No three-lane pattern may obscure all valid responses, and decorative silhouettes cannot change canonical fairness.
 
@@ -105,7 +107,8 @@ Required semantic roots in both source and optimized GLB are exactly these nine 
 
 - Before any `bpy` import or Blender launch, one UTF-8 normalized input and metadata skeleton bind this contract version, reference hash, script hashes, camera matrices, construction hash, collision values, materials, roots, budgets, and exact output paths. The executable schema and rejection rules are binding in `TR4_PREFLIGHT_SCHEMA.md`.
 - One low-resolution diagnostic is exactly one Blender 4.5.5 process and exactly 20 ordered PNG writes: four profiles in `portrait, desktop, landscape, closeup` order, each in `beauty, object-id, road-mask, normal, linear-depth` order. Portrait/desktop/landscape use the frozen ordinary-running record with no pursuer; closeup uses the frozen game-over bookend record so the pursuer model receives explicit visual and mask review. It then invokes the evaluator exactly once. Missing, extra, pre-existing, duplicate, or out-of-order output is `BLOCKED`; there is no automatic retry.
-- Manual inspection blocks flat water, repeated walls, featureless strip roads, primitive-looking characters/hazards, poor material response, fog bands, unreadable silhouettes, clipping, or material-only detail.
+- C7 linear depth is capped visible depth, not far-plane-normalized depth: portrait/desktop/landscape use a `160m` ceiling and closeup `80m`. Foreground maps `clamp((d-near)/(ceiling-near),0,1)*.94` to PNG16; true background is `65535`. Each profile has at least 64 distinct foreground values, foreground `p10<p50<p90<62000`, and median semantic distances strictly increase `runner < beam < ring < column < gap` for ordinary-running profiles.
+- Manual inspection follows the fixed order: global camera/horizon; road primary and medium structure; canyon near/mid/far layers and negative spaces; runner/hazard silhouettes and physical supports; closeup pursuer anatomy and separation; PBR/material/light/fog response; the complete editable Tide Scar loop; normals/depth/masks. Flat water, repeated walls/primitives, featureless strip roads, cropped Scar geometry, black beauty, white depth, primitive-looking characters/hazards, weak material response, unreadable silhouettes, floating supports, z-fighting, clipping, or material-only detail is `MANUAL_BLOCKED`.
 - Pack budget: unoptimized `<=150,000` triangles, optimized `<=110,000`, `<=10` shared materials, `<=8 MiB` optimized GLB. Runtime visible budget remains `<=150,000` desktop / `<=100,000` mobile triangles, `<=60/45` calls, and decoded texture memory `<=38/18 MiB`.
 - The evaluator can emit at most `READY_FOR_MANUAL_REVIEW`. Only a coordinator-authored `docs/workstreams/temple-tr4-coordination/EXPORT_AUTHORIZATION.md` may open a separate export/optimization pass. That pass may write `docs/workstreams/temple-tr4-asset/export-001/**` and `src/assets/tide-scar-tr4/**`, producing `tide-scar-tr4-source.glb`, `tide-scar-tr4.glb`, and hash/validator manifests. Runtime integration starts only after both GLBs retain all nine exact roots and the coordinator records `ACCEPTED_FOR_RUNTIME_INTEGRATION`.
 

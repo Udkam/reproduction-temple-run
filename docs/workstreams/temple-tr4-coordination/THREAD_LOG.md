@@ -83,3 +83,17 @@ GATES sole C6 Blender rc=0; 20 PNG; runner render-set block; evaluator null; exa
 EVIDENCE docs/workstreams/temple-tr4-asset/diagnostic-006/**;docs/workstreams/temple-tr4-asset/THREAD_LOG.md;docs/workstreams/temple-tr4-coordination/BACKLOG_SPLIT_PLAN.md
 BLOCKER no new C7 code/render/export/runtime/browser work before all recovery checkpoints complete
 NEXT verify and commit C01 exact contract paths, then execute C02-C30 sequentially with exact staging and per-checkpoint gates
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 CONTRACT-REVIEW-REQUESTED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T00:00:00+08:00
+BASE ecd5de640362a6e30c5d0157ecd1590be7673318
+PARENT TEMPLE-TR4-DIAGNOSTIC-006 DIAGNOSTIC_BLOCKED;MANUAL_BLOCKED
+HEAD ecd5de640362a6e30c5d0157ecd1590be7673318
+CANDIDATE none
+WRITE_SCOPE CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
+DIRTY exactly five declared never-stage backup/cache paths; staged zero; C01-C30/C04V recovery complete in 31 local commits
+GATES C1-C6/probes and 78 files frozen; C7 schema/identity/camera predicate/substantive reconstruction/material/atmosphere/depth/manual-review/checkpoint boundaries drafted; no Blender/browser/test/build execution
+EVIDENCE docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_007_AUTHORIZATION.md;docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md;docs/workstreams/temple-tr4-coordination/TR4_PREFLIGHT_SCHEMA.md;docs/workstreams/temple-tr4-coordination/BACKLOG_SPLIT_PLAN.md
+BLOCKER no independent C7 contract verdict and no coordinator execution authorization
+NEXT independent read-only review of the exact C7 contract commit; resolve P0/P1 before any source edit or process launch

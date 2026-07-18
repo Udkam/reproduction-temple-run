@@ -54,7 +54,7 @@
 
 ## Current result
 
-Result: **TEMPLE-TR4 in progress.** TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 are historical, unintegrated visual attempts and do not supply TR4 acceptance evidence.
+Result: **TEMPLE-TR4 in progress; C7 contract review requested and no diagnostic authorized.** TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 and C1-C6 are historical, unintegrated or blocked visual attempts and do not supply TR4 acceptance evidence.
 
 ## TEMPLE-TR4 visual and lifecycle gates
 
@@ -70,6 +70,8 @@ Result: **TEMPLE-TR4 in progress.** TR2 remains the accepted simulation/runtime 
 - C4 is an immutable failure baseline, not visual evidence: it wrote 20 PNGs but did not run the evaluator; manual inspection found a rolled composition, 71-93% near-black beauty pixels, no readable far-horizon hierarchy, a reversed/thin Tide Scar, primitive hazards and courier, and a closeup pursuer that reads as a black blob. C5 may prove orientation and illumination only; unchanged geometry can still be manually blocked and cannot be exported.
 - C5 is also immutable failed evidence, not a render: its sole process stopped in canonical preflight ingestion on an insertion-order/key-set mismatch, produced zero PNG, and skipped the evaluator. A later ID may correct that validator predicate only; no C5 output may be reused or described as image evidence.
 - C6 is immutable `DIAGNOSTIC_BLOCKED` evidence. Its sole Blender process returned `0` and wrote 20 PNGs, but runner stopped before evaluator when two valid landscape near-zero axis angles (`2.1073424255447017e-08` recorded and `2.580956827951785e-08` recomputed) were compared by direct radians at `1e-12`; their difference is `4.736144024070833e-09` and both pass the actual `1e-5` alignment gate. Independent inspection is also `MANUAL_BLOCKED`: beauty is mostly black, route/canyon/characters/hazards remain blockout primitives, the Scar loop is cropped, and linear depth is visually white. No C6 pixel, technical, or manual result authorizes export or runtime.
+- C7 is a proposed substantive reconstruction, not a technical retry. It must preserve the exact camera records while changing the faulty angle-agreement predicate to cosine-domain agreement, remove the black world-volume failure, construct real road/canyon/character/hazard geometry, connect procedural material coordinates, keep the Tide Scar loop visible and outside the safety corridor, and emit bounded visible-depth passes. It cannot execute until `DIAGNOSTIC_007_AUTHORIZATION.md` receives an independent ready verdict and a later coordinator authorization.
+- C7 manual review is binding in this order: camera/horizon; road macro/medium structure; canyon depth and negative spaces; runner/hazard silhouettes and supports; pursuer anatomy and separation; PBR/material/light/fog; Tide Scar loop; normals/depth/masks. Repeated primitives, a flat strip, wall corridor, cropped Scar, black beauty, white depth, unreadable anatomy, floating support, z-fighting, or any interpenetration is `MANUAL_BLOCKED` even when every numeric gate passes.
 - Final browser evidence uses real public commands and fixed ticks, records one canvas/zero gameplay DOM entities, hashes screenshots, proves the exact four HUD values, and includes opening/ordinary-running/game-over lifecycle records plus all four hazard actions.
 
 ## TR3-005C D4 development gate

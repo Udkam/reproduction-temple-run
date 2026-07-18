@@ -1,13 +1,15 @@
 # Temple inherited-backlog checkpoint plan
 
-Status: **ACTIVE RECOVERY PLAN**. This plan is the path inventory required by
+Status: **COMPLETE — RECOVERY RANGE FROZEN.** This plan is the path inventory required by
 `docs/COMMIT_POLICY.md` before any new Temple product or visual expansion. It records
 the frozen working tree observed on 2026-07-18 and does not accept any historical proof.
 
 ## Git boundary and inventory closure
 
 - branch: `codex/temple-run`;
-- policy checkpoint / current `HEAD`: `4353205e90559e782ae959e2449d42e8234c3670`;
+- policy checkpoint: `4353205e90559e782ae959e2449d42e8234c3670`;
+- completed recovery `HEAD`: `ecd5de640362a6e30c5d0157ecd1590be7673318`;
+- recovery range after the policy checkpoint: `3446996b9c597fe4401691a618ae46758b0e6bc1..ecd5de640362a6e30c5d0157ecd1590be7673318` (`31` commits);
 - frozen backlog anchor: `52ae9ae631fa3761f8f8737978af1840ba2df8a4`;
 - remote: `https://github.com/Udkam/Game-1.git`;
 - Git dir and common dir: repository-local `.git`;
@@ -15,6 +17,8 @@ the frozen working tree observed on 2026-07-18 and does not accept any historica
 - `git status --short -uall`: exactly 219 paths;
 - ignored but evidence-bearing `*.log` adjuncts: exactly nine paths listed below.
 - post-inventory C6 visual-review adjuncts: exactly two paths in checkpoint C04V.
+- current porcelain after recovery: exactly the five never-stage paths in this file; staged paths zero.
+- C29's five referenced local screenshots exist and match the hashes recorded by its two JSON files, but remain repository-excluded temporary evidence and were not committed.
 
 The match rules in the table are disjoint. Exact-file rows take precedence over prefix
 rows. Counts refer to the 219 porcelain paths; ignored evidence logs are additional and
@@ -108,6 +112,8 @@ set against this plan before committing. `git add .`, `git add -A`, wildcard sta
 cleanup, deletion, and history rewriting are forbidden. A failed verification leaves the
 checkpoint `WIP_UNCOMMITTED`; work does not expand into the next checkpoint.
 
-After C30 and C04V, the only permitted dirty paths are the five explicitly unrelated files. The
-coordinator must then refresh the inventory and open a new bounded C7 contract before any
-new camera, modeling, material, export, runtime, browser, or product edit.
+After C30 and C04V, the only dirty paths are the five explicitly unrelated files. The
+coordinator refreshed the inventory at `ecd5de640362a6e30c5d0157ecd1590be7673318` and
+opened a bounded C7 contract review. This completed plan supplies no C7 execution authority:
+camera, modeling, material, export, runtime, browser, and product edits remain governed by
+the new independently reviewed C7 authorization chain.

@@ -1,6 +1,6 @@
 # TEMPLE-TR4 executable preflight and diagnostic schema
 
-This file is the immutable C1 baseline first made normative for diagnostic `001`. Later diagnostic authorizations inherit every unchanged closed field and state their exact schema/ID/root/value deltas. C5 and C6 are frozen `DIAGNOSTIC_BLOCKED`; `DIAGNOSTIC_006_AUTHORIZATION.md` is the consumed historical overlay that governed the immutable 27-file C6 result. No active diagnostic overlay exists during backlog recovery, and a future C7 requires a new independently reviewed authorization.
+This file is the immutable C1 baseline first made normative for diagnostic `001`. Later diagnostic authorizations inherit every unchanged closed field and state their exact schema/ID/root/value deltas. C5 and C6 are frozen `DIAGNOSTIC_BLOCKED`; `DIAGNOSTIC_006_AUTHORIZATION.md` is the consumed historical overlay that governed the immutable 27-file C6 result. `DIAGNOSTIC_007_AUTHORIZATION.md` now proposes a schema-version-7 overlay, but its status is `CONTRACT REVIEW REQUESTED`: it is not accepted Blender input and creates no execution authority until an independent ready verdict and a separate coordinator authorization are recorded.
 
 ## Canonical JSON
 
@@ -148,3 +148,12 @@ After Blender exits successfully, the runner proves the exact 20-name ordered se
 ## Export boundary
 
 Only a coordinator-authored `EXPORT_AUTHORIZATION.md` containing the accepted diagnostic manifest hash may open export `001`. Source is `docs/workstreams/temple-tr4-asset/export-001/tide-scar-tr4-source.glb`; optimized proof is `docs/workstreams/temple-tr4-asset/export-001/tide-scar-tr4.glb`; runtime copies are `src/assets/tide-scar-tr4/tide-scar-tr4.glb` and `manifest.json`. Source and optimized files must each expose exactly the nine ordered top-level roots, identity transforms, named contact/collision sockets, metre units, and extras. Optimization must not flatten, join named nodes, prune semantic roots, or simplify collision/skin data. `gltf-transform inspect`, the custom semantic validator, byte/triangle/material budgets, and SHA-256 manifest must all pass before the coordinator can record `ACCEPTED_FOR_RUNTIME_INTEGRATION`.
+
+## Proposed C7 overlay — review only
+
+- Identity is schema version `7`, contract `TEMPLE-TR4-C7`, diagnostic root `diagnostic-007`, output prefix `tr4-diagnostic-007-`, and new scene/construction hashes. All twenty profiles, passes, dimensions, and their order remain unchanged except for the new identity-bound names.
+- The four frozen C5/C6 camera records, matrices, FOV, near/far, and lens shift remain unchanged. The generator may keep its recorded angle method. Runner and evaluator require both recorded and recomputed local-axis angles `<=1e-5` and require `abs(cos(recorded)-cos(recomputed))<=1e-12`; direct equality of the near-zero radian values is forbidden.
+- A non-writing dry predicate test must accept the frozen C6 landscape pair and reject a tampered sample whose axis angle exceeds `1e-5`. A dry result cannot create the diagnostic root or launch Blender.
+- C7 changes the construction hash because substantive scene reconstruction is mandatory. Reusing C6 construction or rerendering it with only the predicate fix is `PRECHECK_BLOCKED`.
+- Beauty and linear-depth construction follow the C7 material, compositor, and capped-visible-depth rules in `TR4_VISUAL_CONTRACT.md` and `DIAGNOSTIC_007_AUTHORIZATION.md`; the C1/C6 far-plane-normalized depth record is superseded only for diagnostic `007`.
+- A successful runner/evaluator can emit at most `READY_FOR_MANUAL_REVIEW`. Export, runtime integration, browser capture, the final typecheck/full suite/build, and acceptance remain blocked.
