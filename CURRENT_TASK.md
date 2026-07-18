@@ -5,7 +5,7 @@
 Branch: `codex/temple-run`
 Required checkpoint baseline: `ecd5de640362a6e30c5d0157ecd1590be7673318`
 Frozen inherited-backlog anchor: `52ae9ae631fa3761f8f8737978af1840ba2df8a4`
-Status: **in progress — material-socket-probe-001 process-token/report hardening under review; source and Blender blocked.** Diagnostic `007` remains immutable at `3937ef6`, with zero PNG and no retry. Review of `0964ec5` accepted the absent process-token literal but found the future coordination REPORT line underdefined. The contract now freezes both uniquely reconstructable full lines; their exact counts remain zero and runner must require each exactly once before output-root creation. Fresh independent review is required before restoring two-script source authority. Diagnostic `008` is not authorized.
+Status: **in progress — material-socket-probe-001 exact two-script source implementation authorized; Blender process blocked by two absent launch lines.** Diagnostic `007` remains immutable at `3937ef6`, with zero PNG and no retry. Independent review of `dfcf0bf` found no P0/P1/P2 and returned `READY_FOR_MATERIAL_SOCKET_PROBE_001_PROCESS_TOKEN_CONTRACT`. The asset writer may add exactly the two probe scripts. Runner must require the future process-token and coordination REPORT exact counts to equal one before output-root creation; both remain zero until a separate final-hash launch checkpoint. Diagnostic `008` is not authorized.
 
 C7 task authorization token: `TEMPLE-TR4-C7-TASK-SOURCE-CHAIN-AUTHORIZED`.
 

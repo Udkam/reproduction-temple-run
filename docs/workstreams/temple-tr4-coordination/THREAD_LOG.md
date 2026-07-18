@@ -349,3 +349,17 @@ GATES independent review P0 none; P1 future coordination REPORT full-line litera
 EVIDENCE uniquely reconstructable future REPORT line; process token and REPORT exact line counts both zero before launch
 BLOCKER hardening lacks fresh independent ready verdict; source/Blender/process/diagnostic-008 blocked
 NEXT commit minimal docs correction and obtain fresh independent verdict before restoring source authority
+
+REPORT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 SOURCE-REAUTHORIZED-AFTER-PROCESS-TOKEN-REVIEW
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T22:40:00+08:00
+BASE dfcf0bf26e8fca409f991fcfa272114370d82b93
+PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 PROCESS-TOKEN-CONTRACT-BLOCKED-REVIEW-001-CORRECTED
+HEAD pending restored source-authorization checkpoint
+CANDIDATE none
+WRITE_SCOPE new exact two probe scripts plus probe THREAD_LOG;coordination docs/logs
+DIRTY five declared never-stage backup/cache paths; staged zero before reauthorization
+GATES independent review P0 none; P1 none; P2 none; READY_FOR_MATERIAL_SOCKET_PROBE_001_PROCESS_TOKEN_CONTRACT; future token/report counts both zero
+EVIDENCE exact reviewed SHA dfcf0bf26e8fca409f991fcfa272114370d82b93
+BLOCKER source implementation/review/commit and separate final-hash launch checkpoint remain; process/output/diagnostic-008 blocked
+NEXT commit restored source authority, then one asset writer implements only the two scripts and proves zero-count launch lines block before output root

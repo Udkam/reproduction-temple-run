@@ -54,7 +54,7 @@
 
 ## Current result
 
-Result: **TEMPLE-TR4 in progress; material-socket-probe-001 process-token/report hardening under review, no source/process authority and no visual acceptance.** Diagnostic `007` remains immutable at `3937ef6` with zero PNG. Review of `0964ec5` accepted the future token but required an equally exact future coordination REPORT literal. Both are now frozen, absent, and must become exact-count one only in the final-hash launch checkpoint before runner may create `probe-001`. Fresh review is required before source authority resumes; diagnostic `008` remains unauthorized and the probe cannot satisfy a visual gate. TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 and C1-C6 are historical, unintegrated or blocked visual attempts and do not supply TR4 acceptance evidence.
+Result: **TEMPLE-TR4 in progress; material-socket-probe-001 exact source implementation authorized, process and visual acceptance blocked.** Diagnostic `007` remains immutable at `3937ef6` with zero PNG. Independent review of `dfcf0bf` returned `READY_FOR_MATERIAL_SOCKET_PROBE_001_PROCESS_TOKEN_CONTRACT`. The two named probe scripts may be implemented, but runner must reject the current zero-count process-token and coordination REPORT before output-root creation. Only a later final-hash checkpoint may add both lines and authorize one Blender process. Diagnostic `008` remains unauthorized, and the probe cannot satisfy a visual gate. TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 and C1-C6 are historical, unintegrated or blocked visual attempts and do not supply TR4 acceptance evidence.
 
 ## TEMPLE-TR4 visual and lifecycle gates
 

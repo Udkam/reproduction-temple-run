@@ -80,3 +80,13 @@
   the process token. Both exact line counts remain zero during source work and must become
   exactly one together in the final-hash launch checkpoint.
 - Source and Blender remain blocked pending fresh independent review.
+
+## 2026-07-18 process-token contract ready; source authority restored
+
+- Fresh independent review of exact commit `dfcf0bf` found no P0/P1/P2 and returned
+  `READY_FOR_MATERIAL_SOCKET_PROBE_001_PROCESS_TOKEN_CONTRACT`.
+- Both future launch-line exact counts remain zero. The two-script source implementation
+  may proceed, but runner static checks must prove it blocks before output-root creation
+  until both lines become count one in a later final-hash launch checkpoint.
+- Blender, probe output, diagnostic `008`, render/evaluator/export, runtime, browser,
+  tests/build, push, and visual acceptance remain blocked.

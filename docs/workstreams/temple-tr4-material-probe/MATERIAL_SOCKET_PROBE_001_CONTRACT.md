@@ -61,6 +61,11 @@ their exact SHA-256 values and the final contract/input/evidence-schema/status-s
 hashes must be recorded in a separate launch authorization. The output root remains
 absent and Blender remains blocked until that checkpoint.
 
+Independent review of exact process-token/report hardening commit `dfcf0bf` found no
+P0/P1/P2 and returned `READY_FOR_MATERIAL_SOCKET_PROBE_001_PROCESS_TOKEN_CONTRACT`.
+Source implementation authority is therefore restored. During source work, both future
+launch-line exact counts remain zero and the runner must fail before output-root creation.
+
 ## One-process execution boundary
 
 Only a later coordinator launch checkpoint may authorize execution. The sole standard
