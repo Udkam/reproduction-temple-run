@@ -1,14 +1,15 @@
-# TEMPLE-TR4 diagnostic 007 contract review request
+# TEMPLE-TR4 diagnostic 007 authorization
 
-Status: **DRAFT / CONTRACT REVIEW REQUESTED — NOT AUTHORIZED FOR IMPLEMENTATION OR EXECUTION.**
+Status: **AUTHORIZED FOR EXACT C7-T1/T2 SOURCE CHECKPOINTS; DIAGNOSTIC PROCESS GATED BY DRY PREFLIGHT.**
 
-Independent review of draft commit `2f5fa9c4b1e2f6b51be92020765fa01632e28491` returned `CONTRACT_BLOCKED`: construction-hash scope and the fail-closed material/compositor/depth schema were P0; manual review triggering and the generator checkpoint exception were P1. This revision resolves those findings and requires a fresh review of its exact commit before authorization.
+Independent review of draft commit `2f5fa9c4b1e2f6b51be92020765fa01632e28491` returned `CONTRACT_BLOCKED`: construction-hash scope and the fail-closed material/compositor/depth schema were P0; manual review triggering and the generator checkpoint exception were P1. Review of `15dc793` found its first-round fixes closed but requested complete camera-binding keys and parameter-to-node/default binding. The corrected contract at `614d280` then received `READY_FOR_DIAGNOSTIC_007_CONTRACT` with no P0/P1. The coordinator authorizes the exact checkpoint chain below; no step may skip its predecessor.
 
-This document is a proposed C7 overlay on the immutable C1 schema and the consumed C2-C6 authorizations. It does not authorize a source edit, diagnostic directory, Blender process, evaluator, render, export, runtime integration, browser capture, test, build, commit beyond coordinator documentation, or push. An independent read-only review must return `READY_FOR_DIAGNOSTIC_007_CONTRACT`, after which the coordinator must record a separate explicit authorization before the asset writer starts.
+This document is the active C7 overlay on the immutable C1 schema and the consumed C2-C6 authorizations. It authorizes only the exact C7-T1/T2 source edits and their non-writing checks, followed by one non-writing dry preflight. After those gates, it authorizes one diagnostic-007 Blender process and at most one evaluator under the frozen no-retry boundary. It does not authorize export, runtime integration, browser capture, final test/build, changelog acceptance, push, or unrelated files.
 
 ## Frozen evidence and baseline
 
-- baseline: `ecd5de640362a6e30c5d0157ecd1590be7673318`;
+- reviewed contract baseline: `614d280`;
+- recovery-complete baseline: `ecd5de640362a6e30c5d0157ecd1590be7673318`;
 - frozen inherited-backlog anchor: `52ae9ae631fa3761f8f8737978af1840ba2df8a4`;
 - C1-C6 plus both probes are immutable; C6 contributes 27 files and the older diagnostic/probe set contributes 51 files, for 78 frozen files total;
 - C6 remains `DIAGNOSTIC_BLOCKED; MANUAL_BLOCKED`. Its 20 PNGs cannot be rerun, reused as C7 output, deleted, re-evaluated, or described as acceptance evidence;
