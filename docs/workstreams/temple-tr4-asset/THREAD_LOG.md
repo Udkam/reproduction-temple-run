@@ -351,6 +351,41 @@ or runtime action followed.
   the next exact runner/evaluator source checkpoint; Blender stays blocked until C7-T2
   and the authorized non-writing dry preflight are both green.
 
+## 2026-07-18 C7-T2 runner/evaluator validation checkpoint
+
+- Source checkpoint `51fdbab531072f66b2c5b9106d9f7e9cdf157932` changes exactly
+  `tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py` and
+  `evaluate_tide_scar_tr4_pack.py`. Runner SHA-256 is
+  `5e02c65ac296bd6e830aa65a9581cfa6d95ca557e955a6276ddfd61c7a39175b`;
+  evaluator SHA-256 is
+  `f6ee1c7838a02002208ce607ad7bbeb5acb5052402d6e5f963aefffb7d8590a0`.
+  The checkpoint binds generator SHA-256
+  `d71d225bbaef3a2d9527b63916973cd9c4c77891ba9aa29672053ef12226f26e`
+  and construction SHA-256
+  `6a9735277c29ec32b3e22432b240385bc33993325aaf3422c60ac4f82e0dbd45`.
+- Both validators use the stable C7 predicate
+  `abs(cos(recorded)-cos(recomputed)) <= 1e-12` while separately requiring each angle
+  to remain within `1e-5`. The frozen C6 landscape near-zero pair passes and an injected
+  `1.00001e-5` sample fails in both isolated function copies.
+- Schema `7`, contract `TEMPLE-TR4-C7`, diagnostic `007`, nine semantic roots, twenty
+  ordered outputs, actual geometry/material/depth bindings, Beer-Lambert atmosphere,
+  capped PNG16 visible depth, and maximum `READY_FOR_MANUAL_REVIEW` are fail-closed in
+  runner and evaluator. The runner has exactly one Blender and at most one evaluator
+  subprocess site with no retry path.
+- Independent review first found one P1: the authored `planned-manifest.json` preflight
+  hash was not replayed. The corrected source now requires canonical equality to the
+  launch-authored plan after Blender, before and after evaluator, and before final
+  readiness; evaluator independently replays it at entry and before emission. An
+  isolated temporary-directory positive plan/preflight replay passed, while a canonical
+  sibling-field mutation blocked both validators. Final independent review found no
+  P0/P1/P2 and returned `SOURCE_READY`.
+- UTF-8 AST and `git diff --check` passed. The committed cumulative source diff is
+  `+640/-788`. No main runner/evaluator workflow, Blender import/process, diagnostic-007
+  path, render, export, runtime, browser, project test, build, push, or unrelated file
+  action occurred. The next gate is the one authorized non-writing dry preflight against
+  the committed three-script hashes; Blender remains blocked until that gate returns
+  `READY_FOR_BLENDER`.
+
 ## 2026-07-16 diagnostic-006 terminal result
 
 Verdict: **DIAGNOSTIC_BLOCKED** at stage `render-set`. After coordinator review of the
