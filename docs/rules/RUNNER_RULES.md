@@ -33,6 +33,7 @@ Public commands are `Start`, `StepLeft`, `StepRight`, `Jump`, `Slide`, `Pause`, 
 - Repeated stumbles, or one stumble while already sufficiently close, can cross the capture threshold and end the run through the pursuer.
 - Reaching the capture threshold emits one deterministic `run-failed` event with `pursuer-caught` and ends the run.
 - Rendering maps this value to pursuer position and scale but cannot write pressure back into the simulation.
+- TR4 presentation treats `chaseGap` as latent pressure during ordinary running. The pursuer mesh is restricted to the opening and game-over beats; visibility never changes capture timing, collision, replay, score, or state hash.
 
 ## Turn rules
 
