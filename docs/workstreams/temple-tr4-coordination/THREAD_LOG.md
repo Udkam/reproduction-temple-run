@@ -209,3 +209,17 @@ GATES independent review P0 none; P1 absent CURRENT_TASK historical phrase would
 EVIDENCE exact reviewed SHA efc0b3f; runner verify_c7_authorization lines 1068-1077; diagnostic-007 absent
 BLOCKER CONTRACT_BLOCKED; efc0b3f is not source authority
 NEXT commit corrected two-labelled-line exact-count contract, obtain fresh independent read-only review, then record a separate coordinator reauthorization before any runner source edit
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 C7-T2G-SOURCE-REAUTHORIZED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T19:35:00+08:00
+BASE 9557be32d173dbd943f9134a56b5dd8600b287da
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 C7-T2G-CONTRACT-BLOCKED-REVIEW-001
+HEAD pending C7-T2G source-reauthorization docs checkpoint
+CANDIDATE none
+WRITE_SCOPE tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py exact two obsolete authorization predicates only; coordination docs/logs
+DIRTY five declared never-stage backup/cache paths; staged zero before reauthorization
+GATES independent fresh review of 9557be3 found P0 none, P1 none, P2 none; exact labelled authorization/task line counts each equal one; deletion or duplication fail closed; verdict READY_FOR_C7_T2G_CONTRACT
+EVIDENCE exact reviewed SHA 9557be32d173dbd943f9134a56b5dd8600b287da; durable labelled token lines in DIAGNOSTIC_007_AUTHORIZATION.md and CURRENT_TASK.md
+BLOCKER runner source correction, independent SOURCE_READY, source commit, and one newly authorized dry preflight remain; Blender blocked
+NEXT commit this separate reauthorization, then asset writer changes only the two runner predicates and performs static positive/deletion/duplication checks before independent source review
