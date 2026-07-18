@@ -1,0 +1,14 @@
+{
+  "status": "cleared",
+  "generatedAt": "2026-07-14T02:40:33.539Z",
+  "head": "52ae9ae631fa3761f8f8737978af1840ba2df8a4",
+  "resolvedBaseUrl": "http://127.0.0.1:5193/",
+  "diagnosticMode": true,
+  "labels": [
+    "desktop-normal",
+    "desktop-close-chase",
+    "mobile-normal",
+    "mobile-close-chase",
+    "landscape-running"
+  ]
+}

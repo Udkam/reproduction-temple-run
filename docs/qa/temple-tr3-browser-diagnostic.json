@@ -1,0 +1,2797 @@
+{
+  "generatedAt": "2026-07-14T02:40:33.537Z",
+  "head": "52ae9ae631fa3761f8f8737978af1840ba2df8a4",
+  "resolvedBaseUrl": "http://127.0.0.1:5193/",
+  "browser": "150.0.7871.115",
+  "diagnosticMode": true,
+  "labels": [
+    "desktop-normal",
+    "desktop-close-chase",
+    "mobile-normal",
+    "mobile-close-chase",
+    "landscape-running"
+  ],
+  "records": [
+    {
+      "id": "desktop-normal",
+      "scenario": "running",
+      "screenshot": "docs/screenshots/temple/tr3-diagnostic/desktop-normal.png",
+      "screenshotSha256": "a86245fc324a86d2281b15d615135c1878ab565cbfc8820fbc7956c958f4bd8b",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "devicePixelRatio": 1
+      },
+      "dom": {
+        "canvasCount": 1,
+        "gameplayEntityCount": 0,
+        "overflowX": 0
+      },
+      "appearance": {
+        "highContrast": false,
+        "reducedMotion": false
+      },
+      "ui": {
+        "hud": {
+          "score": 0,
+          "distance": 0,
+          "shards": 0,
+          "flow": 1
+        },
+        "hudText": {
+          "score": "0",
+          "distance": "0 m",
+          "flow": "×1",
+          "shards": "0"
+        },
+        "hudMetrics": [
+          {
+            "selector": ".metric--score",
+            "left": 340,
+            "top": 17,
+            "right": 590.59375,
+            "bottom": 74.203125,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--distance",
+            "left": 633.78125,
+            "top": 24.203125,
+            "right": 829.578125,
+            "bottom": 74.203125,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--flow",
+            "left": 872.765625,
+            "top": 36.203125,
+            "right": 958.90625,
+            "bottom": 74.203125,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--shards",
+            "left": 1002.09375,
+            "top": 36.203125,
+            "right": 1099.984375,
+            "bottom": 74.203125,
+            "insideViewport": true
+          }
+        ],
+        "milestone": null
+      },
+      "safeAreas": [
+        {
+          "selector": ".brandbar",
+          "left": 22,
+          "top": 18,
+          "right": 188.984375,
+          "bottom": 59,
+          "insideViewport": true
+        },
+        {
+          "selector": ".hud",
+          "left": 340,
+          "top": 17,
+          "right": 1100,
+          "bottom": 74.203125,
+          "insideViewport": true
+        },
+        {
+          "selector": ".pause-control",
+          "left": 1374,
+          "top": 18,
+          "right": 1418,
+          "bottom": 62,
+          "insideViewport": true
+        },
+        {
+          "selector": ".touch-controls",
+          "left": 16,
+          "top": 834,
+          "right": 245,
+          "bottom": 882,
+          "insideViewport": true
+        }
+      ],
+      "simulation": {
+        "seed": 1414087749,
+        "hash": "2c926631",
+        "frozen": true,
+        "previousDistance": 0,
+        "previousLanePosition": 0,
+        "status": "running",
+        "tick": 0,
+        "distance": 0,
+        "sectionIndex": 0,
+        "sectionDistance": 0,
+        "lanePosition": 0,
+        "targetLane": 0,
+        "height": 0,
+        "grounded": true,
+        "slideTicksRemaining": 0,
+        "shieldCharges": 0,
+        "score": 0,
+        "shards": 0,
+        "multiplier": 1,
+        "chaseGap": 4.5,
+        "lastDistanceMilestone": 0,
+        "failureReason": null,
+        "events": [
+          {
+            "type": "run-started",
+            "tick": 0
+          }
+        ],
+        "scenarioTrace": {
+          "name": "running",
+          "commands": [
+            {
+              "type": "Start"
+            }
+          ],
+          "replayHash": "2c926631"
+        }
+      },
+      "render": {
+        "canvas": {
+          "width": 1440,
+          "height": 900,
+          "resolution": 1
+        },
+        "options": {
+          "highContrast": false,
+          "reducedMotion": false,
+          "seed": 1414087749,
+          "audioEnabled": true
+        },
+        "presentationAlpha": 1,
+        "presentedDistance": 0,
+        "presentedLanePosition": 0,
+        "runnerWorld": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        "runnerScreen": {
+          "x": 720,
+          "y": 749.486598075298,
+          "visible": true,
+          "bounds": {
+            "left": 668.2367068394431,
+            "top": 585.4002314254311,
+            "right": 771.7632931605569,
+            "bottom": 863.4822122400287,
+            "width": 103.52658632111388,
+            "height": 278.0819808145976,
+            "area": 28788.878191148775
+          }
+        },
+        "pursuerScreen": {
+          "x": 720,
+          "y": 1033.152664832128,
+          "visible": true,
+          "bounds": {
+            "left": 567.5471801474773,
+            "top": 887.3565906316593,
+            "right": 872.4528198525227,
+            "bottom": 900,
+            "width": 304.90563970504536,
+            "height": 12.643409368340713,
+            "area": 3855.0468215066885
+          }
+        },
+        "pursuerGapPx": 23.874378391630557,
+        "hazardScreens": [
+          {
+            "eventId": "section-0:column-center",
+            "kind": "column",
+            "bounds": {
+              "left": 696.2226709091502,
+              "top": 335.14223417647975,
+              "right": 743.7773290908498,
+              "bottom": 407.4221097709525,
+              "width": 47.55465818169955,
+              "height": 72.27987559447274,
+              "area": 3437.244777310919
+            }
+          },
+          {
+            "eventId": "section-0:column-right",
+            "kind": "column",
+            "bounds": {
+              "left": 761.975140923763,
+              "top": 335.14223417647975,
+              "right": 811.9196746560899,
+              "bottom": 407.4221097709525,
+              "width": 49.94453373232693,
+              "height": 72.27987559447274,
+              "area": 3609.9846847965377
+            }
+          },
+          {
+            "eventId": "section-0:jump-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 656.6013805595452,
+              "top": 321.20635230426825,
+              "right": 783.3986194404548,
+              "bottom": 333.0059055933878,
+              "width": 126.79723888090962,
+              "height": 11.799553289119558,
+              "area": 1496.1507770885153
+            }
+          },
+          {
+            "eventId": "section-0:slide-ring",
+            "kind": "ring",
+            "bounds": {
+              "left": 674.8122118195413,
+              "top": 273.09105837976495,
+              "right": 765.1877881804587,
+              "bottom": 300.66259984558565,
+              "width": 90.37557636091742,
+              "height": 27.5715414658207,
+              "area": 2491.79395113248
+            }
+          },
+          {
+            "eventId": "section-1:01-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 949.6700156814338,
+              "top": 266.7430717553174,
+              "right": 968.3677052136923,
+              "bottom": 274.4587122334508,
+              "width": 18.697689532258437,
+              "height": 7.715640478133423,
+              "area": 144.2646502026648
+            }
+          },
+          {
+            "eventId": "section-1:02-column--1",
+            "kind": "column",
+            "bounds": {
+              "left": 1163.2981907259475,
+              "top": 254.4435039054908,
+              "right": 1183.4070463384185,
+              "bottom": 274.372153404255,
+              "width": 20.10885561247096,
+              "height": 19.92864949876423,
+              "area": 400.7423353221917
+            }
+          },
+          {
+            "eventId": "section-1:03-column-1",
+            "kind": "column",
+            "bounds": {
+              "left": 1179.6622577075498,
+              "top": 255.66414931892908,
+              "right": 1200.8087784809866,
+              "bottom": 276.3489191115178,
+              "width": 21.146520773436805,
+              "height": 20.684769792588696,
+              "area": 437.410914112735
+            }
+          },
+          {
+            "eventId": "section-3:01-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 900,
+              "width": 1440,
+              "height": 900,
+              "area": 1296000
+            }
+          },
+          {
+            "eventId": "section-3:02-ring",
+            "kind": "ring",
+            "bounds": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 900,
+              "width": 1440,
+              "height": 900,
+              "area": 1296000
+            }
+          }
+        ],
+        "camera": {
+          "x": 0,
+          "y": 6.149900180155459,
+          "z": 9.449831554012336,
+          "fov": 46.99999999999998,
+          "yaw": 0
+        },
+        "lanePosition": 0,
+        "posture": "run",
+        "visibleSectionIds": [
+          "section-0-d54e6cda",
+          "section-1-cffb3025",
+          "section-2-38bf6ccb",
+          "section-3-67adb2c2",
+          "section-4-467f2a66",
+          "section-5-ca7fdac0"
+        ],
+        "visibleObstacleCount": 18,
+        "drawCalls": 47,
+        "triangles": 9096,
+        "turnProgress": null,
+        "contextLossCount": 0
+      },
+      "consoleProblems": []
+    },
+    {
+      "id": "desktop-close-chase",
+      "scenario": "chase-close",
+      "screenshot": "docs/screenshots/temple/tr3-diagnostic/desktop-close-chase.png",
+      "screenshotSha256": "77437b4a4c63d1c62703f5ea3376d4a1eab8ef1dc0c0e3353af53c7d4911ea73",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "devicePixelRatio": 1
+      },
+      "dom": {
+        "canvasCount": 1,
+        "gameplayEntityCount": 0,
+        "overflowX": 0
+      },
+      "appearance": {
+        "highContrast": false,
+        "reducedMotion": false
+      },
+      "ui": {
+        "hud": {
+          "score": 313,
+          "distance": 31,
+          "shards": 0,
+          "flow": 1
+        },
+        "hudText": {
+          "score": "313",
+          "distance": "31 m",
+          "flow": "×1",
+          "shards": "0"
+        },
+        "hudMetrics": [
+          {
+            "selector": ".metric--score",
+            "left": 340,
+            "top": 17,
+            "right": 590.59375,
+            "bottom": 74.203125,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--distance",
+            "left": 633.78125,
+            "top": 24.203125,
+            "right": 829.578125,
+            "bottom": 74.203125,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--flow",
+            "left": 872.765625,
+            "top": 36.203125,
+            "right": 958.90625,
+            "bottom": 74.203125,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--shards",
+            "left": 1002.09375,
+            "top": 36.203125,
+            "right": 1099.984375,
+            "bottom": 74.203125,
+            "insideViewport": true
+          }
+        ],
+        "milestone": null
+      },
+      "safeAreas": [
+        {
+          "selector": ".brandbar",
+          "left": 22,
+          "top": 18,
+          "right": 188.984375,
+          "bottom": 59,
+          "insideViewport": true
+        },
+        {
+          "selector": ".hud",
+          "left": 340,
+          "top": 17,
+          "right": 1100,
+          "bottom": 74.203125,
+          "insideViewport": true
+        },
+        {
+          "selector": ".pause-control",
+          "left": 1374,
+          "top": 18,
+          "right": 1418,
+          "bottom": 62,
+          "insideViewport": true
+        },
+        {
+          "selector": ".touch-controls",
+          "left": 16,
+          "top": 834,
+          "right": 245,
+          "bottom": 882,
+          "insideViewport": true
+        }
+      ],
+      "simulation": {
+        "seed": 1414087749,
+        "hash": "fa85830e",
+        "frozen": true,
+        "previousDistance": 31.276390825978925,
+        "previousLanePosition": 0,
+        "status": "running",
+        "tick": 219,
+        "distance": 31.385892092738573,
+        "sectionIndex": 0,
+        "sectionDistance": 31.385892092738573,
+        "lanePosition": 0,
+        "targetLane": 0,
+        "height": 0,
+        "grounded": true,
+        "slideTicksRemaining": 0,
+        "shieldCharges": 0,
+        "score": 313,
+        "shards": 0,
+        "multiplier": 1,
+        "chaseGap": 1.194013643298795,
+        "lastDistanceMilestone": 0,
+        "failureReason": null,
+        "events": [],
+        "scenarioTrace": {
+          "name": "chase-close",
+          "commands": [
+            {
+              "type": "Start"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            }
+          ],
+          "replayHash": "fa85830e"
+        }
+      },
+      "render": {
+        "canvas": {
+          "width": 1440,
+          "height": 900,
+          "resolution": 1
+        },
+        "options": {
+          "highContrast": false,
+          "reducedMotion": false,
+          "seed": 1414087749,
+          "audioEnabled": true
+        },
+        "presentationAlpha": 1,
+        "presentedDistance": 31.385892092738573,
+        "presentedLanePosition": 0,
+        "runnerWorld": {
+          "x": 0,
+          "y": 0,
+          "z": -31.385892092738573,
+          "yaw": 0
+        },
+        "runnerScreen": {
+          "x": 720,
+          "y": 740.0254129089318,
+          "visible": true,
+          "bounds": {
+            "left": 668.3058800391842,
+            "top": 576.5117559132389,
+            "right": 771.6941199608158,
+            "bottom": 853.3658552906127,
+            "width": 103.38823992163157,
+            "height": 276.8540993773738,
+            "area": 28623.45804971515
+          }
+        },
+        "pursuerScreen": {
+          "x": 720,
+          "y": 1017.5463873299057,
+          "visible": true,
+          "bounds": {
+            "left": 565.771218181523,
+            "top": 869.580849951128,
+            "right": 874.2287818184769,
+            "bottom": 900,
+            "width": 308.457563636954,
+            "height": 30.419150048871984,
+            "area": 9383.016911981982
+          }
+        },
+        "pursuerGapPx": 16.214994660515345,
+        "hazardScreens": [
+          {
+            "eventId": "section-0:jump-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 585.4156911214213,
+              "top": 421.85621794211096,
+              "right": 854.5843088785787,
+              "bottom": 448.8193806288831,
+              "width": 269.16861775715734,
+              "height": 26.963162686772137,
+              "area": 7257.637230759817
+            }
+          },
+          {
+            "eventId": "section-0:slide-ring",
+            "kind": "ring",
+            "bounds": {
+              "left": 647.1969043409281,
+              "top": 295.07216041910874,
+              "right": 792.803095659072,
+              "bottom": 339.6064889986253,
+              "width": 145.60619131814394,
+              "height": 44.53432857951657,
+              "area": 6484.473967374175
+            }
+          },
+          {
+            "eventId": "section-1:01-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 1021.4778117973964,
+              "top": 271.82486428148457,
+              "right": 1051.9922838069037,
+              "bottom": 283.1968103179778,
+              "width": 30.514472009507358,
+              "height": 11.371946036493227,
+              "area": 347.0089290242007
+            }
+          },
+          {
+            "eventId": "section-1:02-column--1",
+            "kind": "column",
+            "bounds": {
+              "left": 1302.333254650105,
+              "top": 255.7223177571232,
+              "right": 1332.0475915375678,
+              "bottom": 282.1620267671909,
+              "width": 29.714336887462878,
+              "height": 26.43970901006773,
+              "area": 785.6384207316402
+            }
+          },
+          {
+            "eventId": "section-1:03-column-1",
+            "kind": "column",
+            "bounds": {
+              "left": 1330.8455588569407,
+              "top": 257.85965702994474,
+              "right": 1362.7118019235459,
+              "bottom": 285.6412857049553,
+              "width": 31.866243066605193,
+              "height": 27.781628675010552,
+              "area": 885.296132144055
+            }
+          }
+        ],
+        "camera": {
+          "x": 0,
+          "y": 6.15,
+          "z": -21.935892092738573,
+          "fov": 46.99999999999998,
+          "yaw": 0
+        },
+        "lanePosition": 0,
+        "posture": "run",
+        "visibleSectionIds": [
+          "section-0-d54e6cda",
+          "section-1-cffb3025",
+          "section-2-38bf6ccb",
+          "section-3-67adb2c2",
+          "section-4-467f2a66",
+          "section-5-ca7fdac0"
+        ],
+        "visibleObstacleCount": 16,
+        "drawCalls": 47,
+        "triangles": 8752,
+        "turnProgress": null,
+        "contextLossCount": 0
+      },
+      "consoleProblems": []
+    },
+    {
+      "id": "mobile-normal",
+      "scenario": "running",
+      "screenshot": "docs/screenshots/temple/tr3-diagnostic/mobile-normal.png",
+      "screenshotSha256": "2b7aeee57c919e9d2f88d83bbf9123f640afa1c8f36c7924cfeb8ec33258ffe0",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "devicePixelRatio": 3
+      },
+      "dom": {
+        "canvasCount": 1,
+        "gameplayEntityCount": 0,
+        "overflowX": 0
+      },
+      "appearance": {
+        "highContrast": false,
+        "reducedMotion": false
+      },
+      "ui": {
+        "hud": {
+          "score": 0,
+          "distance": 0,
+          "shards": 0,
+          "flow": 1
+        },
+        "hudText": {
+          "score": "0",
+          "distance": "0 m",
+          "flow": "×1",
+          "shards": "0"
+        },
+        "hudMetrics": [
+          {
+            "selector": ".metric--score",
+            "left": 14,
+            "top": 57,
+            "right": 142.34375,
+            "bottom": 95.40625,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--distance",
+            "left": 150.34375,
+            "top": 63.40625,
+            "right": 257.3125,
+            "bottom": 95.40625,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--flow",
+            "left": 265.3125,
+            "top": 68.09375,
+            "right": 316.65625,
+            "bottom": 95.40625,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--shards",
+            "left": 324.65625,
+            "top": 68.09375,
+            "right": 375.984375,
+            "bottom": 95.40625,
+            "insideViewport": true
+          }
+        ],
+        "milestone": null
+      },
+      "safeAreas": [
+        {
+          "selector": ".brandbar",
+          "left": 14,
+          "top": 12,
+          "right": 136.984375,
+          "bottom": 37,
+          "insideViewport": true
+        },
+        {
+          "selector": ".hud",
+          "left": 14,
+          "top": 57,
+          "right": 376,
+          "bottom": 95.40625,
+          "insideViewport": true
+        },
+        {
+          "selector": ".pause-control",
+          "left": 336,
+          "top": 12,
+          "right": 378,
+          "bottom": 54,
+          "insideViewport": true
+        },
+        {
+          "selector": ".gesture-hint",
+          "left": 97.5,
+          "top": 118,
+          "right": 292.5,
+          "bottom": 148,
+          "insideViewport": true
+        }
+      ],
+      "simulation": {
+        "seed": 1414087749,
+        "hash": "2c926631",
+        "frozen": true,
+        "previousDistance": 0,
+        "previousLanePosition": 0,
+        "status": "running",
+        "tick": 0,
+        "distance": 0,
+        "sectionIndex": 0,
+        "sectionDistance": 0,
+        "lanePosition": 0,
+        "targetLane": 0,
+        "height": 0,
+        "grounded": true,
+        "slideTicksRemaining": 0,
+        "shieldCharges": 0,
+        "score": 0,
+        "shards": 0,
+        "multiplier": 1,
+        "chaseGap": 4.5,
+        "lastDistanceMilestone": 0,
+        "failureReason": null,
+        "events": [
+          {
+            "type": "run-started",
+            "tick": 0
+          }
+        ],
+        "scenarioTrace": {
+          "name": "running",
+          "commands": [
+            {
+              "type": "Start"
+            }
+          ],
+          "replayHash": "2c926631"
+        }
+      },
+      "render": {
+        "canvas": {
+          "width": 390,
+          "height": 844,
+          "resolution": 1.75
+        },
+        "options": {
+          "highContrast": false,
+          "reducedMotion": false,
+          "seed": 1414087749,
+          "audioEnabled": true
+        },
+        "presentationAlpha": 1,
+        "presentedDistance": 0,
+        "presentedLanePosition": 0,
+        "runnerWorld": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        "runnerScreen": {
+          "x": 195,
+          "y": 586.6495496059051,
+          "visible": true,
+          "bounds": {
+            "left": 160.8688837372121,
+            "top": 476.7739500902215,
+            "right": 229.1311162627879,
+            "bottom": 661.1946781476732,
+            "width": 68.26223252557583,
+            "height": 184.42072805745175,
+            "area": 12588.970621193757
+          }
+        },
+        "pursuerScreen": {
+          "x": 195,
+          "y": 777.7552732169338,
+          "visible": true,
+          "bounds": {
+            "left": 101.77735999702097,
+            "top": 693.7990082580478,
+            "right": 288.22264000297906,
+            "bottom": 844,
+            "width": 186.4452800059581,
+            "height": 150.20099174195218,
+            "area": 28004.265962500875
+          }
+        },
+        "pursuerGapPx": 32.604330110374576,
+        "hazardScreens": [
+          {
+            "eventId": "section-0:column-center",
+            "kind": "column",
+            "bounds": {
+              "left": 174.90298721322966,
+              "top": 295.6274308736305,
+              "right": 215.09701278677034,
+              "bottom": 357.0571866263515,
+              "width": 40.19402557354067,
+              "height": 61.42975575272101,
+              "area": 2469.1091737012252
+            }
+          },
+          {
+            "eventId": "section-0:column-right",
+            "kind": "column",
+            "bounds": {
+              "left": 230.6256147044435,
+              "top": 295.6274308736305,
+              "right": 272.69211040739265,
+              "bottom": 357.0571866263515,
+              "width": 42.06649570294914,
+              "height": 61.42975575272101,
+              "area": 2584.1345564050534
+            }
+          },
+          {
+            "eventId": "section-0:jump-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 139.21953164246892,
+              "top": 281.1602676814384,
+              "right": 250.78046835753108,
+              "bottom": 291.61578992915304,
+              "width": 111.56093671506216,
+              "height": 10.455522247714612,
+              "area": 1166.4278558002143
+            }
+          },
+          {
+            "eventId": "section-0:slide-ring",
+            "kind": "ring",
+            "bounds": {
+              "left": 154.44735556670642,
+              "top": 236.45572872650604,
+              "right": 235.55264443329358,
+              "bottom": 261.3268589177636,
+              "width": 81.10528886658716,
+              "height": 24.871130191257578,
+              "area": 2017.180198600443
+            }
+          },
+          {
+            "eventId": "section-3:01-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 0,
+              "top": 0,
+              "right": 390,
+              "bottom": 844,
+              "width": 390,
+              "height": 844,
+              "area": 329160
+            }
+          },
+          {
+            "eventId": "section-3:02-ring",
+            "kind": "ring",
+            "bounds": {
+              "left": 0,
+              "top": 0,
+              "right": 390,
+              "bottom": 844,
+              "width": 390,
+              "height": 844,
+              "area": 329160
+            }
+          }
+        ],
+        "camera": {
+          "x": 0,
+          "y": 6.842140545335968,
+          "z": 13.415938084823859,
+          "fov": 46.99999999999998,
+          "yaw": 0
+        },
+        "lanePosition": 0,
+        "posture": "run",
+        "visibleSectionIds": [
+          "section-0-d54e6cda",
+          "section-1-cffb3025",
+          "section-2-38bf6ccb",
+          "section-3-67adb2c2",
+          "section-4-467f2a66",
+          "section-5-ca7fdac0"
+        ],
+        "visibleObstacleCount": 18,
+        "drawCalls": 60,
+        "triangles": 9836,
+        "turnProgress": null,
+        "contextLossCount": 0
+      },
+      "consoleProblems": []
+    },
+    {
+      "id": "mobile-close-chase",
+      "scenario": "chase-close",
+      "screenshot": "docs/screenshots/temple/tr3-diagnostic/mobile-close-chase.png",
+      "screenshotSha256": "c722231c7463c0cb328d93ea2aeb882ef061c0c7547db22214d99a99b4580290",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "devicePixelRatio": 3
+      },
+      "dom": {
+        "canvasCount": 1,
+        "gameplayEntityCount": 0,
+        "overflowX": 0
+      },
+      "appearance": {
+        "highContrast": false,
+        "reducedMotion": false
+      },
+      "ui": {
+        "hud": {
+          "score": 313,
+          "distance": 31,
+          "shards": 0,
+          "flow": 1
+        },
+        "hudText": {
+          "score": "313",
+          "distance": "31 m",
+          "flow": "×1",
+          "shards": "0"
+        },
+        "hudMetrics": [
+          {
+            "selector": ".metric--score",
+            "left": 14,
+            "top": 57,
+            "right": 142.34375,
+            "bottom": 95.40625,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--distance",
+            "left": 150.34375,
+            "top": 63.40625,
+            "right": 257.3125,
+            "bottom": 95.40625,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--flow",
+            "left": 265.3125,
+            "top": 68.09375,
+            "right": 316.65625,
+            "bottom": 95.40625,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--shards",
+            "left": 324.65625,
+            "top": 68.09375,
+            "right": 375.984375,
+            "bottom": 95.40625,
+            "insideViewport": true
+          }
+        ],
+        "milestone": null
+      },
+      "safeAreas": [
+        {
+          "selector": ".brandbar",
+          "left": 14,
+          "top": 12,
+          "right": 136.984375,
+          "bottom": 37,
+          "insideViewport": true
+        },
+        {
+          "selector": ".hud",
+          "left": 14,
+          "top": 57,
+          "right": 376,
+          "bottom": 95.40625,
+          "insideViewport": true
+        },
+        {
+          "selector": ".pause-control",
+          "left": 336,
+          "top": 12,
+          "right": 378,
+          "bottom": 54,
+          "insideViewport": true
+        }
+      ],
+      "simulation": {
+        "seed": 1414087749,
+        "hash": "fa85830e",
+        "frozen": true,
+        "previousDistance": 31.276390825978925,
+        "previousLanePosition": 0,
+        "status": "running",
+        "tick": 219,
+        "distance": 31.385892092738573,
+        "sectionIndex": 0,
+        "sectionDistance": 31.385892092738573,
+        "lanePosition": 0,
+        "targetLane": 0,
+        "height": 0,
+        "grounded": true,
+        "slideTicksRemaining": 0,
+        "shieldCharges": 0,
+        "score": 313,
+        "shards": 0,
+        "multiplier": 1,
+        "chaseGap": 1.194013643298795,
+        "lastDistanceMilestone": 0,
+        "failureReason": null,
+        "events": [],
+        "scenarioTrace": {
+          "name": "chase-close",
+          "commands": [
+            {
+              "type": "Start"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            },
+            {
+              "type": "Tick"
+            }
+          ],
+          "replayHash": "fa85830e"
+        }
+      },
+      "render": {
+        "canvas": {
+          "width": 390,
+          "height": 844,
+          "resolution": 1.75
+        },
+        "options": {
+          "highContrast": false,
+          "reducedMotion": false,
+          "seed": 1414087749,
+          "audioEnabled": true
+        },
+        "presentationAlpha": 1,
+        "presentedDistance": 31.385892092738573,
+        "presentedLanePosition": 0,
+        "runnerWorld": {
+          "x": 0,
+          "y": 0,
+          "z": -31.385892092738573,
+          "yaw": 0
+        },
+        "runnerScreen": {
+          "x": 195,
+          "y": 579.837733366949,
+          "visible": true,
+          "bounds": {
+            "left": 160.89324101302293,
+            "top": 470.14993070053816,
+            "right": 229.10675898697707,
+            "bottom": 654.1589656314873,
+            "width": 68.21351797395414,
+            "height": 184.0090349309491,
+            "area": 12551.903611632251
+          }
+        },
+        "pursuerScreen": {
+          "x": 195,
+          "y": 747.1064197679093,
+          "visible": true,
+          "bounds": {
+            "left": 104.12154125660437,
+            "top": 665.4850398129416,
+            "right": 285.87845874339564,
+            "bottom": 844,
+            "width": 181.75691748679128,
+            "height": 178.51496018705836,
+            "area": 32446.328888876997
+          }
+        },
+        "pursuerGapPx": 11.326074181454374,
+        "hazardScreens": [
+          {
+            "eventId": "section-0:jump-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 84.90179247364514,
+              "top": 369.4134761489648,
+              "right": 305.0982075263548,
+              "bottom": 391.44818799322707,
+              "width": 220.19641505270968,
+              "height": 22.03471184426229,
+              "area": 4851.964554826037
+            }
+          },
+          {
+            "eventId": "section-0:slide-ring",
+            "kind": "ring",
+            "bounds": {
+              "left": 131.55780057502923,
+              "top": 260.0133673723122,
+              "right": 258.4421994249708,
+              "bottom": 298.9991460524699,
+              "width": 126.88439884994156,
+              "height": 38.98577868015769,
+              "area": 4946.687091528677
+            }
+          }
+        ],
+        "camera": {
+          "x": 0,
+          "y": 6.843,
+          "z": -17.966892092738576,
+          "fov": 46.99999999999998,
+          "yaw": 0
+        },
+        "lanePosition": 0,
+        "posture": "run",
+        "visibleSectionIds": [
+          "section-0-d54e6cda",
+          "section-1-cffb3025",
+          "section-2-38bf6ccb",
+          "section-3-67adb2c2",
+          "section-4-467f2a66",
+          "section-5-ca7fdac0"
+        ],
+        "visibleObstacleCount": 16,
+        "drawCalls": 59,
+        "triangles": 9456,
+        "turnProgress": null,
+        "contextLossCount": 0
+      },
+      "consoleProblems": []
+    },
+    {
+      "id": "landscape-running",
+      "scenario": "running",
+      "screenshot": "docs/screenshots/temple/tr3-diagnostic/landscape-running.png",
+      "screenshotSha256": "de5fb16707b12b3fb0174f93d14199e9bf8c56575ffe2c88226dc11a12005697",
+      "viewport": {
+        "width": 844,
+        "height": 390,
+        "devicePixelRatio": 3
+      },
+      "dom": {
+        "canvasCount": 1,
+        "gameplayEntityCount": 0,
+        "overflowX": 0
+      },
+      "appearance": {
+        "highContrast": false,
+        "reducedMotion": false
+      },
+      "ui": {
+        "hud": {
+          "score": 0,
+          "distance": 0,
+          "shards": 0,
+          "flow": 1
+        },
+        "hudText": {
+          "score": "0",
+          "distance": "0 m",
+          "flow": "×1",
+          "shards": "0"
+        },
+        "hudMetrics": [
+          {
+            "selector": ".metric--score",
+            "left": 14,
+            "top": 10,
+            "right": 245.03125,
+            "bottom": 43.765625,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--distance",
+            "left": 253.03125,
+            "top": 12.890625,
+            "right": 477.375,
+            "bottom": 43.765625,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--flow",
+            "left": 485.375,
+            "top": 12.890625,
+            "right": 627.6875,
+            "bottom": 43.765625,
+            "insideViewport": true
+          },
+          {
+            "selector": ".metric--shards",
+            "left": 635.6875,
+            "top": 12.890625,
+            "right": 777.984375,
+            "bottom": 43.765625,
+            "insideViewport": true
+          }
+        ],
+        "milestone": null
+      },
+      "safeAreas": [
+        {
+          "selector": ".hud",
+          "left": 14,
+          "top": 10,
+          "right": 778,
+          "bottom": 43.765625,
+          "insideViewport": true
+        },
+        {
+          "selector": ".pause-control",
+          "left": 792,
+          "top": 10,
+          "right": 834,
+          "bottom": 52,
+          "insideViewport": true
+        },
+        {
+          "selector": ".gesture-hint",
+          "left": 321.765625,
+          "top": 363,
+          "right": 522.234375,
+          "bottom": 378,
+          "insideViewport": true
+        }
+      ],
+      "simulation": {
+        "seed": 1414087749,
+        "hash": "2c926631",
+        "frozen": true,
+        "previousDistance": 0,
+        "previousLanePosition": 0,
+        "status": "running",
+        "tick": 0,
+        "distance": 0,
+        "sectionIndex": 0,
+        "sectionDistance": 0,
+        "lanePosition": 0,
+        "targetLane": 0,
+        "height": 0,
+        "grounded": true,
+        "slideTicksRemaining": 0,
+        "shieldCharges": 0,
+        "score": 0,
+        "shards": 0,
+        "multiplier": 1,
+        "chaseGap": 4.5,
+        "lastDistanceMilestone": 0,
+        "failureReason": null,
+        "events": [
+          {
+            "type": "run-started",
+            "tick": 0
+          }
+        ],
+        "scenarioTrace": {
+          "name": "running",
+          "commands": [
+            {
+              "type": "Start"
+            }
+          ],
+          "replayHash": "2c926631"
+        }
+      },
+      "render": {
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "resolution": 1.75
+        },
+        "options": {
+          "highContrast": false,
+          "reducedMotion": false,
+          "seed": 1414087749,
+          "audioEnabled": true
+        },
+        "presentationAlpha": 1,
+        "presentedDistance": 0,
+        "presentedLanePosition": 0,
+        "runnerWorld": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        "runnerScreen": {
+          "x": 422,
+          "y": 324.78065305401253,
+          "visible": true,
+          "bounds": {
+            "left": 399.56769409580767,
+            "top": 253.67187649935687,
+            "right": 444.43230590419233,
+            "bottom": 374.1821809335803,
+            "width": 44.864611808384666,
+            "height": 120.51030443422343,
+            "area": 5406.648027351692
+          }
+        },
+        "pursuerScreen": {
+          "x": 422,
+          "y": 447.71464004615734,
+          "visible": true,
+          "bounds": {
+            "left": 355.9293761362337,
+            "top": 384.5293575958653,
+            "right": 488.07062386376623,
+            "bottom": 390,
+            "width": 132.14124772753252,
+            "height": 5.470642404134708,
+            "area": 722.8975131535085
+          }
+        },
+        "pursuerGapPx": 10.347176662284994,
+        "hazardScreens": [
+          {
+            "eventId": "section-0:column-center",
+            "kind": "column",
+            "bounds": {
+              "left": 411.69631325485506,
+              "top": 145.22882417433468,
+              "right": 432.30368674514494,
+              "bottom": 176.55052636976575,
+              "width": 20.607373490289888,
+              "height": 31.321702195431072,
+              "area": 645.4580154928808
+            }
+          },
+          {
+            "eventId": "section-0:column-right",
+            "kind": "column",
+            "bounds": {
+              "left": 440.1895324258988,
+              "top": 145.22882417433468,
+              "right": 461.83254510013364,
+              "bottom": 176.55052636976575,
+              "width": 21.643012674234853,
+              "height": 31.321702195431072,
+              "area": 677.8959975943243
+            }
+          },
+          {
+            "eventId": "section-0:jump-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 394.52698734126136,
+              "top": 139.19113968519488,
+              "right": 449.47301265873864,
+              "bottom": 144.3043067108454,
+              "width": 54.94602531747728,
+              "height": 5.113167025650512,
+              "area": 280.948204843883
+            }
+          },
+          {
+            "eventId": "section-0:slide-ring",
+            "kind": "ring",
+            "bounds": {
+              "left": 402.41849751664444,
+              "top": 118.34170533068594,
+              "right": 441.58150248335556,
+              "bottom": 130.2894275366465,
+              "width": 39.16300496671113,
+              "height": 11.947722205960574,
+              "area": 467.90870409291875
+            }
+          },
+          {
+            "eventId": "section-1:01-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 521.5240228609838,
+              "top": 115.5915564730858,
+              "right": 529.6264125302704,
+              "bottom": 118.93494496386083,
+              "width": 8.102389669286595,
+              "height": 3.343388490775027,
+              "area": 27.089436368067275
+            }
+          },
+          {
+            "eventId": "section-1:02-column--1",
+            "kind": "column",
+            "bounds": {
+              "left": 614.0965628184503,
+              "top": 110.26172765434485,
+              "right": 622.8104160152624,
+              "bottom": 118.8974826690921,
+              "width": 8.713853196812124,
+              "height": 8.635755014747247,
+              "area": 75.25070144214163
+            }
+          },
+          {
+            "eventId": "section-1:03-column-1",
+            "kind": "column",
+            "bounds": {
+              "left": 621.1877237987707,
+              "top": 110.79063161108188,
+              "right": 630.3512349104136,
+              "bottom": 119.75404060528835,
+              "width": 9.163511111642947,
+              "height": 8.963408994206475,
+              "area": 82.13629791661137
+            }
+          },
+          {
+            "eventId": "section-3:01-beam",
+            "kind": "beam",
+            "bounds": {
+              "left": 0,
+              "top": 0,
+              "right": 844,
+              "bottom": 390,
+              "width": 844,
+              "height": 390,
+              "area": 329160
+            }
+          },
+          {
+            "eventId": "section-3:02-ring",
+            "kind": "ring",
+            "bounds": {
+              "left": 0,
+              "top": 0,
+              "right": 844,
+              "bottom": 390,
+              "width": 844,
+              "height": 390,
+              "area": 329160
+            }
+          }
+        ],
+        "camera": {
+          "x": 0,
+          "y": 6.14955253111407,
+          "z": 9.449244896254992,
+          "fov": 46.99999999999998,
+          "yaw": 0
+        },
+        "lanePosition": 0,
+        "posture": "run",
+        "visibleSectionIds": [
+          "section-0-d54e6cda",
+          "section-1-cffb3025",
+          "section-2-38bf6ccb",
+          "section-3-67adb2c2",
+          "section-4-467f2a66",
+          "section-5-ca7fdac0"
+        ],
+        "visibleObstacleCount": 18,
+        "drawCalls": 47,
+        "triangles": 9096,
+        "turnProgress": null,
+        "contextLossCount": 0
+      },
+      "consoleProblems": []
+    }
+  ]
+}
