@@ -49,3 +49,14 @@
   four target dispositions are exhaustive and null cannot pass for a unique socket.
 - Source, Blender, diagnostic-008, render/evaluator/export, runtime, browser, tests/build,
   staging, push, and visual acceptance remain blocked pending fresh review.
+
+## 2026-07-18 contract ready and source authorization
+
+- Fresh independent review of exact commit `b530556` found no P0/P1/P2 and returned
+  `READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT`.
+- The coordinator authorizes exactly the two new generator/runner scripts named in the
+  contract, followed by static no-render/no-export checks, independent source review, and
+  separate source commits. Blender process launch remains blocked until final hashes and a
+  separate launch authorization are recorded.
+- Diagnostic `008`, render/evaluator/export, runtime, browser, tests/build, push, and
+  visual acceptance remain blocked.

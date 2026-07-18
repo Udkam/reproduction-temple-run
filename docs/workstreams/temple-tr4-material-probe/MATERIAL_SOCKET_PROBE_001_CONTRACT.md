@@ -1,6 +1,6 @@
 # TEMPLE-TR4 material socket probe 001 contract
 
-Status: **CONTRACT REVIEW REQUESTED; SOURCE AND BLENDER PROCESS NOT AUTHORIZED.**
+Status: **EXACT TWO-SCRIPT SOURCE IMPLEMENTATION AUTHORIZED AFTER INDEPENDENT CONTRACT READINESS; BLENDER PROCESS NOT AUTHORIZED.**
 
 Probe source authorization token: `TEMPLE-TR4-MATERIAL-SOCKET-PROBE-001-SOURCE-AUTHORIZED`.
 
@@ -29,9 +29,9 @@ authorize diagnostic `008`, and cannot claim material, model, render, or visual 
 
 ## Proposed writer scope
 
-No writer authority exists until independent review returns
-`READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT` and the coordinator records a separate
-reauthorization. The later source scope, if authorized, is exactly two new files:
+Independent review of exact contract commit `b530556` found no P0/P1/P2 and returned
+`READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT`. The coordinator now authorizes exactly
+two new source files:
 
 - `tools/temple-asset-pipeline/generate_tide_scar_material_socket_probe.py`;
 - `tools/temple-asset-pipeline/run_tide_scar_material_socket_probe.py`.
@@ -43,6 +43,11 @@ test tools. Source must pass UTF-8 AST, exact input replay, a static absence che
 `bpy.ops.render`, `write_still`, evaluator calls, retry loops, `.png`, `.glb`, `.gltf`,
 `.blend`, and export operators, followed by independent source review and a separate
 source commit.
+
+This source authority is not process authority. After both source files are committed,
+their exact SHA-256 values and the final contract/input/evidence-schema/status-schema
+hashes must be recorded in a separate launch authorization. The output root remains
+absent and Blender remains blocked until that checkpoint.
 
 ## One-process execution boundary
 

@@ -307,3 +307,17 @@ GATES independent review P0 none; P1 unique target supportsDefaultValue null byp
 EVIDENCE occurrenceCount one now forces supportsDefaultValue boolean before existing true/false branches
 BLOCKER corrected schema lacks fresh READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT and separate source authorization; Blender/process/diagnostic-008 blocked
 NEXT commit this minimal schema/docs correction and obtain fresh independent read-only verdict before source
+
+REPORT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 SOURCE-AUTHORIZED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T21:50:00+08:00
+BASE b5305569452234fe759ebdcf03b977c288a538da
+PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-BLOCKED-REVIEW-003-CORRECTED
+HEAD pending source-authorization docs checkpoint
+CANDIDATE none
+WRITE_SCOPE new tools/temple-asset-pipeline/{generate_tide_scar_material_socket_probe.py,run_tide_scar_material_socket_probe.py};probe THREAD_LOG;coordination docs/logs
+DIRTY five declared never-stage backup/cache paths; staged zero before authorization
+GATES fresh independent review P0 none; P1 none; P2 none; READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT; exact 11/19/25/4 input and four-stage/two-schema/seven-hash closure
+EVIDENCE exact reviewed SHA b5305569452234fe759ebdcf03b977c288a538da
+BLOCKER source implementation/review/commits and separate final-hash launch authorization remain; Blender/process/diagnostic-008 blocked
+NEXT commit source authorization, then one asset writer implements only the two new scripts and runs static checks without creating probe-001
