@@ -111,3 +111,17 @@ GATES P0 constructionHash scope conflict; P0 missing exact material/compositor/d
 EVIDENCE exact eight-path coordinator diff at 2f5fa9c; existing C6 pipeline source read-only
 BLOCKER CONTRACT_BLOCKED; draft 2f5fa9c is not implementation or execution authority
 NEXT coordinator corrects the exact contract records and requests a fresh independent review; no source edit or process launch
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 CONTRACT-BLOCKED-REVIEW-002
+THREAD /root/c7_contract_review_2
+TIME 2026-07-18T00:00:00+08:00
+BASE 15dc793
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 CONTRACT-BLOCKED-REVIEW-001
+HEAD 15dc793
+CANDIDATE none
+WRITE_SCOPE read-only
+DIRTY exactly five declared never-stage paths; reviewer changed nothing
+GATES review 001 findings closed; remaining P0 requested explicit complete camera-binding key set; P1 requested exact material parameter/socket/property/default binding; P2 evaluator wording sync
+EVIDENCE corrected seven-path coordinator diff at 15dc793; existing C6 pipeline source read-only
+BLOCKER CONTRACT_BLOCKED; 15dc793 is not implementation or execution authority
+NEXT close exact key/binding wording and request fresh independent review; no source edit or process launch

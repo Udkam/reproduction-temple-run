@@ -75,12 +75,28 @@ C7 retains every C6 construction field except where this section supplies a repl
 
 `construction.materialGraphs` has exactly `coordinateSource="Generated"`, ordered `graphOrder=["sandstone","fresh-break","basalt","basalt-strata","cloth","leather","rock-armour"]`, `template`, and `parameters`.
 
-`template` has exactly:
+`template` has exactly `nodeOrder`, `nodeTypeByName`, `linkOrder`, `rampPositions`, `heightMixBlend`, `roughnessMapClamp`, `parameterBindings`, `fixedNodeProperties`, and `fixedSocketValues`:
 
 - `nodeOrder=["TextureCoordinate","Mapping","MacroNoise","MicroNoise","Voronoi","MacroRamp","RoughnessMap","HeightMix","Bump","Principled","MaterialOutput"]`;
 - `nodeTypeByName={"TextureCoordinate":"ShaderNodeTexCoord","Mapping":"ShaderNodeMapping","MacroNoise":"ShaderNodeTexNoise","MicroNoise":"ShaderNodeTexNoise","Voronoi":"ShaderNodeTexVoronoi","MacroRamp":"ShaderNodeValToRGB","RoughnessMap":"ShaderNodeMapRange","HeightMix":"ShaderNodeMixRGB","Bump":"ShaderNodeBump","Principled":"ShaderNodeBsdfPrincipled","MaterialOutput":"ShaderNodeOutputMaterial"}`;
 - `linkOrder=["TextureCoordinate.Generated->Mapping.Vector","Mapping.Vector->MacroNoise.Vector","Mapping.Vector->MicroNoise.Vector","Mapping.Vector->Voronoi.Vector","MacroNoise.Fac->MacroRamp.Fac","MacroNoise.Fac->RoughnessMap.Value","MicroNoise.Fac->HeightMix.Color1","Voronoi.Distance->HeightMix.Color2","HeightMix.Color->Bump.Height","Bump.Normal->Principled.Normal","MacroRamp.Color->Principled.Base Color","RoughnessMap.Result->Principled.Roughness","Principled.BSDF->MaterialOutput.Surface"]`;
 - `rampPositions=[.28,.72]`, `heightMixBlend="MULTIPLY"`, and `roughnessMapClamp=true`.
+
+`parameterBindings` is exactly this canonical object; the generator assigns every target and then serializes the actual socket/property values for deep comparison:
+
+`{"mappingScale":"Mapping.inputs[Scale].default_value","macroScale":"MacroNoise.inputs[Scale].default_value","macroDetail":"MacroNoise.inputs[Detail].default_value","macroRoughness":"MacroNoise.inputs[Roughness].default_value","microScale":"MicroNoise.inputs[Scale].default_value","microDetail":"MicroNoise.inputs[Detail].default_value","voronoiScale":"Voronoi.inputs[Scale].default_value","voronoiRandomness":"Voronoi.inputs[Randomness].default_value","rampLow":"MacroRamp.color_ramp.elements[0].color:sRGB-to-linear-RGBA","rampHigh":"MacroRamp.color_ramp.elements[1].color:sRGB-to-linear-RGBA","rampPositions[0]":"MacroRamp.color_ramp.elements[0].position","rampPositions[1]":"MacroRamp.color_ramp.elements[1].position","roughnessRange[0]":"RoughnessMap.inputs[To Min].default_value","roughnessRange[1]":"RoughnessMap.inputs[To Max].default_value","bumpDistance":"Bump.inputs[Distance].default_value","bumpStrength":"Bump.inputs[Strength].default_value","materials[name].metallic":"Principled.inputs[Metallic].default_value","materials[name].normalStrength":"equals:parameters[name].bumpStrength"}`.
+
+Hex conversion uses the frozen per-channel sRGB transfer function already used by C6 and alpha `1`.
+
+`fixedNodeProperties` has exactly:
+
+`{"TextureCoordinate.from_instancer":false,"Mapping.vector_type":"POINT","MacroNoise.noise_dimensions":"3D","MacroNoise.noise_type":"FBM","MacroNoise.normalize":true,"MicroNoise.noise_dimensions":"3D","MicroNoise.noise_type":"FBM","MicroNoise.normalize":true,"Voronoi.voronoi_dimensions":"3D","Voronoi.feature":"F1","Voronoi.distance":"EUCLIDEAN","MacroRamp.color_ramp.interpolation":"LINEAR","MacroRamp.color_ramp.color_mode":"RGB","MacroRamp.color_ramp.hue_interpolation":"NEAR","RoughnessMap.data_type":"FLOAT","RoughnessMap.interpolation_type":"LINEAR","RoughnessMap.clamp":true,"HeightMix.blend_type":"MULTIPLY","HeightMix.use_clamp":false,"Bump.invert":false}`.
+
+`fixedSocketValues` has exactly:
+
+`{"Mapping.Location":[0,0,0],"Mapping.Rotation":[0,0,0],"MacroNoise.Lacunarity":2,"MacroNoise.Distortion":0,"MicroNoise.Roughness":.55,"MicroNoise.Lacunarity":2,"MicroNoise.Distortion":0,"Voronoi.Detail":0,"Voronoi.Roughness":.5,"Voronoi.Lacunarity":2,"Voronoi.Smoothness":0,"Voronoi.Exponent":.5,"RoughnessMap.From Min":0,"RoughnessMap.From Max":1,"HeightMix.Fac":1,"Principled.Weight":1,"Principled.IOR":1.5,"Principled.Alpha":1,"Principled.Subsurface Weight":0,"Principled.Specular IOR Level":.5,"Principled.Transmission Weight":0,"Principled.Coat Weight":0,"Principled.Sheen Weight":0,"Principled.Emission Color":[0,0,0,1],"Principled.Emission Strength":0}`.
+
+Every other exposed, unlinked input or influencing property on these eleven nodes must equal a fresh Blender 4.5.5 factory node of the same type. The generator constructs one untouched comparison node per type, serializes identifier/value pairs for both, and blocks on any unlisted difference. Thus the binding proves actual node application rather than metadata equality alone.
 
 Every `parameters` child rejects unknown keys and has exactly `mappingScale`, `macroScale`, `macroDetail`, `macroRoughness`, `microScale`, `microDetail`, `voronoiScale`, `voronoiRandomness`, `rampLow`, `rampHigh`, `roughnessRange`, `bumpDistance`, `bumpStrength`:
 
@@ -94,7 +110,7 @@ Every `parameters` child rejects unknown keys and has exactly `mappingScale`, `m
 | leather | `{"mappingScale":[1,1,1],"macroScale":2.2,"macroDetail":4,"macroRoughness":.60,"microScale":18,"microDetail":3,"voronoiScale":7,"voronoiRandomness":.62,"rampLow":"#20282C","rampHigh":"#394247","roughnessRange":[.66,.84],"bumpDistance":.055,"bumpStrength":.32}` |
 | rock-armour | `{"mappingScale":[1,1,1],"macroScale":.75,"macroDetail":5,"macroRoughness":.70,"microScale":9,"microDetail":4,"voronoiScale":2.7,"voronoiRandomness":.68,"rampLow":"#0A1014","rampHigh":"#1B2830","roughnessRange":[.62,.86],"bumpDistance":.20,"bumpStrength":.54}` |
 
-The generator serializes the actual constructed node names/types/links and numeric values into `scene-metrics.json.materialGraphBinding`; runner and evaluator require exact deep equality with this record before pixel gates.
+The generator serializes the actual constructed node names/types/links, parameter targets, fixed properties/sockets, and factory-default comparison into `scene-metrics.json.materialGraphBinding`; runner and evaluator require exact deep equality with this record before pixel gates.
 
 ### Exact atmosphere/compositor record
 
