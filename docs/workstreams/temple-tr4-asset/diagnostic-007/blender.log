@@ -1,0 +1,24 @@
+Blender 4.5.5 LTS (hash 836beaaf597a built 2025-11-18 01:33:26)
+
+Blender quit
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 2846, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 2841, in main
+    generate(preflight, output_root)
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 2688, in generate
+    materials = {
+                ^
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 2690, in <dictcomp>
+    create_pbr_material(record, graph_contract["parameters"][record["name"]], graph_contract["template"])
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 644, in create_pbr_material
+    actual_material_graph_record(material,record,{"coordinateSource":"Generated","graphOrder":[record["name"]],"template":template,"parameters":{record["name"]:parameters}},factory_audit)
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 528, in actual_material_graph_record
+    for key,(node_name,socket_name) in socket_targets.items(): template["fixedSocketValues"][key]=comparable_value(by_name[node_name].inputs[socket_name].default_value)
+                                                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'bpy_prop_collection[key]: key "Smoothness" not found'
+
+Error: script failed, file: 'E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py', exiting.
