@@ -60,3 +60,14 @@
   separate launch authorization are recorded.
 - Diagnostic `008`, render/evaluator/export, runtime, browser, tests/build, push, and
   visual acceptance remain blocked.
+
+## 2026-07-18 pre-source process-token hardening
+
+- Before source implementation, the coordinator found that the reviewed runner preflight
+  named only the source token even though process authority was intentionally deferred.
+- The contract now freezes a separate complete process-token literal that is absent from
+  the document and must have exact line count zero during source work. The runner will
+  require exact count one plus a process-authorization coordination record before creating
+  the output root; only the later final-hash launch checkpoint may add that line.
+- Source authorization remains limited to two scripts. Blender and diagnostic `008`
+  remain blocked pending independent review of this hardening.

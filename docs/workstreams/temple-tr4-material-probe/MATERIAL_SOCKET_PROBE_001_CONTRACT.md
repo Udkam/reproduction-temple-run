@@ -4,6 +4,12 @@ Status: **EXACT TWO-SCRIPT SOURCE IMPLEMENTATION AUTHORIZED AFTER INDEPENDENT CO
 
 Probe source authorization token: `TEMPLE-TR4-MATERIAL-SOCKET-PROBE-001-SOURCE-AUTHORIZED`.
 
+The future process-authorization line is intentionally absent. Its frozen full-line
+literal is `Probe process authorization token: ` followed by
+`TEMPLE-TR4-MATERIAL-SOCKET-PROBE-001-PROCESS-AUTHORIZED` in backticks and a final period.
+The runner must require exactly one complete matching line before output-root creation;
+the later launch checkpoint, and no earlier commit, may add it.
+
 This is a new zero-render evidence identity after immutable diagnostic `007` stopped with
 zero PNGs at Blender material readback. It is not a retry of diagnostic `007`, does not
 authorize diagnostic `008`, and cannot claim material, model, render, or visual quality.
@@ -54,10 +60,10 @@ absent and Blender remains blocked until that checkpoint.
 Only a later coordinator launch checkpoint may authorize execution. The sole standard
 probe invocation then:
 
-1. verifies repository root, branch, committed input bytes, exactly one complete labelled
-   token line above, the source-authorization coordination log record, both source files,
-   both JSON schemas, Blender executable hash, output-root absence, and no source worktree
-   diff;
+1. verifies repository root, branch, committed input bytes, exactly one complete source
+   token line above, exactly one future process-token line, both source- and
+   process-authorization coordination log records, both source files, both JSON schemas,
+   Blender executable hash, output-root absence, and no source worktree diff;
 2. creates exactly `docs/workstreams/temple-tr4-material-probe/probe-001`;
 3. writes a canonical copy of the committed input as `probe-input.json` before launch;
 4. launches exactly one Blender 4.5.5 background process with the generator and input;

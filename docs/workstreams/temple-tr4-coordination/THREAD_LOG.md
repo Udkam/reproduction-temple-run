@@ -321,3 +321,17 @@ GATES fresh independent review P0 none; P1 none; P2 none; READY_FOR_MATERIAL_SOC
 EVIDENCE exact reviewed SHA b5305569452234fe759ebdcf03b977c288a538da
 BLOCKER source implementation/review/commits and separate final-hash launch authorization remain; Blender/process/diagnostic-008 blocked
 NEXT commit source authorization, then one asset writer implements only the two new scripts and runs static checks without creating probe-001
+
+REPORT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 PROCESS-TOKEN-HARDENING-REVIEW-REQUESTED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T22:05:00+08:00
+BASE bd328a0
+PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 SOURCE-AUTHORIZED
+HEAD pending process-token hardening review-request checkpoint
+CANDIDATE none
+WRITE_SCOPE probe contract/log, CURRENT_TASK.md, acceptance, coordination progress/log
+DIRTY five declared never-stage backup/cache paths; staged zero before correction
+GATES reviewed contract ready at b530556; conservative coordinator audit found source token alone did not mechanically prevent premature launch
+EVIDENCE frozen future process-token full-line literal; current exact line count zero; runner requirement exact count one plus process-authorization coordination record before output root
+BLOCKER hardening lacks fresh independent review; source/Blender/process/diagnostic-008 blocked
+NEXT commit docs-only hardening, obtain fresh independent verdict, then separately restore exact two-script source authority if ready
