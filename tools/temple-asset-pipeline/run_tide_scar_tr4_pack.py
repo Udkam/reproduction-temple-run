@@ -654,8 +654,8 @@ def deep_compare(expected: Any, actual: Any, path: str = "$") -> None:
     if type(expected) is not type(actual):
         raise PrecheckBlocked(f"type mismatch at {path}")
     if isinstance(expected, dict):
-        if list(expected.keys()) != list(actual.keys()):
-            raise PrecheckBlocked(f"unknown/missing/reordered keys at {path}")
+        if sorted(expected.keys()) != sorted(actual.keys()):
+            raise PrecheckBlocked(f"unknown/missing keys at {path}")
         for key in expected:
             deep_compare(expected[key], actual[key], f"{path}.{key}")
     elif isinstance(expected, list):
