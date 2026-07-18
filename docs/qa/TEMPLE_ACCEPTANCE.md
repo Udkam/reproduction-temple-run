@@ -54,7 +54,7 @@
 
 ## Current result
 
-Result: **TEMPLE-TR4 in progress; C7 dry preflight blocked before Blender, exact C7-T2F validator correction authorized.** C7-T1 `a9acb0a` and C7-T2 `51fdbab` passed independent source review, but the first non-writing dry preflight returned `PRECHECK_BLOCKED` on order-sensitive keys at `$.construction.atmosphere`; `diagnostic-007` remained absent. C7-T2F may correct only the runner dictionary comparison to use exact key sets without changing values or lowering unknown/missing-key rejection. A fresh dry preflight is required before Blender. TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 and C1-C6 are historical, unintegrated or blocked visual attempts and do not supply TR4 acceptance evidence.
+Result: **TEMPLE-TR4 in progress; second C7 dry preflight blocked before Blender, exact C7-T2G authorization-token correction authorized.** C7-T1 `a9acb0a`, C7-T2 `51fdbab`, and C7-T2F `de625c6` passed independent source review. C7-T2F closed the canonical object-key defect, but its fresh dry preflight returned `PRECHECK_BLOCKED` because runner still required the superseded C7-D4 top-status sentence; `diagnostic-007` remained absent and no subprocess launched. C7-T2G may replace only that obsolete runner literal with the durable frozen authorization token, without changing values, schema, gates, process limits, or unknown/missing-key rejection. A newly authorized dry preflight is required before Blender. TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 and C1-C6 are historical, unintegrated or blocked visual attempts and do not supply TR4 acceptance evidence.
 
 ## TEMPLE-TR4 visual and lifecycle gates
 

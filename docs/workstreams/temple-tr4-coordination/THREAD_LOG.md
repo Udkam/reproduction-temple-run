@@ -181,3 +181,17 @@ GATES C7-T1 a9acb0a and C7-T2 51fdbab independently SOURCE_READY; first dry pref
 EVIDENCE committed three-script hashes; canonical preflight sorts object keys; active schema rejects unknown/missing keys without binding insertion order
 BLOCKER runner deep_compare uses list(expected.keys()) equality against canonical sorted actual keys; fresh dry preflight and Blender remain blocked
 NEXT commit this docs-only bounded correction authority, record the asset dry failure, then correct only runner deep_compare to sorted exact key-set equality and obtain independent source review before one fresh dry preflight
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 SECOND-DRY-PREFLIGHT-PRECHECK-BLOCKED-C7-T2G-AUTHORIZED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T19:00:00+08:00
+BASE f7b421b77cabc133b3e71ea5f5777cb3dc63ef51
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 DRY-PREFLIGHT-PRECHECK-BLOCKED-C7-T2F-AUTHORIZED
+HEAD pending C7-T2G authorization docs checkpoint
+CANDIDATE none
+WRITE_SCOPE tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py exact authorization-token literal only; coordination docs/logs
+DIRTY five declared never-stage backup/cache paths; staged zero before authorization
+GATES C7-T2F de625c6 independently SOURCE_READY; fresh dry preflight exit 1 PRECHECK_BLOCKED; exact reason diagnostic-007 authorization status is not the frozen C7 source authorization; diagnostic-007 absent; Blender/evaluator not launched
+EVIDENCE runner line 1069 still requires superseded C7-D4 top-status sentence while active authorization correctly records C7-T2F; no C7 construction/schema/value/process defect observed
+BLOCKER runner authorization check is coupled to a mutable top-status sentence; newly authorized dry preflight and Blender remain blocked
+NEXT commit this docs-only bounded correction authority, record the asset dry failure, then replace only the runner literal with the durable authorization token and obtain independent source review before one newly authorized dry preflight
