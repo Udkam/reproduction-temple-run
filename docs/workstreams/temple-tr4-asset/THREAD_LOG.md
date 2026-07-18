@@ -815,3 +815,17 @@ authorization.
   `ec174a6f5e1eca8b8315e6e8c4045542e8c9ade01af3eb6ae1a02f609a1a306d`.
 - No Blender, evaluator, render, export, browser, test, build, Git, commit, or push action
   occurred during this dry gate.
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 C7-T2F-FRESH-DRY-PREFLIGHT-BLOCKED
+DATE 2026-07-18
+ROLE Temple asset implementation owner
+HEAD f7b421b
+COMMAND `python tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py --dry-preflight`
+EXIT 1
+VERDICT PRECHECK_BLOCKED
+REASON `diagnostic-007 authorization status is not the frozen C7 source authorization`
+EVIDENCE `docs/workstreams/temple-tr4-asset/diagnostic-007` absent; Blender not started; evaluator not started
+NEVER_STAGE the five frozen backup/cache paths remain untouched
+ROOT_CAUSE runner line 1069 still checks the C7-D4 status literal that the committed `bb7eedd` header status replaced
+AUTHORITY coordinator commit `efc0b3f` authorizes only C7-T2G to replace that literal with the durable `TEMPLE-TR4-C7-SOURCE-CHAIN-AUTHORIZED` token
+BLOCKER Blender remains blocked
