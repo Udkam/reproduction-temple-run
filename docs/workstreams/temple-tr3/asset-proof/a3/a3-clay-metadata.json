@@ -1,0 +1,237 @@
+{
+  "schema": "temple-tr3-a3-clay-proof-v1",
+  "generator": "generate_tide_scar_hero_a3.py",
+  "seed": 270803,
+  "stage": "clay-only",
+  "cleanRoom": "Deterministic local Blender Python geometry and clay materials; no external images, models, or reference pixels read.",
+  "semanticRoots": [
+    "Causeway_Root",
+    "Canyon_Root",
+    "Runner_Root",
+    "Pursuer_Root",
+    "Obstacle_Ring_Root",
+    "TideScar_Ribbon_Editable"
+  ],
+  "triangles": 3308,
+  "route": {
+    "moduleCount": 16,
+    "spineSamples": 17,
+    "routeLengthMetres": 125.949,
+    "cumulativeYawDegrees": 120.494,
+    "verticalRangeMetres": 5.95,
+    "broadRises": 5,
+    "jointCount": 16,
+    "edgeLosses": 4,
+    "sideShelves": 26,
+    "horizontalStrataBreaks": 32,
+    "safeCenterCorridorRatio": 0.68
+  },
+  "canyon": {
+    "bandCount": 3,
+    "nearButtressGroups": 6,
+    "midMesaShelfGroups": 10,
+    "farFogSilhouettes": 4,
+    "abyssOpeningsPortrait": 3,
+    "maxNearWallOccupancy": 0.19,
+    "repeatedGenericVerticalWalls": 0
+  },
+  "ring": {
+    "outerSpanToDeckWidth": 0.534,
+    "thicknessToOuterSpan": 0.133,
+    "openingToOuterArea": 0.538,
+    "baseContactsDeck": true
+  },
+  "tideScar": {
+    "editable": true,
+    "baked": false,
+    "rightThird": true,
+    "widthToDeck": 0.016,
+    "routeCoverage": 0.67,
+    "clips": [
+      "pursuer",
+      "courier",
+      "ring"
+    ]
+  },
+  "compositionTargets": {
+    "portrait": {
+      "horizonY": 0.19,
+      "roadEntryWidth": 0.69,
+      "roadNarrowWidth": 0.22,
+      "routeVisibleHeight": 0.68,
+      "courierCenterY": [
+        0.6,
+        0.68
+      ],
+      "pursuerCenterY": [
+        0.7,
+        0.79
+      ],
+      "ringCenterY": [
+        0.34,
+        0.48
+      ]
+    },
+    "desktop": {
+      "deckVisibleHeight": 0.6,
+      "ringCenterY": [
+        0.34,
+        0.48
+      ]
+    }
+  },
+  "projections": {
+    "portrait": {
+      "courier": {
+        "x": 0.01825,
+        "y": 0.56947,
+        "width": 0.05681,
+        "height": 0.07329,
+        "pixelWidth": 30.68,
+        "pixelHeight": 70.36,
+        "centerY": 0.60611
+      },
+      "pursuer": {
+        "x": 0.0,
+        "y": 0.6636,
+        "width": 0.0,
+        "height": 0.107,
+        "pixelWidth": 0.0,
+        "pixelHeight": 102.72,
+        "centerY": 0.7171
+      },
+      "ring": {
+        "x": 0.37832,
+        "y": 0.34087,
+        "width": 0.21113,
+        "height": 0.12083,
+        "pixelWidth": 114.01,
+        "pixelHeight": 116.0,
+        "centerY": 0.40128
+      },
+      "causeway": {
+        "x": 0.0,
+        "y": 0.19633,
+        "width": 1.0,
+        "height": 0.80367,
+        "pixelWidth": 540.0,
+        "pixelHeight": 771.53,
+        "centerY": 0.59816
+      },
+      "tideScar": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 0.0,
+        "height": 0.0,
+        "pixelWidth": 0.0,
+        "pixelHeight": 0.0,
+        "centerY": 0.0
+      }
+    },
+    "desktop": {
+      "courier": {
+        "x": 0.20692,
+        "y": 0.60472,
+        "width": 0.02999,
+        "height": 0.12719,
+        "pixelWidth": 28.79,
+        "pixelHeight": 68.68,
+        "centerY": 0.66832
+      },
+      "pursuer": {
+        "x": 0.07908,
+        "y": 0.74358,
+        "width": 0.09201,
+        "height": 0.16406,
+        "pixelWidth": 88.33,
+        "pixelHeight": 88.59,
+        "centerY": 0.82561
+      },
+      "ring": {
+        "x": 0.4287,
+        "y": 0.2612,
+        "width": 0.11738,
+        "height": 0.21326,
+        "pixelWidth": 112.68,
+        "pixelHeight": 115.16,
+        "centerY": 0.36783
+      },
+      "causeway": {
+        "x": 0.0,
+        "y": 0.05577,
+        "width": 0.786,
+        "height": 0.94423,
+        "pixelWidth": 754.56,
+        "pixelHeight": 509.88,
+        "centerY": 0.52789
+      },
+      "tideScar": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 0.0,
+        "height": 0.0,
+        "pixelWidth": 0.0,
+        "pixelHeight": 0.0,
+        "centerY": 0.0
+      }
+    },
+    "closeup": {
+      "courier": {
+        "x": 0.0734,
+        "y": 0.17954,
+        "width": 0.0602,
+        "height": 0.17677,
+        "pixelWidth": 38.53,
+        "pixelHeight": 84.85,
+        "centerY": 0.26792
+      },
+      "pursuer": {
+        "x": 0.0,
+        "y": 0.31497,
+        "width": 0.0,
+        "height": 0.21854,
+        "pixelWidth": 0.0,
+        "pixelHeight": 104.9,
+        "centerY": 0.42424
+      },
+      "ring": {
+        "x": 0.6338,
+        "y": 0.0,
+        "width": 0.17489,
+        "height": 0.19249,
+        "pixelWidth": 111.93,
+        "pixelHeight": 92.4,
+        "centerY": 0.09625
+      },
+      "causeway": {
+        "x": 0.0,
+        "y": 0.01374,
+        "width": 1.0,
+        "height": 0.98626,
+        "pixelWidth": 640.0,
+        "pixelHeight": 473.4,
+        "centerY": 0.50687
+      },
+      "tideScar": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 0.0,
+        "height": 0.0,
+        "pixelWidth": 0.0,
+        "pixelHeight": 0.0,
+        "centerY": 0.0
+      }
+    }
+  },
+  "gateFailures": [],
+  "nonGoals": [
+    "final materials",
+    "GLB export",
+    "KTX2",
+    "runtime integration",
+    "browser capture",
+    "commit",
+    "push",
+    "QA"
+  ]
+}

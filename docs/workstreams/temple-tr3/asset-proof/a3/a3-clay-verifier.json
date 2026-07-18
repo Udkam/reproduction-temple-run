@@ -1,0 +1,293 @@
+{
+  "schema": "temple-tr3-a3-clay-verifier-v1",
+  "passed": false,
+  "sourceChecks": {
+    "deckModules": true,
+    "canyonBands": true,
+    "elevationSteps": true,
+    "fractureJoints": true,
+    "wallOccupancy": true,
+    "ringAperture": true,
+    "triangles": true,
+    "semanticRoots": true
+  },
+  "portraitActorSeparationPx": 20.01,
+  "frames": {
+    "portrait": {
+      "width": 540,
+      "height": 960,
+      "p50": 0.4823529411764706,
+      "p95": 0.6980392156862745,
+      "nearBlackPercent": 0.0,
+      "semanticRois": {
+        "courier": {
+          "box": [
+            10,
+            547,
+            41,
+            617
+          ],
+          "p50": 0.6901960784313725,
+          "p95": 0.7176470588235294,
+          "contrast": 0.5019607843137255
+        },
+        "pursuer": {
+          "box": [
+            0,
+            637,
+            1,
+            740
+          ],
+          "p50": 0.7019607843137254,
+          "p95": 0.7058823529411765,
+          "contrast": 0.09411764705882353
+        },
+        "ring": {
+          "box": [
+            204,
+            327,
+            318,
+            443
+          ],
+          "p50": 0.6705882352941176,
+          "p95": 0.7019607843137254,
+          "contrast": 0.5098039215686274
+        }
+      },
+      "projections": {
+        "courier": {
+          "x": 0.01825,
+          "y": 0.56947,
+          "width": 0.05681,
+          "height": 0.07329,
+          "pixelWidth": 30.68,
+          "pixelHeight": 70.36,
+          "centerY": 0.60611
+        },
+        "pursuer": {
+          "x": 0.0,
+          "y": 0.6636,
+          "width": 0.0,
+          "height": 0.107,
+          "pixelWidth": 0.0,
+          "pixelHeight": 102.72,
+          "centerY": 0.7171
+        },
+        "ring": {
+          "x": 0.37832,
+          "y": 0.34087,
+          "width": 0.21113,
+          "height": 0.12083,
+          "pixelWidth": 114.01,
+          "pixelHeight": 116.0,
+          "centerY": 0.40128
+        },
+        "causeway": {
+          "x": 0.0,
+          "y": 0.19633,
+          "width": 1.0,
+          "height": 0.80367,
+          "pixelWidth": 540.0,
+          "pixelHeight": 771.53,
+          "centerY": 0.59816
+        },
+        "tideScar": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0,
+          "pixelWidth": 0.0,
+          "pixelHeight": 0.0,
+          "centerY": 0.0
+        }
+      }
+    },
+    "desktop": {
+      "width": 960,
+      "height": 540,
+      "p50": 0.4666666666666667,
+      "p95": 0.7019607843137254,
+      "nearBlackPercent": 0.0,
+      "semanticRois": {
+        "courier": {
+          "box": [
+            199,
+            327,
+            227,
+            395
+          ],
+          "p50": 0.6823529411764706,
+          "p95": 0.7176470588235294,
+          "contrast": 0.5098039215686274
+        },
+        "pursuer": {
+          "box": [
+            76,
+            402,
+            164,
+            490
+          ],
+          "p50": 0.615686274509804,
+          "p95": 0.7058823529411765,
+          "contrast": 0.592156862745098
+        },
+        "ring": {
+          "box": [
+            412,
+            141,
+            524,
+            256
+          ],
+          "p50": 0.611764705882353,
+          "p95": 0.7019607843137254,
+          "contrast": 0.5058823529411764
+        }
+      },
+      "projections": {
+        "courier": {
+          "x": 0.20692,
+          "y": 0.60472,
+          "width": 0.02999,
+          "height": 0.12719,
+          "pixelWidth": 28.79,
+          "pixelHeight": 68.68,
+          "centerY": 0.66832
+        },
+        "pursuer": {
+          "x": 0.07908,
+          "y": 0.74358,
+          "width": 0.09201,
+          "height": 0.16406,
+          "pixelWidth": 88.33,
+          "pixelHeight": 88.59,
+          "centerY": 0.82561
+        },
+        "ring": {
+          "x": 0.4287,
+          "y": 0.2612,
+          "width": 0.11738,
+          "height": 0.21326,
+          "pixelWidth": 112.68,
+          "pixelHeight": 115.16,
+          "centerY": 0.36783
+        },
+        "causeway": {
+          "x": 0.0,
+          "y": 0.05577,
+          "width": 0.786,
+          "height": 0.94423,
+          "pixelWidth": 754.56,
+          "pixelHeight": 509.88,
+          "centerY": 0.52789
+        },
+        "tideScar": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0,
+          "pixelWidth": 0.0,
+          "pixelHeight": 0.0,
+          "centerY": 0.0
+        }
+      }
+    },
+    "closeup": {
+      "width": 640,
+      "height": 480,
+      "p50": 0.26666666666666666,
+      "p95": 0.6980392156862745,
+      "nearBlackPercent": 0.0,
+      "semanticRois": {
+        "courier": {
+          "box": [
+            47,
+            86,
+            86,
+            171
+          ],
+          "p50": 0.5058823529411764,
+          "p95": 0.7137254901960784,
+          "contrast": 0.5254901960784314
+        },
+        "pursuer": {
+          "box": [
+            0,
+            151,
+            1,
+            256
+          ],
+          "p50": 0.7019607843137254,
+          "p95": 0.7058823529411765,
+          "contrast": 0.1568627450980392
+        },
+        "ring": {
+          "box": [
+            406,
+            0,
+            518,
+            92
+          ],
+          "p50": 0.592156862745098,
+          "p95": 0.6980392156862745,
+          "contrast": 0.5254901960784314
+        }
+      },
+      "projections": {
+        "courier": {
+          "x": 0.0734,
+          "y": 0.17954,
+          "width": 0.0602,
+          "height": 0.17677,
+          "pixelWidth": 38.53,
+          "pixelHeight": 84.85,
+          "centerY": 0.26792
+        },
+        "pursuer": {
+          "x": 0.0,
+          "y": 0.31497,
+          "width": 0.0,
+          "height": 0.21854,
+          "pixelWidth": 0.0,
+          "pixelHeight": 104.9,
+          "centerY": 0.42424
+        },
+        "ring": {
+          "x": 0.6338,
+          "y": 0.0,
+          "width": 0.17489,
+          "height": 0.19249,
+          "pixelWidth": 111.93,
+          "pixelHeight": 92.4,
+          "centerY": 0.09625
+        },
+        "causeway": {
+          "x": 0.0,
+          "y": 0.01374,
+          "width": 1.0,
+          "height": 0.98626,
+          "pixelWidth": 640.0,
+          "pixelHeight": 473.4,
+          "centerY": 0.50687
+        },
+        "tideScar": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0,
+          "pixelWidth": 0.0,
+          "pixelHeight": 0.0,
+          "centerY": 0.0
+        }
+      }
+    }
+  },
+  "failures": [
+    "portrait pursuer non-positive bbox",
+    "closeup pursuer non-positive bbox",
+    "actors not in same road band"
+  ],
+  "notes": [
+    "Pillow records rendered luminance/semantic ROI evidence; Blender source projection records the real camera-space semantic bounds.",
+    "Manual structural review remains mandatory and can block a numerically passing batch."
+  ]
+}
