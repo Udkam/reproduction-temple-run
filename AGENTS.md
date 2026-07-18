@@ -7,8 +7,8 @@ These rules apply to every worker on the `main` branch.
 - The primary Codex task is the coordinator. It owns scope, sequencing, final acceptance,
   `docs/logs/CHANGELOG.md`, integration, and push. A writer may create only the bounded
   local checkpoint commits authorized by `docs/COMMIT_POLICY.md`.
-- The Temple implementation owner may edit only the paths named in `CURRENT_TASK.md` and
-  must keep `DESIGN.md`, rules, tests, and QA contracts synchronized with behavior.
+- The Temple implementation owner may edit only the paths named in `docs/CURRENT_TASK.md` and
+  must keep `docs/DESIGN.md`, rules, tests, and QA contracts synchronized with behavior.
 - Independent QA is read-only and starts only after a candidate SHA exists. It must not
   repair production code or rewrite the implementation owner's evidence.
 - Tetris work lives only in `E:\Proj\reproduction-tetris` on `main`; do not read its dirty
@@ -18,7 +18,7 @@ These rules apply to every worker on the `main` branch.
 
 ## Required execution order
 
-1. Read `AGENTS.md`, `DESIGN.md`, `CURRENT_TASK.md`, `docs/rules/RUNNER_RULES.md`,
+1. Read `AGENTS.md`, `docs/DESIGN.md`, `docs/CURRENT_TASK.md`, `docs/rules/RUNNER_RULES.md`,
    `docs/qa/TEMPLE_ACCEPTANCE.md`, and the latest changelog entry.
 2. Correct the contracts before code whenever rules, visual direction, evidence, or
    completion gates change. Status must say `in progress` until final evidence exists.
@@ -78,7 +78,7 @@ These rules apply to every worker on the `main` branch.
 
 ## Evidence and scope
 
-- Keep `DESIGN.md`, `CURRENT_TASK.md`, `docs/rules/RUNNER_RULES.md`, and `docs/qa/TEMPLE_ACCEPTANCE.md` aligned with production behavior.
+- Keep `docs/DESIGN.md`, `docs/CURRENT_TASK.md`, `docs/rules/RUNNER_RULES.md`, and `docs/qa/TEMPLE_ACCEPTANCE.md` aligned with production behavior.
 - Browser evidence must use fixed seeds/ticks, real keyboard or touch input where claimed,
   hashed screenshots, structured canonical state, one canvas, zero gameplay DOM entities,
   and zero console errors. QA scenarios must be reachable by real commands and replay to

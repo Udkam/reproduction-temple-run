@@ -67,7 +67,7 @@ Source implementation authority is therefore restored. During source work, both 
 launch-line exact counts remain zero and the runner must fail before output-root creation.
 
 Static inspection then found the untracked fail-closed runner exceeds the default 500
-hand-authored-line checkpoint budget, but `CURRENT_TASK.md` had not named an exact atomic
+hand-authored-line checkpoint budget, but `docs/CURRENT_TASK.md` had not named an exact atomic
 exception. Further editing, execution, staging, and commit are paused with both scripts
 WIP_UNCOMMITTED and `probe-001` absent. The proposed exception owns only
 `run_tide_scar_material_socket_probe.py` and keeps the repository/Git/authorization,

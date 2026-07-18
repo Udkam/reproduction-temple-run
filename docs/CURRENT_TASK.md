@@ -90,7 +90,7 @@ May change only:
 
 - `src/game/render/theme.ts`, `src/game/render/WorldRenderer.ts`, `src/game/render/runnerRig.ts`, `src/game/render/pursuerRig.ts`, `src/game/render/tideScarWorld.ts`, and their direct tests; new render-only `d4Profile.ts`, `d4Assets.ts`, and `tideScarRoad.ts`
 - `src/App.tsx`, `src/styles.css`, and `scripts/capture-temple-evidence.mjs`
-- `DESIGN.md`, this file, `docs/qa/TEMPLE_ACCEPTANCE.md`, `docs/workstreams/temple-tr3/THREAD_LOG.md`, development-only `docs/screenshots/temple/tr3-d4-dev/**`, and `src/assets/tide-scar-d4/` containing only the D4A manifest and seven approved runtime derivatives
+- `docs/DESIGN.md`, this file, `docs/qa/TEMPLE_ACCEPTANCE.md`, `docs/workstreams/temple-tr3/THREAD_LOG.md`, development-only `docs/screenshots/temple/tr3-d4-dev/**`, and `src/assets/tide-scar-d4/` containing only the D4A manifest and seven approved runtime derivatives
 
 Must not change `src/game/core/**`, `src/game/runtime/**`, rules, generator, canonical state, collision boxes, lanes, speed curve, stumble/capture behavior, replay/hash, package/config files, or `docs/logs/CHANGELOG.md`. Do not cherry-pick D4 design commits. Visual seed data derives only from section/event identity and cannot enter canonical state or hashes. The D4 composite/north-star/source PNGs are forbidden from runtime; no gameplay additions, false metrics, static mockup evidence, DOM gameplay cells, or imported/copy-pasted external assets are allowed.
 

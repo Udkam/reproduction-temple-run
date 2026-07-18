@@ -28,7 +28,7 @@ must be force-staged only by exact path in their named evidence checkpoint.
 
 | ID | Reviewable claim and exact assignment | Porcelain paths | Verification before commit |
 | --- | --- | ---: | --- |
-| C01 | `docs(tr4): freeze the C6 terminal contract and backlog split`: `CURRENT_TASK.md`, `DESIGN.md`, `docs/rules/RUNNER_RULES.md`, `docs/qa/TEMPLE_ACCEPTANCE.md`, and every file directly under `docs/workstreams/temple-tr4-coordination/`, including this plan | 17 after this plan is added | UTF-8/LF audit, `git diff --check`, closed C1-C6 status consistency |
+| C01 | `docs(tr4): freeze the C6 terminal contract and backlog split`: `docs/CURRENT_TASK.md`, `docs/DESIGN.md`, `docs/rules/RUNNER_RULES.md`, `docs/qa/TEMPLE_ACCEPTANCE.md`, and every file directly under `docs/workstreams/temple-tr4-coordination/`, including this plan | 17 after this plan is added | UTF-8/LF audit, `git diff --check`, closed C1-C6 status consistency |
 | C02 | `tool(tr4): preserve the fail-closed C1-C6 diagnostic pipeline`: exact three files `tools/temple-asset-pipeline/generate_tide_scar_tr4_pack.py`, `evaluate_tide_scar_tr4_pack.py`, and `run_tide_scar_tr4_pack.py` | 3 | AST parse, exact launch hashes, C6 status/hash cross-check; no rerun |
 | C03 | `evidence(tr4): preserve C1-C5 and probe failures`: every porcelain path under `docs/workstreams/temple-tr4-asset/` except `THREAD_LOG.md` and `diagnostic-006/**` | 44 | exact-set/hash audit, PNG headers, terminal verdicts; force-stage the seven exact logs below |
 | C04 | `evidence(tr4): preserve the blocked C6 render set`: every porcelain path under `docs/workstreams/temple-tr4-asset/diagnostic-006/` | 26 | exact 27-file set including the ignored log, hashes, 20 PNG headers, `DIAGNOSTIC_BLOCKED`, Blender `0`, evaluator null |
@@ -62,7 +62,7 @@ must be force-staged only by exact path in their named evidence checkpoint.
 
 ## Atomic source-checkpoint exceptions
 
-`CURRENT_TASK.md` names the same exceptions. They are preservation checkpoints, not
+`docs/CURRENT_TASK.md` names the same exceptions. They are preservation checkpoints, not
 permission to add code:
 
 - C02 is one self-hashed, closed three-script TR4 process; splitting it would make the

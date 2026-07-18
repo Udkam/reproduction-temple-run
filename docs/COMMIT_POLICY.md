@@ -4,7 +4,7 @@ Status: authoritative for every task and worker in `E:\Proj\reproduction-temple-
 
 This policy prevents a workstream from accumulating an entire feature, visual pass,
 asset pipeline, evidence matrix, and QA history into one opaque commit. It complements
-`AGENTS.md`; where a task needs an exception, `CURRENT_TASK.md` must authorize that exact
+`AGENTS.md`; where a task needs an exception, `docs/CURRENT_TASK.md` must authorize that exact
 exception before editing begins.
 
 ## 1. One commit, one reviewable claim
@@ -34,7 +34,7 @@ toward the line budget because they must be placed in a separate evidence or ass
 commit. Direct tests for the claim belong with the source commit.
 
 If a change is truly atomic and must exceed a limit, stop before editing beyond the
-limit. `CURRENT_TASK.md` must then name the exception, exact paths, reason it cannot be
+limit. `docs/CURRENT_TASK.md` must then name the exception, exact paths, reason it cannot be
 split, owners, and required whole-range verification. File-count pressure is never a
 reason to commit unrelated concerns together.
 

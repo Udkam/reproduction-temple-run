@@ -7,7 +7,7 @@ BASE 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 PARENT TEMPLE-TR3-A6-REVIEW-001 BLOCKED
 HEAD 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 CANDIDATE none
-WRITE_SCOPE DESIGN.md;CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
+WRITE_SCOPE docs/DESIGN.md;docs/CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
 DIRTY inherited TR3/A3/A4/A5/A6 and renderer work preserved; new TR4 coordination contract only
 GATES reference PNG viewed and hashed; supplied gameplay video/page inspected read-only; C3 camera binding passed all profiles but sole process stopped before first render on invalid look enum assignment; C3 frozen; C4 independent contract review READY with no P0/P1
 EVIDENCE docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md;docs/workstreams/temple-tr4-coordination/TR4_PREFLIGHT_SCHEMA.md;docs/workstreams/temple-tr4-coordination/REFERENCE_ANALYSIS.md;docs/workstreams/temple-tr4-asset/camera-probe-001/probe-plan.json;docs/workstreams/temple-tr4-asset/camera-probe-001/blender.log;docs/workstreams/temple-tr4-asset/camera-probe-001/probe-status.json
@@ -21,7 +21,7 @@ BASE 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 PARENT TEMPLE-TR4-DIAGNOSTIC-004 DIAGNOSTIC_BLOCKED;MANUAL_BLOCKED
 HEAD 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 CANDIDATE none
-WRITE_SCOPE DESIGN.md;CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
+WRITE_SCOPE docs/DESIGN.md;docs/CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
 DIRTY inherited TR3/A3/A4/A5/A6 and renderer work preserved; C1-C4 and both probes immutable
 GATES C4 one Blender process/20 PNG; evaluator not invoked; 27 frozen hashes recorded; independent manual verdict BLOCKED; C5 execution remains NOT AUTHORIZED pending exact contract review
 EVIDENCE docs/workstreams/temple-tr4-asset/diagnostic-004/**;docs/workstreams/temple-tr4-asset/THREAD_LOG.md;docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_005_AUTHORIZATION.md;docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md
@@ -35,7 +35,7 @@ BASE 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 PARENT TEMPLE-TR4-DIAGNOSTIC-004 DIAGNOSTIC_BLOCKED;MANUAL_BLOCKED
 HEAD 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 CANDIDATE none
-WRITE_SCOPE DESIGN.md;CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
+WRITE_SCOPE docs/DESIGN.md;docs/CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
 DIRTY inherited TR3/A3/A4/A5/A6 and renderer work preserved; C1-C4 and both probes immutable
 GATES contract-consistency review READY_FOR_DIAGNOSTIC_005_CONTRACT; numeric/geometry review READY_FOR_DIAGNOSTIC_005_CONTRACT; no P0/P1; C5 identity/ancillary/camera/light/fog/placement/raster/single-process/manual boundaries closed
 EVIDENCE docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_005_AUTHORIZATION.md;docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md;docs/workstreams/temple-tr4-asset/diagnostic-004/**;docs/workstreams/temple-tr4-asset/THREAD_LOG.md
@@ -49,7 +49,7 @@ BASE 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 PARENT TEMPLE-TR4-DIAGNOSTIC-005 DIAGNOSTIC_BLOCKED
 HEAD 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 CANDIDATE none
-WRITE_SCOPE DESIGN.md;CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
+WRITE_SCOPE docs/DESIGN.md;docs/CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
 DIRTY inherited TR3/A3/A4/A5/A6 and renderer work preserved; C1-C5 and both probes immutable
 GATES C5 dry READY and independent post-patch READY; sole Blender rc=1 before construction; zero PNG; evaluator null; C5 four-file evidence frozen; C6 execution NOT AUTHORIZED pending exact contract review
 EVIDENCE docs/workstreams/temple-tr4-asset/diagnostic-005/**;docs/workstreams/temple-tr4-asset/THREAD_LOG.md;docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_006_AUTHORIZATION.md
@@ -63,7 +63,7 @@ BASE 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 PARENT TEMPLE-TR4-DIAGNOSTIC-005 DIAGNOSTIC_BLOCKED
 HEAD 52ae9ae631fa3761f8f8737978af1840ba2df8a4
 CANDIDATE none
-WRITE_SCOPE DESIGN.md;CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
+WRITE_SCOPE docs/DESIGN.md;docs/CURRENT_TASK.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
 DIRTY inherited TR3/A3/A4/A5/A6 and renderer work preserved; C1-C5 and both probes immutable
 GATES root-cause/boundary review READY_FOR_DIAGNOSTIC_006_CONTRACT; contract-consistency review READY_FOR_DIAGNOSTIC_006_CONTRACT; exact 51-file frozen set and C6 identity/key-set/canonical-round-trip/single-process/manual boundaries closed
 EVIDENCE docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_006_AUTHORIZATION.md;docs/workstreams/temple-tr4-asset/diagnostic-005/**;docs/workstreams/temple-tr4-asset/THREAD_LOG.md
@@ -77,7 +77,7 @@ BASE 4353205e90559e782ae959e2449d42e8234c3670
 PARENT TEMPLE-TR4-DIAGNOSTIC-006 DIAGNOSTIC_BLOCKED
 HEAD 4353205e90559e782ae959e2449d42e8234c3670
 CANDIDATE none
-WRITE_SCOPE CURRENT_TASK.md;DESIGN.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
+WRITE_SCOPE docs/CURRENT_TASK.md;docs/DESIGN.md;docs/rules/RUNNER_RULES.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
 DIRTY 219 inherited porcelain paths plus nine ignored evidence logs inventoried; five cache/backup paths explicitly never-stage
 GATES sole C6 Blender rc=0; 20 PNG; runner render-set block; evaluator null; exact 27-file C6 root frozen; all 20 images independently MANUAL_BLOCKED; backlog plan C01-C30 closed
 EVIDENCE docs/workstreams/temple-tr4-asset/diagnostic-006/**;docs/workstreams/temple-tr4-asset/THREAD_LOG.md;docs/workstreams/temple-tr4-coordination/BACKLOG_SPLIT_PLAN.md
@@ -91,7 +91,7 @@ BASE ecd5de640362a6e30c5d0157ecd1590be7673318
 PARENT TEMPLE-TR4-DIAGNOSTIC-006 DIAGNOSTIC_BLOCKED;MANUAL_BLOCKED
 HEAD ecd5de640362a6e30c5d0157ecd1590be7673318
 CANDIDATE none
-WRITE_SCOPE CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
+WRITE_SCOPE docs/CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/**
 DIRTY exactly five declared never-stage backup/cache paths; staged zero; C01-C30/C04V recovery complete in 31 local commits
 GATES C1-C6/probes and 78 files frozen; C7 schema/identity/camera predicate/substantive reconstruction/material/atmosphere/depth/manual-review/checkpoint boundaries drafted; no Blender/browser/test/build execution
 EVIDENCE docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_007_AUTHORIZATION.md;docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md;docs/workstreams/temple-tr4-coordination/TR4_PREFLIGHT_SCHEMA.md;docs/workstreams/temple-tr4-coordination/BACKLOG_SPLIT_PLAN.md
@@ -136,7 +136,7 @@ CANDIDATE none
 WRITE_SCOPE C7-T1 exact generator; C7-T2 exact runner/evaluator; then diagnostic-007 evidence only
 DIRTY exactly five declared never-stage paths; staged zero before authorization
 GATES independent review found no P0/P1 and returned READY_FOR_DIAGNOSTIC_007_CONTRACT; exact construction/material/compositor/depth/camera/manual/atomic boundaries closed
-EVIDENCE CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_007_AUTHORIZATION.md;TR4_VISUAL_CONTRACT.md;TR4_PREFLIGHT_SCHEMA.md;reviewed contract SHA 614d280
+EVIDENCE docs/CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_007_AUTHORIZATION.md;TR4_VISUAL_CONTRACT.md;TR4_PREFLIGHT_SCHEMA.md;reviewed contract SHA 614d280
 BLOCKER C7-T1 and C7-T2 source checkpoints plus non-writing dry preflight do not yet exist; Blender remains blocked
 NEXT single asset writer implements C7-T1 generator only, performs exact non-writing checks, appends the asset THREAD_LOG, and commits that checkpoint before C7-T2
 
@@ -147,7 +147,7 @@ BASE 844ec843289252fbecb2ff0c960d702331d2f1a5
 PARENT TEMPLE-TR4-DIAGNOSTIC-007 AUTHORIZED
 HEAD pending C7-D3 docs-only checkpoint
 CANDIDATE none
-WRITE_SCOPE CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md;TR4_PREFLIGHT_SCHEMA.md;DIAGNOSTIC_007_AUTHORIZATION.md;progress.md;THREAD_LOG.md
+WRITE_SCOPE docs/CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md;TR4_PREFLIGHT_SCHEMA.md;DIAGNOSTIC_007_AUTHORIZATION.md;progress.md;THREAD_LOG.md
 DIRTY uncommitted C7-T1 generator WIP plus five declared never-stage backup/cache paths; staged zero before C7-D3
 GATES static frozen-portrait projection only; old center X=.8817599105873106-1.0471892051751452 and full tube X=.876288018535559-1.0526610972268966; replacement center X=.8817599105873106-.9830895106526318 and full tube X=.876288018535559-.9886556545320699; no Blender/evaluator/test/build/browser execution
 EVIDENCE immutable diagnostic-006 portrait view/projection matrices; exact C7-D3 actual-world loop controls; world inner edge X=2.957m > safety bound 2.92m
@@ -220,7 +220,7 @@ CANDIDATE none
 WRITE_SCOPE tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py exact two obsolete authorization predicates only; coordination docs/logs
 DIRTY five declared never-stage backup/cache paths; staged zero before reauthorization
 GATES independent fresh review of 9557be3 found P0 none, P1 none, P2 none; exact labelled authorization/task line counts each equal one; deletion or duplication fail closed; verdict READY_FOR_C7_T2G_CONTRACT
-EVIDENCE exact reviewed SHA 9557be32d173dbd943f9134a56b5dd8600b287da; durable labelled token lines in DIAGNOSTIC_007_AUTHORIZATION.md and CURRENT_TASK.md
+EVIDENCE exact reviewed SHA 9557be32d173dbd943f9134a56b5dd8600b287da; durable labelled token lines in DIAGNOSTIC_007_AUTHORIZATION.md and docs/CURRENT_TASK.md
 BLOCKER runner source correction, independent SOURCE_READY, source commit, and one newly authorized dry preflight remain; Blender blocked
 NEXT commit this separate reauthorization, then asset writer changes only the two runner predicates and performs static positive/deletion/duplication checks before independent source review
 
@@ -259,7 +259,7 @@ BASE 735c143
 PARENT TEMPLE-TR4-DIAGNOSTIC-007 TERMINAL-DIAGNOSTIC-BLOCKED
 HEAD pending probe contract review-request checkpoint
 CANDIDATE none
-WRITE_SCOPE new docs/workstreams/temple-tr4-material-probe/{MATERIAL_SOCKET_PROBE_001_CONTRACT.md,MATERIAL_SOCKET_PROBE_001_INPUT.json,THREAD_LOG.md};CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;coordination progress/log
+WRITE_SCOPE new docs/workstreams/temple-tr4-material-probe/{MATERIAL_SOCKET_PROBE_001_CONTRACT.md,MATERIAL_SOCKET_PROBE_001_INPUT.json,THREAD_LOG.md};docs/CURRENT_TASK.md;docs/qa/TEMPLE_ACCEPTANCE.md;coordination progress/log
 DIRTY five declared never-stage backup/cache paths; staged zero before contract draft
 GATES independent diagnostic-007 evidence/root-cause review P0 none, P1 material socket contract blocked, P2 none; official Blender contract states Voronoi inputs are dynamic by node properties
 EVIDENCE diagnostic-007 evidence commit 3937ef6; exact frozen node/property/25-target canonical probe input; proposed one Blender process, zero render/evaluator/export, four-file closure
@@ -273,7 +273,7 @@ BASE 733f4d1fda9ac6d9eb9bd7620ef6a2a2ed475e3b
 PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-REVIEW-REQUESTED
 HEAD pending corrected probe contract review-request checkpoint
 CANDIDATE none
-WRITE_SCOPE probe contract/input/evidence-schema/status-schema/log plus CURRENT_TASK.md, acceptance, coordination progress/log
+WRITE_SCOPE probe contract/input/evidence-schema/status-schema/log plus docs/CURRENT_TASK.md, acceptance, coordination progress/log
 DIRTY five declared never-stage backup/cache paths; staged zero before correction
 GATES independent review P0 none; P1 unique token absent; P1 evidence schema descriptive; P1 failure/provenance closure incomplete; P2 none; verdict CONTRACT_BLOCKED
 EVIDENCE exact reviewed SHA 733f4d1; corrected complete labelled token; two Draft 2020-12 JSON Schemas; exact stage closures; contract/input/schema/runner/generator/Blender hashes
@@ -287,7 +287,7 @@ BASE bf4cda5586bc88af3d1a366211c9b67f98240b2d
 PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-BLOCKED-REVIEW-001-CORRECTED
 HEAD pending second corrected schema review-request checkpoint
 CANDIDATE none
-WRITE_SCOPE probe contract/evidence-schema/status-schema/log plus CURRENT_TASK.md, acceptance, coordination progress/log
+WRITE_SCOPE probe contract/evidence-schema/status-schema/log plus docs/CURRENT_TASK.md, acceptance, coordination progress/log
 DIRTY five declared never-stage backup/cache paths; staged zero before correction
 GATES independent review P0 none; P1 tuple file objects underconstrained; P1 value types and unique target nulls underconstrained; P1 OS launch failure unrepresentable; P2 none; verdict CONTRACT_BLOCKED
 EVIDENCE full tuple item refs and items:false; exact default-value JSON type branches; non-null unique target evidence; new launch stage with null return/render counts
@@ -301,7 +301,7 @@ BASE ec2fbdc016611d90629ddba138ff145a76fd3bab
 PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-BLOCKED-REVIEW-002-CORRECTED
 HEAD pending unique-target closure review-request checkpoint
 CANDIDATE none
-WRITE_SCOPE evidence schema, probe contract/log, CURRENT_TASK.md, acceptance, coordination progress/log
+WRITE_SCOPE evidence schema, probe contract/log, docs/CURRENT_TASK.md, acceptance, coordination progress/log
 DIRTY five declared never-stage backup/cache paths; staged zero before correction
 GATES independent review P0 none; P1 unique target supportsDefaultValue null bypass; P2 none; all tuple/type/stage/provenance checks otherwise closed
 EVIDENCE occurrenceCount one now forces supportsDefaultValue boolean before existing true/false branches
@@ -329,7 +329,7 @@ BASE bd328a0
 PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 SOURCE-AUTHORIZED
 HEAD pending process-token hardening review-request checkpoint
 CANDIDATE none
-WRITE_SCOPE probe contract/log, CURRENT_TASK.md, acceptance, coordination progress/log
+WRITE_SCOPE probe contract/log, docs/CURRENT_TASK.md, acceptance, coordination progress/log
 DIRTY five declared never-stage backup/cache paths; staged zero before correction
 GATES reviewed contract ready at b530556; conservative coordinator audit found source token alone did not mechanically prevent premature launch
 EVIDENCE frozen future process-token full-line literal; current exact line count zero; runner requirement exact count one plus process-authorization coordination record before output root
@@ -343,7 +343,7 @@ BASE 0964ec5
 PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 PROCESS-TOKEN-HARDENING-REVIEW-REQUESTED
 HEAD pending process-report literal correction checkpoint
 CANDIDATE none
-WRITE_SCOPE probe contract/log, CURRENT_TASK.md, acceptance, coordination progress/log
+WRITE_SCOPE probe contract/log, docs/CURRENT_TASK.md, acceptance, coordination progress/log
 DIRTY five declared never-stage backup/cache paths; staged zero before correction
 GATES independent review P0 none; P1 future coordination REPORT full-line literal absent; P2 none; process-token full literal accepted and exact count zero
 EVIDENCE uniquely reconstructable future REPORT line; process token and REPORT exact line counts both zero before launch
@@ -371,9 +371,23 @@ BASE f098956b414e89a9807f7932cc18ea0dc9417c5b
 PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 SOURCE-REAUTHORIZED-AFTER-PROCESS-TOKEN-REVIEW
 HEAD pending runner atomic-exception review-request checkpoint
 CANDIDATE none
-WRITE_SCOPE CURRENT_TASK.md;probe contract/log;acceptance;coordination progress/log
+WRITE_SCOPE docs/CURRENT_TASK.md;probe contract/log;acceptance;coordination progress/log
 DIRTY two authorized untracked probe scripts plus five declared never-stage backup/cache paths; staged zero before contract correction
 GATES generator 444 lines;runner approximately 1130 lines;AST and JSON parse green;forbidden render/export/evaluator process absent;probe-001 absent;future launch-line counts zero
 EVIDENCE source is WIP_UNCOMMITTED and unexecuted;COMMIT_POLICY default 500-line budget requires exact exception, owner, indivisibility reason, and whole-checkpoint verification
 BLOCKER fresh READY_FOR_MATERIAL_SOCKET_PROBE_001_RUNNER_ATOMIC_EXCEPTION and separate source reauthorization;Blender/process/diagnostic-008 blocked
 NEXT commit docs-only exception review request, obtain independent read-only verdict, then separately decide source reauthorization
+
+REPORT TEMPLE-REPOSITORY-MIGRATION ARCHIVE-INTEGRITY-VERIFIED
+THREAD 019f75cd-f2bd-76f1-bb72-d3ecb3038662
+TIME 2026-07-18T23:35:00+08:00
+BASE 84039746231df16994aef9f2b4b85d2978607469
+PARENT standalone repository migration
+HEAD pending documentation migration checkpoint
+CANDIDATE none
+WRITE_SCOPE AGENTS.md;docs/{CURRENT_TASK.md,DESIGN.md,COMMIT_POLICY.md};active TR4 coordination/material-probe contracts and logs;tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py
+DIRTY tracked migration paths only; untracked tide-scar-hero.blend1, Python cache, and two material-socket-probe scripts remain unstaged and excluded
+GATES diagnostic-001 through diagnostic-007 planned-manifest preflight SHA-256 values all match the UTF-8/LF-normalized preflight bytes; direct Windows CRLF byte hashing is not archive evidence
+EVIDENCE historical preflight blobs resolve to 32dc27c9bc77adc8bb3e91fe77557c8cf4676c1d for 001-005, 861fba6e2469ea40c091921b3b37e2f932415386 for 006, and 3937ef6771d9edd76b90d56eac6197a7dc253e6d for 007; no Blender, browser, test, or build command ran
+BLOCKER material-socket-probe-001 remains WIP_UNCOMMITTED and runtime remains blocked by its active authorization boundary
+NEXT commit and push the standalone documentation migration; then open only a separately authorized visible-runtime slice

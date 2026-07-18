@@ -114,7 +114,7 @@ Required semantic roots in both source and optimized GLB are exactly these nine 
 
 ## Workstream boundaries
 
-- Coordinator: `DESIGN.md`, `CURRENT_TASK.md`, `docs/rules/RUNNER_RULES.md`, `docs/qa/TEMPLE_ACCEPTANCE.md`, `docs/logs/CHANGELOG.md` only at final acceptance, and `docs/workstreams/temple-tr4-coordination/**`.
+- Coordinator: `docs/DESIGN.md`, `docs/CURRENT_TASK.md`, `docs/rules/RUNNER_RULES.md`, `docs/qa/TEMPLE_ACCEPTANCE.md`, `docs/logs/CHANGELOG.md` only at final acceptance, and `docs/workstreams/temple-tr4-coordination/**`.
 - Asset diagnostic writer: new `tools/temple-asset-pipeline/generate_tide_scar_tr4_pack.py`, `tools/temple-asset-pipeline/evaluate_tide_scar_tr4_pack.py`, `tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py`, and `docs/workstreams/temple-tr4-asset/**` only. After a separate export authorization, the same writer may additionally create `src/assets/tide-scar-tr4/**`.
 - Independent diagnostic visual reviewer starts after the runner stops whenever an exact complete 20-PNG set exists, regardless of whether the evaluator was invoked or passed. It may write only `docs/workstreams/temple-tr4-visual-review/TR4_DIAGNOSTIC_REVIEW.md` and `docs/workstreams/temple-tr4-visual-review/THREAD_LOG.md`; all asset, tool, contract, runtime, and evidence images are read-only. It inspects the four beauty frames and their bound masks/depth, and cannot repair or rerender. An incomplete set is not manually reviewed.
 - Diagnostic C7 proves only ordinary-running pursuer absence and game-over bookend model presence. Opening visibility, tick/distance boundaries, pause hiding, and failure-branch lifecycle behavior are runtime/test/browser obligations after asset acceptance.

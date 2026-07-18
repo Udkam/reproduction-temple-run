@@ -99,7 +99,7 @@
   1,130 lines. The runner therefore exceeds the default 500 hand-authored-line checkpoint
   budget, while the active task named no exact exception.
 - Further source editing, execution, staging, and commit are paused as WIP_UNCOMMITTED.
-  `CURRENT_TASK.md` now proposes one exact-path runner exception because its pure-Python
+  `docs/CURRENT_TASK.md` now proposes one exact-path runner exception because its pure-Python
   Git/authorization boundary, static two-script audit, single-process gate, evidence
   replay, and four status closures form one self-hashed executable claim.
 - Independent exception readiness and separate coordinator source reauthorization are
