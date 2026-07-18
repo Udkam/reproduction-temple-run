@@ -829,3 +829,16 @@ NEVER_STAGE the five frozen backup/cache paths remain untouched
 ROOT_CAUSE runner line 1069 still checks the C7-D4 status literal that the committed `bb7eedd` header status replaced
 AUTHORITY coordinator commit `efc0b3f` authorizes only C7-T2G to replace that literal with the durable `TEMPLE-TR4-C7-SOURCE-CHAIN-AUTHORIZED` token
 BLOCKER Blender remains blocked
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 C7-T2G-SOURCE-CHECKPOINT
+DATE 2026-07-18
+ROLE Temple asset implementation owner
+SOURCE_COMMIT 973d2fa9b20055ce495e708ad7d56babaaa8f570
+RUNNER_SHA256 ef99b614f2095cc82445780a39add825d42c239afa5d766302fd7672a00e5d58
+RUNNER_BLOB 57e8336424c5c0126f122f2105df7990a83a0d6c
+DIFF +2/-2
+SOURCE_CHANGE both complete labelled authorization lines now use exact `splitlines().count(FULL_LABELLED_LINE) != 1` predicates
+CHECKS UTF-8 AST, diff check, current positive, deletion count 0 negative, and duplication count 2 negative all passed
+INDEPENDENT_REVIEW P0 none; P1 none; P2 none; SOURCE_READY
+PROCESS runner not executed; Blender not started; evaluator not started; no process, test, build, or browser execution
+NEXT one newly authorized `--dry-preflight`; Blender remains blocked
