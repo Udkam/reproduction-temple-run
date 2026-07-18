@@ -1,6 +1,6 @@
 # TEMPLE-TR4 material socket probe 001 contract
 
-Status: **EXACT TWO-SCRIPT SOURCE IMPLEMENTATION AUTHORIZED AFTER INDEPENDENT CONTRACT READINESS; BLENDER PROCESS NOT AUTHORIZED.**
+Status: **SOURCE PAUSED AT WIP_UNCOMMITTED PENDING ATOMIC RUNNER-CHECKPOINT EXCEPTION REVIEW; BLENDER PROCESS NOT AUTHORIZED.**
 
 Probe source authorization token: `TEMPLE-TR4-MATERIAL-SOCKET-PROBE-001-SOURCE-AUTHORIZED`.
 
@@ -65,6 +65,16 @@ Independent review of exact process-token/report hardening commit `dfcf0bf` foun
 P0/P1/P2 and returned `READY_FOR_MATERIAL_SOCKET_PROBE_001_PROCESS_TOKEN_CONTRACT`.
 Source implementation authority is therefore restored. During source work, both future
 launch-line exact counts remain zero and the runner must fail before output-root creation.
+
+Static inspection then found the untracked fail-closed runner exceeds the default 500
+hand-authored-line checkpoint budget, but `CURRENT_TASK.md` had not named an exact atomic
+exception. Further editing, execution, staging, and commit are paused with both scripts
+WIP_UNCOMMITTED and `probe-001` absent. The proposed exception owns only
+`run_tide_scar_material_socket_probe.py` and keeps the repository/Git/authorization,
+input/schema/provenance, single-process, evidence replay, and four terminal-closure gates
+in one HEAD-bound executable unit. It may become active only after a fresh independent
+`READY_FOR_MATERIAL_SOCKET_PROBE_001_RUNNER_ATOMIC_EXCEPTION` verdict and a separate
+coordinator reauthorization. The generator remains a separate normal checkpoint.
 
 ## One-process execution boundary
 

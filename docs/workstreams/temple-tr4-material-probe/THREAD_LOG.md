@@ -90,3 +90,19 @@
   until both lines become count one in a later final-hash launch checkpoint.
 - Blender, probe output, diagnostic `008`, render/evaluator/export, runtime, browser,
   tests/build, push, and visual acceptance remain blocked.
+
+## 2026-07-18 oversized runner WIP paused for atomic-exception review
+
+- The asset writer added only the two authorized untracked scripts and did not execute
+  either one. `probe-001` remains absent; both future launch-line exact counts remain zero.
+- Root static inspection found the generator at 444 lines and the runner at approximately
+  1,130 lines. The runner therefore exceeds the default 500 hand-authored-line checkpoint
+  budget, while the active task named no exact exception.
+- Further source editing, execution, staging, and commit are paused as WIP_UNCOMMITTED.
+  `CURRENT_TASK.md` now proposes one exact-path runner exception because its pure-Python
+  Git/authorization boundary, static two-script audit, single-process gate, evidence
+  replay, and four status closures form one self-hashed executable claim.
+- Independent exception readiness and separate coordinator source reauthorization are
+  required before the writer may resume. Blender, probe output, diagnostic `008`,
+  render/evaluator/export, runtime, browser, tests/build, push, and visual acceptance
+  remain blocked.

@@ -363,3 +363,17 @@ GATES independent review P0 none; P1 none; P2 none; READY_FOR_MATERIAL_SOCKET_PR
 EVIDENCE exact reviewed SHA dfcf0bf26e8fca409f991fcfa272114370d82b93
 BLOCKER source implementation/review/commit and separate final-hash launch checkpoint remain; process/output/diagnostic-008 blocked
 NEXT commit restored source authority, then one asset writer implements only the two scripts and proves zero-count launch lines block before output root
+
+REPORT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 RUNNER-ATOMIC-EXCEPTION-REVIEW-REQUESTED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T20:08:55+08:00
+BASE f098956b414e89a9807f7932cc18ea0dc9417c5b
+PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 SOURCE-REAUTHORIZED-AFTER-PROCESS-TOKEN-REVIEW
+HEAD pending runner atomic-exception review-request checkpoint
+CANDIDATE none
+WRITE_SCOPE CURRENT_TASK.md;probe contract/log;acceptance;coordination progress/log
+DIRTY two authorized untracked probe scripts plus five declared never-stage backup/cache paths; staged zero before contract correction
+GATES generator 444 lines;runner approximately 1130 lines;AST and JSON parse green;forbidden render/export/evaluator process absent;probe-001 absent;future launch-line counts zero
+EVIDENCE source is WIP_UNCOMMITTED and unexecuted;COMMIT_POLICY default 500-line budget requires exact exception, owner, indivisibility reason, and whole-checkpoint verification
+BLOCKER fresh READY_FOR_MATERIAL_SOCKET_PROBE_001_RUNNER_ATOMIC_EXCEPTION and separate source reauthorization;Blender/process/diagnostic-008 blocked
+NEXT commit docs-only exception review request, obtain independent read-only verdict, then separately decide source reauthorization
