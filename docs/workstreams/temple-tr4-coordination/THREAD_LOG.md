@@ -195,3 +195,17 @@ GATES C7-T2F de625c6 independently SOURCE_READY; fresh dry preflight exit 1 PREC
 EVIDENCE runner line 1069 still requires superseded C7-D4 top-status sentence while active authorization correctly records C7-T2F; no C7 construction/schema/value/process defect observed
 BLOCKER runner authorization check is coupled to a mutable top-status sentence; newly authorized dry preflight and Blender remain blocked
 NEXT commit this docs-only bounded correction authority, record the asset dry failure, then replace only the runner literal with the durable authorization token and obtain independent source review before one newly authorized dry preflight
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 C7-T2G-CONTRACT-BLOCKED-REVIEW-001
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T19:20:00+08:00
+BASE efc0b3fcf321c2554d5523d49e84bf648923ee98
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 SECOND-DRY-PREFLIGHT-PRECHECK-BLOCKED-C7-T2G-AUTHORIZED
+HEAD pending corrected C7-T2G contract review-request checkpoint
+CANDIDATE none
+WRITE_SCOPE coordination docs/logs only; source and process execution blocked
+DIRTY five declared never-stage backup/cache paths; staged zero before correction
+GATES independent review P0 none; P1 absent CURRENT_TASK historical phrase would cause deterministic next PRECHECK_BLOCKED; P1 bare authorization-token substring appears in authoritative line and explanatory prose; P2 none
+EVIDENCE exact reviewed SHA efc0b3f; runner verify_c7_authorization lines 1068-1077; diagnostic-007 absent
+BLOCKER CONTRACT_BLOCKED; efc0b3f is not source authority
+NEXT commit corrected two-labelled-line exact-count contract, obtain fresh independent read-only review, then record a separate coordinator reauthorization before any runner source edit
