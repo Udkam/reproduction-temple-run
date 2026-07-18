@@ -237,3 +237,17 @@ GATES C7-T2G 973d2fa independent SOURCE_READY; newly authorized dry preflight ex
 EVIDENCE generator SHA256 d71d225bbaef3a2d9527b63916973cd9c4c77891ba9aa29672053ef12226f26e; runner SHA256 ef99b614f2095cc82445780a39add825d42c239afa5d766302fd7672a00e5d58; evaluator SHA256 f6ee1c7838a02002208ce607ad7bbeb5acb5052402d6e5f963aefffb7d8590a0; construction SHA256 6a9735277c29ec32b3e22432b240385bc33993325aaf3422c60ac4f82e0dbd45
 BLOCKER none for the single diagnostic process; export/runtime/browser/final acceptance remain blocked
 NEXT commit coordination and asset dry-ready records, then invoke the standard runner exactly once with PYTHONDONTWRITEBYTECODE=1; no retry under any terminal result
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 TERMINAL-DIAGNOSTIC-BLOCKED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T20:05:00+08:00
+BASE f584643
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 DRY-PREFLIGHT-READY-FOR-BLENDER
+HEAD evidence 3937ef6; pending terminal coordination checkpoint
+CANDIDATE none
+WRITE_SCOPE immutable diagnostic-007 four-file evidence; coordination and asset logs only
+DIRTY five declared never-stage backup/cache paths; staged zero after evidence commit
+GATES standard runner invoked exactly once; runner exit 1; Blender 4.5.5 exit 1; evaluator null; PNG count zero; no visual review
+EVIDENCE diagnostic-007 exactly preflight.json 24054/4086c7394c54cf6b8ac9f41e4512a74113232547540035f288d55672b7caaf35; planned-manifest.json 3791/fe43f335001de5441df71ff43e8c3c2dae9451f238d6e50a0a347204b1d229dc; blender.log 1774/70ed1b44c0bf46edb99d7b41a7334ec24d6bab68ae8459bfd8de895b166f2177; diagnostic-status.json 363/029549ce684c45d93d42524b3aaf2bc173adb102b9a55d23750a9244d1f5373f; evidence commit 3937ef6
+BLOCKER first material readback unconditionally indexed absent dynamic Voronoi Smoothness socket; diagnostic-007 immutable and no retry
+NEXT independent read-only root-cause review; if evidence requires it, draft a new-ID zero-render material-socket schema probe contract before any diagnostic-008 source or process authority
