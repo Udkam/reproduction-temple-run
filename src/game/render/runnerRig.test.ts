@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createRunnerRig, updateRunnerRig } from './runnerRig';
+import { RUNNER_GAIT_PHASE_COUNT, createRunnerRig, sampleRunnerGait, updateRunnerRig } from './runnerRig';
 
 const basePose = {
   speed: 12,
@@ -11,6 +11,23 @@ const basePose = {
 };
 
 describe('runner reduced motion', () => {
+  it('interpolates all eight authored gait phases without a boundary jump or limb-side flip', () => {
+    const keyframes = Array.from({ length: RUNNER_GAIT_PHASE_COUNT }, (_, index) => sampleRunnerGait(index / RUNNER_GAIT_PHASE_COUNT));
+    expect(new Set(keyframes.map((sample) => sample.thigh))).toHaveLength(RUNNER_GAIT_PHASE_COUNT);
+    expect(keyframes.some((sample) => sample.thigh > 0)).toBe(true);
+    expect(keyframes.some((sample) => sample.thigh < 0)).toBe(true);
+
+    const samples = Array.from({ length: 65 }, (_, index) => sampleRunnerGait(index / 64));
+    for (let index = 1; index < samples.length; index += 1) {
+      const previous = samples[index - 1]!;
+      const current = samples[index]!;
+      expect(Math.abs(current.thigh - previous.thigh)).toBeLessThan(0.16);
+      expect(Math.abs(current.shin - previous.shin)).toBeLessThan(0.2);
+      expect(Math.abs(current.arm - previous.arm)).toBeLessThan(0.15);
+    }
+    expect(Math.abs(samples[0]!.foot - samples.at(-1)!.foot)).toBeLessThan(0.001);
+  });
+
   it('keeps decorative core and shield rotations static', () => {
     const rig = createRunnerRig();
     updateRunnerRig(rig, { ...basePose, elapsed: 1, reducedMotion: true });
@@ -44,6 +61,14 @@ describe('runner reduced motion', () => {
     expect(rig.pelvis.rotation.y).not.toBe(first.pelvis);
     expect(rig.chest.rotation.y).not.toBe(first.chest);
     expect(Math.sign(rig.pelvis.rotation.y)).toBe(-Math.sign(rig.chest.rotation.y));
+  });
+
+  it('batches animated material pieces while retaining one real rig shadow caster', () => {
+    const rig = createRunnerRig();
+    updateRunnerRig(rig, { ...basePose, elapsed: 0.3, reducedMotion: false });
+    expect(rig.batches.length).toBeGreaterThan(1);
+    expect(rig.batches.reduce((total, batch) => total + batch.sources.length, 0)).toBeGreaterThan(rig.batches.length);
+    expect(rig.shadowCaster.name).toContain('courier-material-batch');
   });
 
   it('keeps jump and slide as distinct semantic whole-body poses', () => {
