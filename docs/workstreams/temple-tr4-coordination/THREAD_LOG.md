@@ -223,3 +223,17 @@ GATES independent fresh review of 9557be3 found P0 none, P1 none, P2 none; exact
 EVIDENCE exact reviewed SHA 9557be32d173dbd943f9134a56b5dd8600b287da; durable labelled token lines in DIAGNOSTIC_007_AUTHORIZATION.md and CURRENT_TASK.md
 BLOCKER runner source correction, independent SOURCE_READY, source commit, and one newly authorized dry preflight remain; Blender blocked
 NEXT commit this separate reauthorization, then asset writer changes only the two runner predicates and performs static positive/deletion/duplication checks before independent source review
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 DRY-PREFLIGHT-READY-FOR-BLENDER
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T19:50:00+08:00
+BASE cee5b12
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 C7-T2G-SOURCE-REAUTHORIZED
+HEAD pending dry-ready coordination checkpoint
+CANDIDATE none
+WRITE_SCOPE coordination docs/logs; then one immutable diagnostic-007 evidence directory only
+DIRTY five declared never-stage backup/cache paths; staged zero before record
+GATES C7-T2G 973d2fa independent SOURCE_READY; newly authorized dry preflight exit 0; sole output READY_FOR_BLENDER; diagnostic-007 absent; Blender/evaluator not launched
+EVIDENCE generator SHA256 d71d225bbaef3a2d9527b63916973cd9c4c77891ba9aa29672053ef12226f26e; runner SHA256 ef99b614f2095cc82445780a39add825d42c239afa5d766302fd7672a00e5d58; evaluator SHA256 f6ee1c7838a02002208ce607ad7bbeb5acb5052402d6e5f963aefffb7d8590a0; construction SHA256 6a9735277c29ec32b3e22432b240385bc33993325aaf3422c60ac4f82e0dbd45
+BLOCKER none for the single diagnostic process; export/runtime/browser/final acceptance remain blocked
+NEXT commit coordination and asset dry-ready records, then invoke the standard runner exactly once with PYTHONDONTWRITEBYTECODE=1; no retry under any terminal result
