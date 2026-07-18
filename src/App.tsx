@@ -168,13 +168,14 @@ export default function App() {
 
       <header className="brandbar" aria-label="Tide Relay">
         <span className="brand-glyph" aria-hidden="true"><i /></span>
-        <span className="brand-copy"><strong>Tide Relay</strong><span>follow the jade line</span></span>
+        <span className="brand-copy"><strong>Tide Relay</strong><span>follow the tide scar</span></span>
       </header>
 
       <section className="hud" aria-label="Run status" data-score={hudScore} data-distance={hudDistance} data-shards={hudShards} data-flow={hudFlow}>
         <div className="metric metric--score"><span>Score</span><strong>{hudScore.toLocaleString('en-US')}</strong></div>
         <div className="metric metric--distance"><span>Distance</span><strong>{hudDistance.toLocaleString('en-US')} <small>m</small></strong></div>
-        <div className="metric metric--support"><span>Flow ×{hudFlow}</span><strong>{hudShards} shards</strong></div>
+        <div className="metric metric--flow"><span>Flow</span><strong>×{hudFlow}</strong></div>
+        <div className="metric metric--shards"><span>Shards</span><strong>{hudShards}</strong></div>
       </section>
 
       {showMilestone ? (
@@ -191,6 +192,8 @@ export default function App() {
         onClick={() => status === 'paused' ? resume() : runtimeRef.current?.pause()}
       >{status === 'paused' ? '▶' : 'Ⅱ'}</button>
 
+      {status === 'paused' ? <p className="pause-marker" role="status">Paused</p> : null}
+
       {showTurnCue && section ? (
         <div className={`turn-cue${turnWindowActive ? '' : ' turn-cue--warning'}`} data-testid="turn-cue">
           <strong aria-hidden="true">{section.requiredTurn === 'left' ? '←' : '→'}</strong>
@@ -200,30 +203,20 @@ export default function App() {
 
       {(state?.runner.shieldCharges ?? 0) > 0 ? <div className="shield-rail" aria-label="Aegis charge ready"><i /></div> : null}
 
-      {status !== 'running' ? (
+      {status !== 'running' && status !== 'paused' ? (
         <section className="overlay" aria-modal="true" role="dialog" aria-labelledby="overlay-title">
           <div className="overlay-card">
             {status === 'ready' ? (
               <>
                 <p className="overlay-eyebrow">the path remembers every footstep</p>
                 <h1 id="overlay-title">Tide<br /><em>Relay</em></h1>
-                <p className="overlay-copy">Run the flooded observatory. Read the ruins, jump the broken spans, duck beneath the instruments—and do not let the tide catch you.</p>
+                <p className="overlay-copy">Run the flooded observatory. Use arrows or one-finger swipes to read the ruins, jump broken spans, duck beneath instruments—and do not let the tide catch you.</p>
                 <div className="ready-meta">
                   <p><span>best distance</span><strong>{formatDistance(bestDistance)} m</strong></p>
                   <p><span>best score</span><strong>{bestScore.toLocaleString('en-US')}</strong></p>
                   <p><span>move</span><strong>arrows / swipe</strong></p>
                 </div>
                 <div className="overlay-actions"><button id="primary-action" className="primary-action" type="button" onClick={start}>Start running</button></div>
-              </>
-            ) : status === 'paused' ? (
-              <>
-                <p className="overlay-eyebrow">take a breath</p>
-                <h2 id="overlay-title">Run<br />paused</h2>
-                <p className="overlay-copy">The route is waiting exactly where you left it.</p>
-                <div className="overlay-actions">
-                  <button id="primary-action" className="primary-action" type="button" onClick={resume}>Resume</button>
-                  <button className="secondary-action" type="button" onClick={restart}>Restart run</button>
-                </div>
               </>
             ) : (
               <>
@@ -244,10 +237,10 @@ export default function App() {
       ) : null}
 
       <nav className="touch-controls" aria-label="Runner controls">
-        <button className="touch-action" type="button" aria-label="Move or turn left" onClick={() => action('left')}>←</button>
-        <button className="touch-action" type="button" aria-label="Jump" onClick={() => action('jump')}>↑</button>
-        <button className="touch-action" type="button" aria-label="Slide" onClick={() => action('slide')}>↓</button>
-        <button className="touch-action" type="button" aria-label="Move or turn right" onClick={() => action('right')}>→</button>
+        <button className="touch-action" type="button" aria-label="Move or turn left" disabled={status !== 'running'} onClick={() => action('left')}>←</button>
+        <button className="touch-action" type="button" aria-label="Jump" disabled={status !== 'running'} onClick={() => action('jump')}>↑</button>
+        <button className="touch-action" type="button" aria-label="Slide" disabled={status !== 'running'} onClick={() => action('slide')}>↓</button>
+        <button className="touch-action" type="button" aria-label="Move or turn right" disabled={status !== 'running'} onClick={() => action('right')}>→</button>
       </nav>
       {status === 'running' && (state?.distance ?? 0) < 20 ? <p className="gesture-hint">swipe sideways · up to jump · down to slide</p> : null}
 
