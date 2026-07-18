@@ -1066,12 +1066,12 @@ def verify_c7_authorization(repo_root: Path) -> None:
         if not path.is_file():
             raise PrecheckBlocked(f"required authorization input is missing: {path}")
     authorization_text = authorization.read_text(encoding="utf-8")
-    if "Status: **AUTHORIZED FOR EXACT C7-T1/T2 SOURCE CHECKPOINTS AFTER C7-D3; DIAGNOSTIC PROCESS GATED BY DRY PREFLIGHT.**" not in authorization_text:
+    if authorization_text.splitlines().count("C7 launch authorization token: `TEMPLE-TR4-C7-SOURCE-CHAIN-AUTHORIZED`.") != 1:
         raise PrecheckBlocked("diagnostic-007 authorization status is not the frozen C7 source authorization")
     if "READY_FOR_DIAGNOSTIC_007_CONTRACT" not in authorization_text or "READY_FOR_DIAGNOSTIC_007_LOOP_CONTRACT" not in authorization_text:
         raise PrecheckBlocked("diagnostic-007 independent contract verdicts are missing")
     current_task_text = current_task.read_text(encoding="utf-8")
-    if "C7-T1/T2 source checkpoints reauthorized" not in current_task_text:
+    if current_task_text.splitlines().count("C7 task authorization token: `TEMPLE-TR4-C7-TASK-SOURCE-CHAIN-AUTHORIZED`.") != 1:
         raise PrecheckBlocked("CURRENT_TASK.md does not retain C7-T1/T2 source authorization")
     coordination_text = coordination_log.read_text(encoding="utf-8")
     if "REPORT TEMPLE-TR4-DIAGNOSTIC-007 C7-D4-SOURCE-REAUTHORIZED" not in coordination_text:
