@@ -386,6 +386,29 @@ or runtime action followed.
   the committed three-script hashes; Blender remains blocked until that gate returns
   `READY_FOR_BLENDER`.
 
+## 2026-07-18 C7 first dry-preflight terminal result
+
+- The authorized command `python tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py
+  --dry-preflight` ran once against committed source HEAD `343d511` and returned exit `1`
+  with `{"verdict":"PRECHECK_BLOCKED","reason":"unknown/missing/reordered keys at
+  $.construction.atmosphere"}`.
+- `diagnostic-007` remained absent. The runner created no preflight, plan, log, image,
+  status, or other evidence file and launched neither its Blender subprocess nor its
+  evaluator subprocess. The five declared never-stage backup/cache paths were untouched.
+- Static comparison showed that generator and runner atmosphere values and authored key
+  order are identical. The mismatch appears only after the runner canonicalizes the
+  complete preflight with sorted JSON keys, then compares that canonical object against
+  an insertion-ordered authored object using `list(expected.keys())` equality. This is a
+  validator implementation defect, not a construction, material, camera, or visual
+  contract change.
+- Coordinator checkpoint `bb7eedd` authorizes C7-T2F to change exactly the runner's
+  dictionary comparison from insertion-order equality to exact sorted key-set equality,
+  while preserving recursive types/values, array order, canonical bytes, unknown/missing
+  rejection, all hashes/gates, two subprocess maximum, and no-retry behavior. A positive
+  reordered-key case and negative unknown-key case, independent source review, and a
+  bounded runner-only commit are required before one fresh non-writing dry preflight.
+  Blender remains blocked.
+
 ## 2026-07-16 diagnostic-006 terminal result
 
 Verdict: **DIAGNOSTIC_BLOCKED** at stage `render-set`. After coordinator review of the
