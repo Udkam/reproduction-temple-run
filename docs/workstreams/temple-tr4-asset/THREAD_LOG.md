@@ -322,6 +322,35 @@ or runtime action followed.
 - No Blender, evaluator, render, export, browser, test, build, Git, commit, or push action
   occurred during this dry gate.
 
+## 2026-07-18 C7-T1 generator reconstruction checkpoint
+
+- Coordinator authority is C7-D4 commit `a4d4155`, following independent
+  `READY_FOR_DIAGNOSTIC_007_LOOP_CONTRACT` on exact C7-D3 commit `d66e1a5`. The asset
+  writer changed only `tools/temple-asset-pipeline/generate_tide_scar_tr4_pack.py`.
+- Source checkpoint `a9acb0a343bbd6947ad69064aeca6f283284be3a` reconstructs the C7 road,
+  layered canyon, twelve courier poses, game-over pursuer, four canonical hazard
+  silhouettes, procedural material graphs, Beer-Lambert beauty compositor, capped
+  linear depth, and twenty-output fail-closed scene metrics. File blob SHA-1 is
+  `2f386319c15fe320a7e36302b2f28b132d49593b`; canonical construction SHA-256 is
+  `6a9735277c29ec32b3e22432b240385bc33993325aaf3422c60ac4f82e0dbd45`.
+- The corrected Tide Scar loop uses the thirteen exact actual-world controls from C7-D3,
+  identity curve/root transforms, actual world control readback, and projection/safety
+  checks over every vertex of the evaluated NURBS/bevel tube. The pursuer audit covers
+  all renderable mesh/curve descendants, including the three ridge meshes and
+  `dorsalSeam`, for evaluated triangles, world height, unique data, modeling mode, radial
+  quality, and primitive separation while retaining exact named-part coverage.
+- UTF-8 AST parsing passed at 2,846 lines; `git diff --check` passed; canonical
+  construction replay reproduced the SHA-256 above; static output audit found one render
+  call site, exactly twenty ordered output records, and no retry path. Independent source
+  review found no P0/P1 and returned `SOURCE_READY` against the stable `+1328/-324` diff.
+  Its sole residual P2 is that canyon occlusion witnesses use conservative projected AABB
+  overlap and AABB-center Euclidean depth; this cannot override the later full manual
+  beauty/mask/depth review.
+- No Blender import/process, runner, evaluator, diagnostic-007 path, render, export,
+  runtime, browser, test, build, push, or unrelated file action occurred. C7-T2 remains
+  the next exact runner/evaluator source checkpoint; Blender stays blocked until C7-T2
+  and the authorized non-writing dry preflight are both green.
+
 ## 2026-07-16 diagnostic-006 terminal result
 
 Verdict: **DIAGNOSTIC_BLOCKED** at stage `render-set`. After coordinator review of the
