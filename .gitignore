@@ -3,6 +3,8 @@ dist/
 coverage/
 .playwright-mcp/
 .vite/
+__pycache__/
+*.blend1
 docs/screenshots/temple/*-dev*.png
 
 *.log
