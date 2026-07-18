@@ -12,6 +12,10 @@ The approved reference supplies only high-level composition, depth, material, li
 
 The courier remains an original articulated star-map runner. The rock-armored pursuer is a cinematic bookend: visible on the ready/opening beat and game-over ending beat only, absent during ordinary running, close-pressure, milestones, hazard previews, and pause. Canonical `chaseGap` remains deterministic pressure data and may drive presentation cues without exposing a continuous monster mesh.
 
+### R1 runtime environment implementation
+
+R1 replaces the legacy inward panorama/card canyon with deterministic geometry: irregular near cliff lips, interrupted mid-depth buttresses, and a desaturated far silhouette. The camera must read a thick broken causeway in the lower frame, playable middle depth, and open negative space to the horizon; fog is depth-based atmosphere only, never a card or full-width band.
+
 Existing `beam`, `ring`, `column`, `gap`, and turn semantics remain unchanged. TR4 remaps them visually to an original fractured jump threshold, supported low-clearance arch, asymmetrical lane blocker, broken span, and route-end cliff. Any primitive/blockout appearance, flat water band, repeated wall corridor, featureless strip road, clipping, detached limb, floating support, or pixel-gate-only completion claim is a visual failure.
 
 ## Historical aesthetic direction — Tide Scar D4 (TR3-005C, superseded by TR4)

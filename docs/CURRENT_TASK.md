@@ -34,6 +34,12 @@ TR4 rebuilds the original TIDE//RELAY presentation from the user-approved visual
 
 The binding construction, camera, material, lifecycle, anti-clipping, semantic-root, export, and budget gates are in `docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md`.
 
+### TEMPLE-TR4-R1 — runtime canyon replacement (authorized, in progress)
+
+This user-authorized visible-runtime slice supersedes the earlier sequencing hold for its exact scope only. It may change exactly `src/game/render/tideScarWorld.ts`, `src/game/render/tideScarWorld.test.ts`, and `src/game/render/WorldRenderer.ts`. It replaces the inward panorama/card approach with deterministic near/mid/far canyon geometry, a physically thick fractured route surround, and depth-safe atmospheric separation. It must preserve simulation, collision, replay hashes, one-canvas ownership, public input, and all existing lifecycle cleanup. No external asset, Blender launch, export, package/configuration change, or material-socket-probe path is permitted.
+
+The checkpoint requires a targeted renderer/world test, typecheck, and a manually inspected local browser gameplay frame before any follow-on hazard, character, or UI work. Its status remains in progress until that evidence exists; it does not accept the broader TR4 asset or runtime program.
+
 ### Recovery-only atomic checkpoint exceptions
 
 These exceptions authorize preservation commits only and do not authorize new code:

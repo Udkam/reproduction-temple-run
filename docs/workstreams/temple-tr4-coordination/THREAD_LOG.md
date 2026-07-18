@@ -391,3 +391,17 @@ GATES diagnostic-001 through diagnostic-007 planned-manifest preflight SHA-256 v
 EVIDENCE historical preflight blobs resolve to 32dc27c9bc77adc8bb3e91fe77557c8cf4676c1d for 001-005, 861fba6e2469ea40c091921b3b37e2f932415386 for 006, and 3937ef6771d9edd76b90d56eac6197a7dc253e6d for 007; no Blender, browser, test, or build command ran
 BLOCKER material-socket-probe-001 remains WIP_UNCOMMITTED and runtime remains blocked by its active authorization boundary
 NEXT commit and push the standalone documentation migration; then open only a separately authorized visible-runtime slice
+
+REPORT TEMPLE-TR4-R1 RUNTIME-ENVIRONMENT-AUTHORIZED
+THREAD 019f75cd-f2bd-76f1-bb72-d3ecb3038662
+TIME 2026-07-18T23:50:00+08:00
+BASE 9e40931b9d578cf43baf46ba47198887e9f4379d
+PARENT TEMPLE-REPOSITORY-MIGRATION ARCHIVE-INTEGRITY-VERIFIED
+HEAD pending R1 contract checkpoint
+CANDIDATE none
+WRITE_SCOPE docs/DESIGN.md;docs/CURRENT_TASK.md;docs/workstreams/temple-tr4-coordination/{TR4_VISUAL_CONTRACT.md,THREAD_LOG.md}
+DIRTY existing historical CRLF-only records and untracked WIP remain excluded
+GATES exact R1 source scope is tideScarWorld.ts, tideScarWorld.test.ts, and WorldRenderer.ts; targeted renderer/world test, typecheck, and manually inspected local browser gameplay frame required
+EVIDENCE no Blender, material-socket probe, external asset, browser capture, or source edit has run in this contract checkpoint
+BLOCKER R1 source/evidence remain in progress; broader TR4 acceptance is not claimed
+NEXT implement the geometric canyon replacement as one bounded runtime source checkpoint
