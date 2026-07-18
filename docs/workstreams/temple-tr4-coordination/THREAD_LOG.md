@@ -97,3 +97,17 @@ GATES C1-C6/probes and 78 files frozen; C7 schema/identity/camera predicate/subs
 EVIDENCE docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_007_AUTHORIZATION.md;docs/workstreams/temple-tr4-coordination/TR4_VISUAL_CONTRACT.md;docs/workstreams/temple-tr4-coordination/TR4_PREFLIGHT_SCHEMA.md;docs/workstreams/temple-tr4-coordination/BACKLOG_SPLIT_PLAN.md
 BLOCKER no independent C7 contract verdict and no coordinator execution authorization
 NEXT independent read-only review of the exact C7 contract commit; resolve P0/P1 before any source edit or process launch
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 CONTRACT-BLOCKED-REVIEW-001
+THREAD /root/c7_contract_review_2
+TIME 2026-07-18T00:00:00+08:00
+BASE 2f5fa9c4b1e2f6b51be92020765fa01632e28491
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 CONTRACT-REVIEW-REQUESTED
+HEAD 2f5fa9c4b1e2f6b51be92020765fa01632e28491
+CANDIDATE none
+WRITE_SCOPE read-only
+DIRTY exactly five declared never-stage paths; reviewer changed nothing
+GATES P0 constructionHash scope conflict; P0 missing exact material/compositor/depth schema; P1 complete-render-set manual trigger; P1 generator atomic exception; P2 diagnostic/runtime lifecycle proof boundary
+EVIDENCE exact eight-path coordinator diff at 2f5fa9c; existing C6 pipeline source read-only
+BLOCKER CONTRACT_BLOCKED; draft 2f5fa9c is not implementation or execution authority
+NEXT coordinator corrects the exact contract records and requests a fresh independent review; no source edit or process launch

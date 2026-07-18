@@ -2,6 +2,8 @@
 
 Status: **DRAFT / CONTRACT REVIEW REQUESTED — NOT AUTHORIZED FOR IMPLEMENTATION OR EXECUTION.**
 
+Independent review of draft commit `2f5fa9c4b1e2f6b51be92020765fa01632e28491` returned `CONTRACT_BLOCKED`: construction-hash scope and the fail-closed material/compositor/depth schema were P0; manual review triggering and the generator checkpoint exception were P1. This revision resolves those findings and requires a fresh review of its exact commit before authorization.
+
 This document is a proposed C7 overlay on the immutable C1 schema and the consumed C2-C6 authorizations. It does not authorize a source edit, diagnostic directory, Blender process, evaluator, render, export, runtime integration, browser capture, test, build, commit beyond coordinator documentation, or push. An independent read-only review must return `READY_FOR_DIAGNOSTIC_007_CONTRACT`, after which the coordinator must record a separate explicit authorization before the asset writer starts.
 
 ## Frozen evidence and baseline
@@ -19,7 +21,7 @@ This document is a proposed C7 overlay on the immutable C1 schema and the consum
 - diagnostic root is exactly `docs\workstreams\temple-tr4-asset\diagnostic-007`;
 - output prefix is exactly `tr4-diagnostic-007-`;
 - gameplay scene ID is `tr4-diagnostic-running-007`; bookend scene ID is `tr4-diagnostic-game-over-007`;
-- the construction hash must be new and must cover every C7 geometry, node-graph, light, compositor, depth, semantic-root, collision, camera, and output record;
+- `constructionHash` is new and remains SHA-256 of canonical `construction` only. It covers C7 geometry, material-graph, light, compositor, and depth records inside that object; it does not cover sibling fields. `planned-manifest.json.preflightSha256` binds the complete normalized preflight, including camera, collision, top-level material, semantic-root, budget, and output records;
 - output order, profiles, passes, and dimensions remain exactly the C1 order: four profiles `portrait,desktop,landscape,closeup`, each with `beauty,object-id,road-mask,normal,linear-depth`, for exactly 20 PNGs named `tr4-diagnostic-007-{profile}-{pass}.png`;
 - all four frozen camera positions, targets, up vectors, FOV, near/far, lens shifts, projection matrices, view matrices, and analytic screen gates remain unchanged.
 
@@ -49,12 +51,62 @@ C7 is not a validator retry. Before its sole render, the new construction hash m
 
 Public gameplay sources inform only generic turn/jump/slide/gap/lane-readability grammar. No commercial frame, name, logo, character, creature, road mesh, texture, UI, sound, exact obstacle arrangement, or trade dress may enter C7.
 
+### Exact reconstruction-schema additions
+
+C7 retains every C6 construction field except where this section supplies a replacement. The resulting objects reject unknown or missing keys:
+
+- `road` retains its thirteen C6 fields and adds exactly `capCrosswiseSegments=9`, `capLongitudinalSegmentsPerModule=8`, `fractureEventsPerModule=3`, `undercutEventsPerModule=2`, `sideApronsPerModule=2`, `vistaBendStartZ=-82`, `vistaBendMaxOffsetX=12`. `nearLoopShoulder` becomes `{"rightOuterX":4.45,"zRange":[-5.2,-2.8]}`.
+- each `canyon.near/mid/far` band retains its C6 fields and adds exactly `recipe`, `ridgeSegmentsPerSignature`, `terracesPerSignature`, `overhangsPerSignature`, `recessesPerSignature`. Values are near `{"recipe":"layered-ridge-near-v1","ridgeSegmentsPerSignature":9,"terracesPerSignature":3,"overhangsPerSignature":2,"recessesPerSignature":2}`, mid `{"recipe":"layered-ridge-mid-v1","ridgeSegmentsPerSignature":8,"terracesPerSignature":3,"overhangsPerSignature":2,"recessesPerSignature":2}`, and far `{"recipe":"layered-ridge-far-v1","ridgeSegmentsPerSignature":7,"terracesPerSignature":2,"overhangsPerSignature":1,"recessesPerSignature":1}`. Counts remain `8/10/12` and every generated signature record must hash uniquely inside its band.
+- `runner` retains its C6 fields and adds exactly `modelingMode="profiled-articulated-mesh-v1"`, `minimumRadialSegments=10`, `primitiveJoinForbidden=true`, `nonAdjacentIntersectionTolerance=0`.
+- `pursuer` retains its C6 fields and adds exactly `modelingMode="separated-rock-plate-quadruped-v1"`, `minimumRadialSegments=10`, `primitiveJoinForbidden=true`, `bodyCoreSeparationMin=.18`.
+- every hazard record retains its C6 fields and adds exactly `visualName`, `baseEmbedRange=[.08,.15]`, `maxProxyDiscrepancy=.06`, `coPlanarFacesAllowed=false`. Names are `Fault Lip`, `Coral Throat`, `Basalt Splitter`, and `Tidebreak Gap` in canonical order.
+- `tideScar` retains its C6 fields and adds exactly `nearLoopVisibilityProfile="portrait"`, `bakedTextureAllowed=false`. `loopControlPoints` is replaced by the ahead-of-runner spline `[[3.00,.035,-3.20],[3.09,.035,-2.87],[3.33,.035,-2.64],[3.65,.035,-2.55],[3.98,.035,-2.64],[4.22,.035,-2.87],[4.30,.035,-3.20],[4.22,.035,-3.52],[3.98,.035,-3.76],[3.65,.035,-3.85],[3.33,.035,-3.76],[3.09,.035,-3.52],[3.00,.035,-3.20]]`.
+
+`scene-metrics.json` retains the C6 keys and adds exact `geometryBinding`, `materialGraphBinding`, and `depthEncodingBinding`. `geometryBinding` has exactly `road`, `canyon`, `runner`, `pursuer`, `hazards`, `tideScar`, `verdict`; its normalized values are generated from the actual Blender objects and must deep-equal the corresponding construction records, with `verdict="READY_FOR_DIAGNOSTIC_RENDER"`. The generator also verifies unique canyon signature hashes, road cap/apron/undercut event counts, named part/root coverage, ground sockets, hazard supports, and the loop spline before writing this record. Runner and evaluator reject any mismatch before pixel gates.
+
 ## Procedural PBR and atmosphere repair
 
 - No external texture file is allowed. Each sandstone, fresh-break, basalt, strata, cloth, leather, and rock-armour node graph explicitly connects Object or Generated coordinates through Mapping into bounded macro and micro Noise/Voronoi fields, colour ramps, roughness modulation, and bump. Every node link and scale is serialized in construction metadata.
 - Procedural surface response supplements authored macro/medium geometry; it cannot replace fractures, strata, ledges, plates, limbs, or supports.
 - The raw beauty scene uses Principled BSDF materials, the frozen warm key/cool fill/contact bounce, AgX `AgX - Medium High Contrast`, exposure `0`, and world surface `#6E8294` at strength `.55`. World volume is disabled.
 - The beauty compositor uses rendered visible depth to compute `T(d)=exp(-.0035*d)` and mixes fog `#9AA7A8` by `1-T`; background is the same fog colour. Fog cards, panorama caps, emission lift, exposure lift, and pixel-threshold shortcuts are forbidden.
+
+### Exact material-graph record
+
+`construction.materialGraphs` has exactly `coordinateSource="Generated"`, ordered `graphOrder=["sandstone","fresh-break","basalt","basalt-strata","cloth","leather","rock-armour"]`, `template`, and `parameters`.
+
+`template` has exactly:
+
+- `nodeOrder=["TextureCoordinate","Mapping","MacroNoise","MicroNoise","Voronoi","MacroRamp","RoughnessMap","HeightMix","Bump","Principled","MaterialOutput"]`;
+- `nodeTypeByName={"TextureCoordinate":"ShaderNodeTexCoord","Mapping":"ShaderNodeMapping","MacroNoise":"ShaderNodeTexNoise","MicroNoise":"ShaderNodeTexNoise","Voronoi":"ShaderNodeTexVoronoi","MacroRamp":"ShaderNodeValToRGB","RoughnessMap":"ShaderNodeMapRange","HeightMix":"ShaderNodeMixRGB","Bump":"ShaderNodeBump","Principled":"ShaderNodeBsdfPrincipled","MaterialOutput":"ShaderNodeOutputMaterial"}`;
+- `linkOrder=["TextureCoordinate.Generated->Mapping.Vector","Mapping.Vector->MacroNoise.Vector","Mapping.Vector->MicroNoise.Vector","Mapping.Vector->Voronoi.Vector","MacroNoise.Fac->MacroRamp.Fac","MacroNoise.Fac->RoughnessMap.Value","MicroNoise.Fac->HeightMix.Color1","Voronoi.Distance->HeightMix.Color2","HeightMix.Color->Bump.Height","Bump.Normal->Principled.Normal","MacroRamp.Color->Principled.Base Color","RoughnessMap.Result->Principled.Roughness","Principled.BSDF->MaterialOutput.Surface"]`;
+- `rampPositions=[.28,.72]`, `heightMixBlend="MULTIPLY"`, and `roughnessMapClamp=true`.
+
+Every `parameters` child rejects unknown keys and has exactly `mappingScale`, `macroScale`, `macroDetail`, `macroRoughness`, `microScale`, `microDetail`, `voronoiScale`, `voronoiRandomness`, `rampLow`, `rampHigh`, `roughnessRange`, `bumpDistance`, `bumpStrength`:
+
+| Material | Exact parameter record |
+| --- | --- |
+| sandstone | `{"mappingScale":[1,1,1],"macroScale":.65,"macroDetail":5,"macroRoughness":.68,"microScale":8.5,"microDetail":3,"voronoiScale":2.4,"voronoiRandomness":.65,"rampLow":"#8F7659","rampHigh":"#D8B98C","roughnessRange":[.72,.94],"bumpDistance":.18,"bumpStrength":.42}` |
+| fresh-break | `{"mappingScale":[1,1,1],"macroScale":1.2,"macroDetail":4,"macroRoughness":.62,"microScale":12,"microDetail":3,"voronoiScale":3.2,"voronoiRandomness":.70,"rampLow":"#5E4A37","rampHigh":"#8F7659","roughnessRange":[.82,.96],"bumpDistance":.22,"bumpStrength":.58}` |
+| basalt | `{"mappingScale":[1,1,1],"macroScale":.55,"macroDetail":5,"macroRoughness":.72,"microScale":7,"microDetail":4,"voronoiScale":1.8,"voronoiRandomness":.58,"rampLow":"#111A20","rampHigh":"#263846","roughnessRange":[.64,.90],"bumpDistance":.20,"bumpStrength":.48}` |
+| basalt-strata | `{"mappingScale":[.55,2.8,.55],"macroScale":.80,"macroDetail":4,"macroRoughness":.66,"microScale":10,"microDetail":3,"voronoiScale":2.2,"voronoiRandomness":.55,"rampLow":"#24343E","rampHigh":"#405764","roughnessRange":[.70,.92],"bumpDistance":.24,"bumpStrength":.62}` |
+| cloth | `{"mappingScale":[1,1,1],"macroScale":3.5,"macroDetail":3,"macroRoughness":.55,"microScale":32,"microDetail":2,"voronoiScale":10,"voronoiRandomness":.50,"rampLow":"#172B36","rampHigh":"#294756","roughnessRange":[.78,.94],"bumpDistance":.035,"bumpStrength":.24}` |
+| leather | `{"mappingScale":[1,1,1],"macroScale":2.2,"macroDetail":4,"macroRoughness":.60,"microScale":18,"microDetail":3,"voronoiScale":7,"voronoiRandomness":.62,"rampLow":"#20282C","rampHigh":"#394247","roughnessRange":[.66,.84],"bumpDistance":.055,"bumpStrength":.32}` |
+| rock-armour | `{"mappingScale":[1,1,1],"macroScale":.75,"macroDetail":5,"macroRoughness":.70,"microScale":9,"microDetail":4,"voronoiScale":2.7,"voronoiRandomness":.68,"rampLow":"#0A1014","rampHigh":"#1B2830","roughnessRange":[.62,.86],"bumpDistance":.20,"bumpStrength":.54}` |
+
+The generator serializes the actual constructed node names/types/links and numeric values into `scene-metrics.json.materialGraphBinding`; runner and evaluator require exact deep equality with this record before pixel gates.
+
+### Exact atmosphere/compositor record
+
+`construction.lighting` has exactly the C6 values for `worldColor="#6E8294"`, `worldStrength=.55`, `key`, `fill`, and `contact`, with no fog-volume keys. `construction.atmosphere` has exactly:
+
+- `mode="beer-lambert-depth-composite"`, `worldVolumeEnabled=false`, `depthSource="RenderLayers.Depth"`, `density=.0035`, `fogColor="#9AA7A8"`, `backgroundPolicy="fog-color"`, `viewTransform="AgX"`, `look="AgX - Medium High Contrast"`, `exposure=0`, `gamma=1`;
+- `nodeOrder=["RenderLayers","NegDensity","ExpTransmittance","OneMinusTransmittance","FogColor","MixFog","Composite"]`;
+- `nodeTypeByName={"RenderLayers":"CompositorNodeRLayers","NegDensity":"CompositorNodeMath","ExpTransmittance":"CompositorNodeMath","OneMinusTransmittance":"CompositorNodeMath","FogColor":"CompositorNodeRGB","MixFog":"CompositorNodeMixRGB","Composite":"CompositorNodeComposite"}`;
+- `operationByName={"NegDensity":"MULTIPLY","ExpTransmittance":"EXPONENT","OneMinusTransmittance":"SUBTRACT","MixFog":"MIX"}`;
+- `linkOrder=["RenderLayers.Depth->NegDensity.Value","NegDensity.Value->ExpTransmittance.Value","ExpTransmittance.Value->OneMinusTransmittance.Value","OneMinusTransmittance.Value->MixFog.Fac","RenderLayers.Image->MixFog.Color1","FogColor.Image->MixFog.Color2","MixFog.Image->Composite.Image"]`.
+
+Constants are `NegDensity` multiplier `-.0035` and `OneMinusTransmittance` first input `1`. Blender's `EXPONENT` operation is the exact `e^value` operation. `camera-binding.json` schema version `3` records an `atmosphereBinding` with exactly the normalized atmosphere fields, `transmittance20/120/520`, and `verdict="READY_FOR_DIAGNOSTIC_RENDER"`; runner/evaluator deep-compare it before accepting the output set.
 
 ## Visible-depth repair
 
@@ -67,6 +119,12 @@ The C1 far-plane-normalized depth mapping is superseded only for C7:
 - foreground `p10 < p50 < p90 < 62000`;
 - ordinary-running semantic median depth strictly increases `runner < beam < ring < column < gap`;
 - every pass remains PNG16 with its exact camera matrix and dimensions.
+
+`construction.depthEncoding` has exactly:
+
+`{"distanceMetric":"euclidean-camera-distance-meters","nearSource":"cameras[].near","ceilingByProfile":{"portrait":160,"desktop":160,"landscape":160,"closeup":80},"foregroundScale":.94,"backgroundValue":65535,"bitDepth":16,"colorType":0,"rounding":"floor(x+0.5)","foregroundQuantileSample":"known-object-id-nonbackground-and-depth-not-65535","semanticSampleSource":"exact-object-id-palette"}`.
+
+The percentile population is every pixel whose object-ID RGB equals a non-background palette entry and whose depth is not `65535`; quantiles use the existing evaluator's deterministic sorted linear interpolation. Each semantic median uses only pixels matching that semantic's exact object-ID colour. `scene-metrics.json.depthEncodingBinding` must deep-equal the normalized record plus `verdict="READY_FOR_DIAGNOSTIC_RENDER"`; evaluator also verifies the actual PNG header and pixel distribution.
 
 A nearly uniform white depth image, background/foreground ambiguity, inverted ordering, eight-bit truncation, or fewer than 64 foreground values is `DIAGNOSTIC_BLOCKED`.
 
@@ -88,12 +146,12 @@ Any flat strip road, low-poly blockout, repeated primitive, wall corridor, black
 ## Checkpoint and execution order
 
 1. **C7-D1 coordinator contract:** this review-request commit only. No implementation or process launch.
-2. **Independent contract review:** read-only against the exact C7-D1 SHA and these coordinator documents. It returns `READY_FOR_DIAGNOSTIC_007_CONTRACT` or exact P0/P1 findings; it cannot edit production or evidence.
+2. **Independent contract review:** read-only against the exact C7-D1 SHA and these coordinator documents. It returns `READY_FOR_DIAGNOSTIC_007_CONTRACT` or exact P0/P1 findings; it cannot edit production or evidence. Draft `2f5fa9c` was blocked and is not authority; this corrected revision requires a fresh verdict.
 3. **C7-D2 coordinator authorization:** only after a ready verdict, a separate docs-only commit records execution authority and exact accepted review provenance.
 4. **C7-T1 generator reconstruction:** the single asset writer changes exactly `tools/temple-asset-pipeline/generate_tide_scar_tr4_pack.py`; AST/static checks only. Its size is an explicit atomic exception because this self-hashed scene generator cannot be partially staged without falsifying construction provenance.
 5. **C7-T2 evidence predicate/depth evaluation:** the same writer changes exactly `tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py` and `evaluate_tide_scar_tr4_pack.py`; AST/static checks plus the non-writing positive/negative dry predicate test only.
 6. **Authorized dry preflight:** only after C7-T1 and C7-T2 are committed and hashes are stable. It must stop before Blender on any mismatch.
 7. **C7-E1 diagnostic evidence:** one Blender 4.5.5 background process, exactly 20 PNG writes, then at most one evaluator. New `diagnostic-007/**` plus its exact ignored `blender.log` form a separate evidence commit. No retry.
-8. **C7-V1 independent visual review:** docs-only `TR4_DIAGNOSTIC_REVIEW.md` and visual-review `THREAD_LOG.md`; no repair or rerender.
+8. **C7-V1 independent visual review:** whenever the runner stops with the exact complete 20-PNG set, regardless of evaluator invocation/result, perform docs-only `TR4_DIAGNOSTIC_REVIEW.md` and visual-review `THREAD_LOG.md`; no repair or rerender. An incomplete set is not manually reviewed.
 
 Every asset step appends `docs/workstreams/temple-tr4-asset/THREAD_LOG.md`. Every commit stages exact paths and separates coordinator docs, source, generated evidence, and independent review. Export, runtime adoption, browser work, final typecheck/full Vitest/build, independent candidate QA, changelog acceptance, and push remain blocked regardless of C7 numeric success.

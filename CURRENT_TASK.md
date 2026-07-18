@@ -24,7 +24,7 @@ TR4 rebuilds the original TIDE//RELAY presentation from the user-approved visual
 1. Recovery split: **complete** at `ecd5de640362a6e30c5d0157ecd1590be7673318`. C01-C30 plus evidence-only C04V were committed in dependency order. The five explicitly unrelated generated/cache files remain untracked and never-stage.
 2. Coordinator contract: C7 is `DRAFT / CONTRACT REVIEW REQUESTED`. It changes only this file, `docs/qa/TEMPLE_ACCEPTANCE.md`, and named files under `docs/workstreams/temple-tr4-coordination/`. No implementation or diagnostic process follows from this draft.
 3. Asset writer only after a ready independent review and a separate coordinator authorization: C7-T1 may change only the TR4 generator; C7-T2 may change only the TR4 runner and evaluator. C7 must combine the stable camera-evidence predicate with substantive environment, character, hazard, material, Tide Scar, lighting, and depth-output repair before its sole next render; a technical-only rerender of C6 geometry is forbidden.
-4. Independent diagnostic visual reviewer only after the evaluator stops: it may write `docs/workstreams/temple-tr4-visual-review/TR4_DIAGNOSTIC_REVIEW.md` and `THREAD_LOG.md` only, and must judge the four beauty frames plus masks/depth without repairing assets.
+4. Independent diagnostic visual reviewer starts whenever the sole process leaves an exact, complete, closed 20-PNG set, whether the runner stopped before or after evaluator invocation. It may write `docs/workstreams/temple-tr4-visual-review/TR4_DIAGNOSTIC_REVIEW.md` and `THREAD_LOG.md` only, and must judge the four beauty frames plus masks/depth without repairing assets. An incomplete render set is frozen technical evidence but is not visually reviewed.
 5. Runtime remains blocked after proof acceptance until `RUNTIME_ADOPTION.md` records exact accepted hashes and `ACCEPTED_FOR_RUNTIME_INTEGRATION`. Wildcard or “direct tests” authority is forbidden.
 6. After the last source edit, exactly one final typecheck, one complete Vitest suite, one production build, and one browser-evidence pass. Independent QA is read-only after a candidate SHA.
 
@@ -41,6 +41,10 @@ These exceptions authorize preservation commits only and do not authorize new co
 - C26 owns exactly `src/game/render/WorldRenderer.ts` and `WorldRenderer.test.ts`. The inherited renderer delta exceeds 500 lines and has no typecheckable partial-file checkpoint. Verification is typecheck plus only the direct renderer test.
 
 Owners are the coordinator for contract/evidence checkpoints, one bounded asset-pipeline writer for C02/C07/C08/C10/C12/C14, and one bounded renderer writer for C19-C28. No writer may begin the next checkpoint before the current cached path list, checks, and local commit are reported.
+
+### C7 atomic source-checkpoint exception — proposed, inactive until authorization
+
+C7-T1 owns exactly `tools/temple-asset-pipeline/generate_tide_scar_tr4_pack.py`; owner is the single Temple TR4 asset writer. The reconstruction spans the file's mutually dependent scene construction, material binding, compositor, depth pass, semantic roots, metrics, and 20-write loop. The runner hashes this exact generator before it can author a fail-closed preflight, so partially staged intermediate versions would either falsify provenance or create a source checkpoint that cannot satisfy the closed construction contract. C7-T1 is therefore one path and may exceed 500 changed lines only after independent contract readiness and a separate coordinator authorization. Whole-checkpoint verification is exact-path cached-set inspection, `git diff --cached --check`, UTF-8, Python AST parse, static forbidden-path/import/output audit, and canonical construction-schema/hash replay without importing `bpy`, creating `diagnostic-007`, or launching Blender. This exception does not extend to runner/evaluator, evidence, export, or runtime files.
 
 ## Historical TR3-005C/A3-A6 state — preserved, not current authority
 
