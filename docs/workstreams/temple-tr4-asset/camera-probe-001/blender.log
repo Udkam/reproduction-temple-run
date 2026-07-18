@@ -1,0 +1,16 @@
+Blender 4.5.5 LTS (hash 836beaaf597a built 2025-11-18 01:33:26)
+
+Blender quit
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 1172, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 1161, in main
+    run_camera_probe(plan, output_root)
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 782, in run_camera_probe
+    raise RuntimeError(f"camera probe response is degenerate for {record['profile']}: b0={b0}, b1={b1}")
+RuntimeError: camera probe response is degenerate for portrait: b0=0.0, b1=0.0
+
+Error: script failed, file: 'E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py', exiting.

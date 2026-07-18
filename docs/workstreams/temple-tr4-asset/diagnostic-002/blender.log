@@ -1,0 +1,18 @@
+Blender 4.5.5 LTS (hash 836beaaf597a built 2025-11-18 01:33:26)
+
+Blender quit
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 1004, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 999, in main
+    generate(preflight, output_root)
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 960, in generate
+    set_camera(camera, camera_record)
+  File "E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py", line 657, in set_camera
+    raise RuntimeError(f"camera shift response is degenerate for {record['profile']}")
+RuntimeError: camera shift response is degenerate for portrait
+
+Error: script failed, file: 'E:\Proj\Game-1-temple\tools\temple-asset-pipeline\generate_tide_scar_tr4_pack.py', exiting.
