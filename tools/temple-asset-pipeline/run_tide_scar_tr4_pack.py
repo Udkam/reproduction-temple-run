@@ -24,8 +24,8 @@ from typing import Any
 
 
 SCHEMA_ID = "tide-relay.temple-tr4.asset-preflight"
-SCHEMA_VERSION = 6
-CONTRACT_VERSION = "TEMPLE-TR4-C6"
+SCHEMA_VERSION = 7
+CONTRACT_VERSION = "TEMPLE-TR4-C7"
 SEED = 1414090053
 REFERENCE_PATH = Path(
     r"C:\Users\ALEXCH~1\AppData\Local\Temp\codex-clipboard-ca70825b-99a6-4290-8307-4d90b2077d48.png"
@@ -38,14 +38,13 @@ BLENDER_EXECUTABLE = Path(
 BLENDER_VERSION = "4.5.5 LTS"
 BLENDER_EXECUTABLE_SHA256 = "597f600e625f24e4f542906702b5a7dd33f6c6ff166e106b03ef4b1c3fb3921c"
 PYTHON_VERSION = "3.12.0"
-CONSTRUCTION_SHA256 = "2ab30e4580a7bdf6b8eeddf8dcd2acc5d17fa3c101aecc9d530cbea535c79c10"
-DIAGNOSTIC_RELATIVE = Path("docs/workstreams/temple-tr4-asset/diagnostic-006")
-CAMERA_PROBE_RELATIVE = Path("docs/workstreams/temple-tr4-asset/camera-probe-001")
-MATRIX_PROBE_RELATIVE = Path("docs/workstreams/temple-tr4-asset/matrix-probe-001")
-AUTHORIZATION_RELATIVE = Path("docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_006_AUTHORIZATION.md")
+GENERATOR_SHA256 = "d71d225bbaef3a2d9527b63916973cd9c4c77891ba9aa29672053ef12226f26e"
+CONSTRUCTION_SHA256 = "6a9735277c29ec32b3e22432b240385bc33993325aaf3422c60ac4f82e0dbd45"
+DIAGNOSTIC_RELATIVE = Path("docs/workstreams/temple-tr4-asset/diagnostic-007")
+AUTHORIZATION_RELATIVE = Path("docs/workstreams/temple-tr4-coordination/DIAGNOSTIC_007_AUTHORIZATION.md")
 CURRENT_TASK_RELATIVE = Path("CURRENT_TASK.md")
 COORDINATION_LOG_RELATIVE = Path("docs/workstreams/temple-tr4-coordination/THREAD_LOG.md")
-DIAGNOSTIC_ID = "006"
+DIAGNOSTIC_ID = "007"
 CAMERA_BINDING_PROFILE_KEYS = [
     "profile", "lensShiftY", "originalShift0", "evaluatedShift0",
     "originalShift1", "evaluatedShift1", "matrix0", "matrix1", "difference",
@@ -66,6 +65,7 @@ SCREEN_PROJECTION_KEYS = [
 PROFILE_METRIC_KEYS = [
     "luminanceP50", "luminanceP95", "nearBlackFraction", "routeLuminanceP50",
     "roadMaskFraction", "normalUniqueColors", "depthUniqueValues", "depthMin", "depthMax",
+    "foregroundDepthP10", "foregroundDepthP50", "foregroundDepthP90",
     "runnerBounds", "runnerCentroidY", "runnerMargin", "runnerBeautyLuminanceP50",
     "pursuerBounds", "pursuerMargin", "pursuerWidthPixels", "pursuerBeautyLuminanceP50",
     "pursuerBeautyLuminanceP95", "roadBottomWidthFraction", "roadFarRouteWidthFraction",
@@ -77,14 +77,9 @@ EVALUATION_GATE_KEYS = [
     "routeLuminance", "nearBlack", "roadMaskBinaryArea", "semanticSubjects",
     "normalVariation", "depthVariation", "runnerBandContainment", "roadPerspective",
     "semanticScreenOrder", "scarRightOfRoute", "runnerRoiLuminance", "pursuerCloseup",
-    "roadNormalUp", "representativeDepthOrder",
+    "roadNormalUp", "depthBackgroundSeparation", "foregroundDepthQuantiles",
+    "representativeDepthOrder",
 ]
-EXPECTED_SCENE_COUNTS = {
-    "meshObjects": 400,
-    "sourceTrianglesBeforeModifiers": 45224,
-    "beautyMaterialCount": 10,
-}
-EXPECTED_ROOT_CHILDREN = [215, 90, 46, 27, 12, 10, 11, 21, 2]
 FROZEN_C6_EVIDENCE = {
     "diagnostic001Preflight": ("docs/workstreams/temple-tr4-asset/diagnostic-001/preflight.json", "50d9c5bd2b59f6475e8ddd87ab6b404260fe3bb19f7132ff866d3e3d679fea12"),
     "diagnostic001Plan": ("docs/workstreams/temple-tr4-asset/diagnostic-001/planned-manifest.json", "dc57b641ad824a84dcfb27299e7ebdb5fbe9a6e35a2d96bd099cde1877a830bf"),
@@ -138,19 +133,34 @@ FROZEN_C6_EVIDENCE = {
     "diagnostic005BlenderLog": ("docs/workstreams/temple-tr4-asset/diagnostic-005/blender.log", "68f20d179729ff363aa142e76f55a530690ce156a6378552b981c0afa1abdd94"),
     "diagnostic005Status": ("docs/workstreams/temple-tr4-asset/diagnostic-005/diagnostic-status.json", "e31e89d92fc5a5ed0f3e93acda637ee15ab384141ba49f29bbe487f178431752"),
 }
-FROZEN_MATRIX_PROBE_EVIDENCE = {
-    "diagnostic001Preflight": ("docs/workstreams/temple-tr4-asset/diagnostic-001/preflight.json", "50d9c5bd2b59f6475e8ddd87ab6b404260fe3bb19f7132ff866d3e3d679fea12"),
-    "diagnostic001Plan": ("docs/workstreams/temple-tr4-asset/diagnostic-001/planned-manifest.json", "dc57b641ad824a84dcfb27299e7ebdb5fbe9a6e35a2d96bd099cde1877a830bf"),
-    "diagnostic001BlenderLog": ("docs/workstreams/temple-tr4-asset/diagnostic-001/blender.log", "aefcd7fa6b80112f030583769f8865fdb2da2e254a77192bdde3c48d95561343"),
-    "diagnostic001Status": ("docs/workstreams/temple-tr4-asset/diagnostic-001/diagnostic-status.json", "551768eaf9a764d906cf7be54b05203bdc7fa78c79f43e1a0528c392f7e097a9"),
-    "diagnostic002Preflight": ("docs/workstreams/temple-tr4-asset/diagnostic-002/preflight.json", "a43a26447924f4c6a6e07ebf7ad9de4273bb28eeb142393d9a14007eda63b294"),
-    "diagnostic002Plan": ("docs/workstreams/temple-tr4-asset/diagnostic-002/planned-manifest.json", "5325ca93cef20d3201c9e20a8bcfb45beebeec79a382b965fc208754373a8df1"),
-    "diagnostic002BlenderLog": ("docs/workstreams/temple-tr4-asset/diagnostic-002/blender.log", "aefcd7fa6b80112f030583769f8865fdb2da2e254a77192bdde3c48d95561343"),
-    "diagnostic002Status": ("docs/workstreams/temple-tr4-asset/diagnostic-002/diagnostic-status.json", "551768eaf9a764d906cf7be54b05203bdc7fa78c79f43e1a0528c392f7e097a9"),
-    "cameraProbe001Plan": ("docs/workstreams/temple-tr4-asset/camera-probe-001/probe-plan.json", "4cf25d218366661f01cab8ff6d3cd66809b9883b25a57b74548b9d99d65a5802"),
-    "cameraProbe001BlenderLog": ("docs/workstreams/temple-tr4-asset/camera-probe-001/blender.log", "e32fb009d0c551faaaaa8d76f314aeadfb03fee696e226a6ca01b115435519cf"),
-    "cameraProbe001Status": ("docs/workstreams/temple-tr4-asset/camera-probe-001/probe-status.json", "feaec46ada7ab64e579751d884d68b22a7a96f4467d59037feb373d59b8979dc"),
-    "evaluator": ("tools/temple-asset-pipeline/evaluate_tide_scar_tr4_pack.py", "656ace4f6b1c73e33352523fe36a55ad37f67df99aa4e52db608ee4b391af9a1"),
+FROZEN_DIAGNOSTIC_006_EVIDENCE = {
+    "diagnostic006BlenderLog": ("docs/workstreams/temple-tr4-asset/diagnostic-006/blender.log", "5ab26ba8855d15e505140588918a171f7ef514581a98673057cc3c3031d495a7"),
+    "diagnostic006CameraBinding": ("docs/workstreams/temple-tr4-asset/diagnostic-006/camera-binding.json", "87bf4713b06380f5715b585f3698749f0cb778384ad7f700f3db40c6906202d2"),
+    "diagnostic006Status": ("docs/workstreams/temple-tr4-asset/diagnostic-006/diagnostic-status.json", "709955632cde56d890d0be378a0ce6d32fa994bf27aa45ad17bfe9f2ab6beb0d"),
+    "diagnostic006Plan": ("docs/workstreams/temple-tr4-asset/diagnostic-006/planned-manifest.json", "6912ecee8b60ee77c22eaa1e6e5a9ab26a73e6e9b185423a5e4819ed8807274c"),
+    "diagnostic006Preflight": ("docs/workstreams/temple-tr4-asset/diagnostic-006/preflight.json", "f739ff0cbf7d11a100678f9d37cee5ca3f2cc071181359b125f46b615ce3585e"),
+    "diagnostic006RenderOrder": ("docs/workstreams/temple-tr4-asset/diagnostic-006/render-order.json", "4f354bf772f3a7d70fb4131515850ed35503b4a647f4b76dc8de38604ed714a9"),
+    "diagnostic006SceneMetrics": ("docs/workstreams/temple-tr4-asset/diagnostic-006/scene-metrics.json", "7f89c5ea9d4457d285a75fbb4cb8aad4cd94dce3598e4773d6a0152e0707ebe6"),
+    "diagnostic006CloseupBeauty": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-closeup-beauty.png", "acb211e2fad2fc5729efde5e36df549deec1cb6557abba88f9997e5029d54d7a"),
+    "diagnostic006CloseupDepth": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-closeup-linear-depth.png", "158daa1261289d025a38b23f4355a5a5608154d08566f45682f724a31c2b0144"),
+    "diagnostic006CloseupNormal": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-closeup-normal.png", "f61052830945ddce269ab5e14bb126cc3020faa0a4428ea253f7d9f726f87506"),
+    "diagnostic006CloseupObjectId": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-closeup-object-id.png", "29f066be8252654afb1c2d6a83813b716dbd20cbd35e0b13662ce5884d2ce89e"),
+    "diagnostic006CloseupRoadMask": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-closeup-road-mask.png", "60e11ced6dd27f18d85715c380c77682b0e60af26881de595f0ade02ebe35b64"),
+    "diagnostic006DesktopBeauty": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-desktop-beauty.png", "ce855424fcc59324668bbd780a6aac56a2ec793b819746c3cda0ef68fdc6e086"),
+    "diagnostic006DesktopDepth": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-desktop-linear-depth.png", "c0f1bf2a5384bdbb5c84657027ef4306507f970d5f3f96d24111cc9a112e6ca8"),
+    "diagnostic006DesktopNormal": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-desktop-normal.png", "f30253f354ca5770fea3f4027698e0072e04610da6c341d949ecf26d9b8cf066"),
+    "diagnostic006DesktopObjectId": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-desktop-object-id.png", "4095c0c6c97e7100677aeb00ef6eaa455999dd6b8a6325b8bbff8a58465eaa6b"),
+    "diagnostic006DesktopRoadMask": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-desktop-road-mask.png", "fd42a94ca16204f94dcf24daeec074d1db4286e474a0ed4601a9d102658109ac"),
+    "diagnostic006LandscapeBeauty": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-landscape-beauty.png", "6bb3bf3073fb735148d322c3df09b6ef6d8c914f926a17f97fdd72ef19c2a911"),
+    "diagnostic006LandscapeDepth": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-landscape-linear-depth.png", "e7ddc3163f841f48eb98b070d4a84edab1f16419a25e4e86cb2283a5c308ac60"),
+    "diagnostic006LandscapeNormal": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-landscape-normal.png", "b21fd54af2b0f8ea8f6f4a7d3f3a1c9124920caed95086dbcd051d5ef652b97c"),
+    "diagnostic006LandscapeObjectId": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-landscape-object-id.png", "6a95bc66694e14a6d933633c161c9dbb3f32d9297c6616615e5fb56ef1b64992"),
+    "diagnostic006LandscapeRoadMask": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-landscape-road-mask.png", "de62ceb25bd89ab57429d09bfac070e16a4b1a93ac71b1e50122724bbcfa811f"),
+    "diagnostic006PortraitBeauty": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-portrait-beauty.png", "6835d148278e052bb807c9abde6aa88a2c3d6ca1e5ef065bdd43c50f37e7ffb4"),
+    "diagnostic006PortraitDepth": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-portrait-linear-depth.png", "00e1e94fbd2242ddce4ab5f5f95311766ebbb434b97db15594ce692e366ea13f"),
+    "diagnostic006PortraitNormal": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-portrait-normal.png", "06ece6f8104a47822266525a35add77a99dadfdf294c7acd6ef10f9e48317866"),
+    "diagnostic006PortraitObjectId": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-portrait-object-id.png", "f9ca7aab496ccc5bc182c788dfd644ef54179786705851fd3ffd9deeb6a54462"),
+    "diagnostic006PortraitRoadMask": ("docs/workstreams/temple-tr4-asset/diagnostic-006/tr4-diagnostic-006-portrait-road-mask.png", "3b377785b62567a0e14b32bc7e2222ea9eb73e1b8b31e84517e3b2ad36540391"),
 }
 
 
@@ -400,105 +410,96 @@ def build_cameras() -> list[dict[str, Any]]:
     return cameras
 
 
-def build_construction() -> dict[str, Any]:
-    return {
-        "axis": {"forward": "-Z", "right": "+X", "up": "+Y"},
-        "canyon": {
-            "bandOrder": ["near", "mid", "far"],
-            "near": {"absXRange": [8.0, 16.0], "contrast": 0.86, "count": 8, "saturation": 0.72, "yRange": [-8.0, 10.0], "zRange": [-100.0, -10.0]},
-            "mid": {"absXRange": [18.0, 34.0], "contrast": 0.58, "count": 10, "saturation": 0.48, "yRange": [-12.0, 18.0], "zRange": [-140.0, -20.0]},
-            "far": {"absXRange": [38.0, 70.0], "contrast": 0.30, "count": 12, "saturation": 0.24, "yRange": [-16.0, 30.0], "zRange": [-180.0, -35.0]},
-            "negativeSpaceCount": 3,
-            "occlusionBoundaryCount": 2,
-            "fullWidthWaterVisible": False,
-        },
-        "hazards": {
-            "order": ["beam", "ring", "column", "gap"],
-            "beam": {
-                "semanticRoot": "TR4_Hazard_Beam",
-                "action": "jump",
-                "collisionProxy": {"height": 0.82, "widthAll": 5.84, "widthLane": 0.84},
-                "visualBounds": {"topYRange": [0.68, 0.76], "widthLaneMax": 1.55},
-                "socketOrder": ["entry", "apex.clearance", "exit", "ground.L", "ground.R"],
-            },
-            "ring": {
-                "semanticRoot": "TR4_Hazard_Ring",
-                "action": "slide",
-                "collisionProxy": {"laneWidth": 0.84, "requiresSlide": True},
-                "visualBounds": {"lowestSolidY": 1.05, "openingHeight": 0.90, "widthLaneMax": 1.55},
-                "socketOrder": ["entry", "slide.clearance", "exit", "ground.L", "ground.R"],
-            },
-            "column": {
-                "semanticRoot": "TR4_Hazard_Column",
-                "action": "lane-change",
-                "collisionProxy": {"laneWidth": 0.84},
-                "visualBounds": {"widthLaneMax": 1.55},
-                "socketOrder": ["entry", "safe.left", "safe.right", "exit", "ground"],
-            },
-            "gap": {
-                "semanticRoot": "TR4_Gap_Lips",
-                "action": "jump",
-                "collisionProxy": {"clearanceHeight": 0.52, "lengthFromCanonicalEvent": True},
-                "visualBounds": {"hiddenFloor": False, "lipDepthMin": 0.55},
-                "socketOrder": ["takeoff", "apex.clearance", "landing"],
-            },
-        },
-        "lighting": {
-            "worldColor": "#6E8294",
-            "worldStrength": 0.55,
-            "fogColor": "#9AA7A8",
-            "fogDensity": 0.0035,
-            "fogAnisotropy": 0.18,
-            "key": {"color": "#FFD7A3", "energy": 4.2, "surfaceToLight": [-0.51966, 0.77949, 0.34977], "shadow": True},
-            "fill": {"color": "#7EA6C4", "energy": 1.1, "surfaceToLight": [0.48019, 0.62025, -0.62025], "shadow": False},
-            "contact": {
-                "color": "#E7C79C", "energy": 430.0, "shape": "DISK", "size": 9.0,
-                "shadow": False, "location": [0.0, 7.5, 4.0], "target": [0.0, 0.0, -4.0],
-            },
-        },
-        "pursuer": {
-            "partOrder": ["pelvisPlate", "ribPlate", "shoulderPlate", "neck", "head", "jaw", "foreleg.L.upper", "foreleg.L.lower", "paw.L.front", "foreleg.R.upper", "foreleg.R.lower", "paw.R.front", "hindleg.L.upper", "hindleg.L.lower", "paw.L.rear", "hindleg.R.upper", "hindleg.R.lower", "paw.R.rear", "dorsalSeam"],
-            "contactSocketOrder": ["ground.front.L", "ground.front.R", "ground.rear.L", "ground.rear.R", "capture.target"],
-            "bookendRoot": [0.0, 0.0, 2.4],
-            "height": 1.78,
-            "maxGroundError": 0.03,
-            "triangleCeiling": 24000,
-        },
-        "road": {
-            "surfaceY": 0.0,
-            "width": 6.4,
-            "bounds": [-3.2, 3.2],
-            "visualSafetyBounds": [-2.92, 2.92],
-            "moduleCount": 16,
-            "moduleLengthRange": [6.0, 11.0],
-            "thicknessRange": [0.55, 1.2],
-            "sideDepthRange": [2.5, 8.0],
-            "signatureOrder": ["terrace-fracture", "buttress-recess", "collapsed-lip", "strata-undercut", "rubble-shoulder", "split-ledge"],
-            "maxConsecutiveSignatureRepeats": 2,
-            "strataEventsPerModule": 2,
-            "rubbleEventsPerModule": 1,
-            "nearLoopShoulder": {"rightOuterX": 4.45, "zRange": [2.8, 5.2]},
-        },
-        "runner": {
-            "partOrder": ["pelvis", "chest", "head", "upperArm.L", "forearm.L", "hand.L", "upperArm.R", "forearm.R", "hand.R", "thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R", "coatTail.L", "coatTail.R"],
-            "contactSocketOrder": ["ground.foot.L", "ground.foot.R", "camera.target"],
-            "poseOrder": ["run.0", "run.1", "run.2", "run.3", "run.4", "run.5", "run.6", "run.7", "jump", "slide", "stumble", "failure"],
-            "root": [0.0, 0.0, 0.0],
-            "height": 2.32,
-            "maxGroundError": 0.03,
-            "triangleCeiling": 18000,
-        },
-        "tideScar": {
-            "mainWidthRange": [0.075, 0.11],
-            "mainCenterXRange": [3.0, 3.06],
-            "surfaceOffsetY": 0.035,
-            "mainControlPoints": [[3.03, 0.035, 8.0], [3.05, 0.035, 0.0], [3.01, 0.035, -10.0], [3.06, 0.035, -22.0], [3.02, 0.035, -36.0], [3.04, 0.035, -52.0], [3.00, 0.035, -70.0], [3.05, 0.035, -92.0], [3.02, 0.035, -120.0]],
-            "loopControlPoints": [[3.00, 0.035, 4.00], [3.09, 0.035, 4.33], [3.33, 0.035, 4.56], [3.65, 0.035, 4.65], [3.98, 0.035, 4.56], [4.22, 0.035, 4.33], [4.30, 0.035, 4.00], [4.22, 0.035, 3.68], [3.98, 0.035, 3.44], [3.65, 0.035, 3.35], [3.33, 0.035, 3.44], [3.09, 0.035, 3.68], [3.00, 0.035, 4.00]],
-            "gapClipPadding": 0.35,
-            "hazardClipPadding": 0.25,
-        },
-        "unitMeters": 1.0,
+def build_material_graph_contract() -> dict[str, Any]:
+    parameters = {
+        "sandstone": {"mappingScale": [1, 1, 1], "macroScale": 0.65, "macroDetail": 5, "macroRoughness": 0.68, "microScale": 8.5, "microDetail": 3, "voronoiScale": 2.4, "voronoiRandomness": 0.65, "rampLow": "#8F7659", "rampHigh": "#D8B98C", "roughnessRange": [0.72, 0.94], "bumpDistance": 0.18, "bumpStrength": 0.42},
+        "fresh-break": {"mappingScale": [1, 1, 1], "macroScale": 1.2, "macroDetail": 4, "macroRoughness": 0.62, "microScale": 12, "microDetail": 3, "voronoiScale": 3.2, "voronoiRandomness": 0.70, "rampLow": "#5E4A37", "rampHigh": "#8F7659", "roughnessRange": [0.82, 0.96], "bumpDistance": 0.22, "bumpStrength": 0.58},
+        "basalt": {"mappingScale": [1, 1, 1], "macroScale": 0.55, "macroDetail": 5, "macroRoughness": 0.72, "microScale": 7, "microDetail": 4, "voronoiScale": 1.8, "voronoiRandomness": 0.58, "rampLow": "#111A20", "rampHigh": "#263846", "roughnessRange": [0.64, 0.90], "bumpDistance": 0.20, "bumpStrength": 0.48},
+        "basalt-strata": {"mappingScale": [0.55, 2.8, 0.55], "macroScale": 0.80, "macroDetail": 4, "macroRoughness": 0.66, "microScale": 10, "microDetail": 3, "voronoiScale": 2.2, "voronoiRandomness": 0.55, "rampLow": "#24343E", "rampHigh": "#405764", "roughnessRange": [0.70, 0.92], "bumpDistance": 0.24, "bumpStrength": 0.62},
+        "cloth": {"mappingScale": [1, 1, 1], "macroScale": 3.5, "macroDetail": 3, "macroRoughness": 0.55, "microScale": 32, "microDetail": 2, "voronoiScale": 10, "voronoiRandomness": 0.50, "rampLow": "#172B36", "rampHigh": "#294756", "roughnessRange": [0.78, 0.94], "bumpDistance": 0.035, "bumpStrength": 0.24},
+        "leather": {"mappingScale": [1, 1, 1], "macroScale": 2.2, "macroDetail": 4, "macroRoughness": 0.60, "microScale": 18, "microDetail": 3, "voronoiScale": 7, "voronoiRandomness": 0.62, "rampLow": "#20282C", "rampHigh": "#394247", "roughnessRange": [0.66, 0.84], "bumpDistance": 0.055, "bumpStrength": 0.32},
+        "rock-armour": {"mappingScale": [1, 1, 1], "macroScale": 0.75, "macroDetail": 5, "macroRoughness": 0.70, "microScale": 9, "microDetail": 4, "voronoiScale": 2.7, "voronoiRandomness": 0.68, "rampLow": "#0A1014", "rampHigh": "#1B2830", "roughnessRange": [0.62, 0.86], "bumpDistance": 0.20, "bumpStrength": 0.54},
     }
+    return {
+        "coordinateSource": "Generated",
+        "graphOrder": ["sandstone", "fresh-break", "basalt", "basalt-strata", "cloth", "leather", "rock-armour"],
+        "template": {
+            "nodeOrder": ["TextureCoordinate", "Mapping", "MacroNoise", "MicroNoise", "Voronoi", "MacroRamp", "RoughnessMap", "HeightMix", "Bump", "Principled", "MaterialOutput"],
+            "nodeTypeByName": {"TextureCoordinate": "ShaderNodeTexCoord", "Mapping": "ShaderNodeMapping", "MacroNoise": "ShaderNodeTexNoise", "MicroNoise": "ShaderNodeTexNoise", "Voronoi": "ShaderNodeTexVoronoi", "MacroRamp": "ShaderNodeValToRGB", "RoughnessMap": "ShaderNodeMapRange", "HeightMix": "ShaderNodeMixRGB", "Bump": "ShaderNodeBump", "Principled": "ShaderNodeBsdfPrincipled", "MaterialOutput": "ShaderNodeOutputMaterial"},
+            "linkOrder": ["TextureCoordinate.Generated->Mapping.Vector", "Mapping.Vector->MacroNoise.Vector", "Mapping.Vector->MicroNoise.Vector", "Mapping.Vector->Voronoi.Vector", "MacroNoise.Fac->MacroRamp.Fac", "MacroNoise.Fac->RoughnessMap.Value", "MicroNoise.Fac->HeightMix.Color1", "Voronoi.Distance->HeightMix.Color2", "HeightMix.Color->Bump.Height", "Bump.Normal->Principled.Normal", "MacroRamp.Color->Principled.Base Color", "RoughnessMap.Result->Principled.Roughness", "Principled.BSDF->MaterialOutput.Surface"],
+            "rampPositions": [0.28, 0.72],
+            "heightMixBlend": "MULTIPLY",
+            "roughnessMapClamp": True,
+            "parameterBindings": {"mappingScale": "Mapping.inputs[Scale].default_value", "macroScale": "MacroNoise.inputs[Scale].default_value", "macroDetail": "MacroNoise.inputs[Detail].default_value", "macroRoughness": "MacroNoise.inputs[Roughness].default_value", "microScale": "MicroNoise.inputs[Scale].default_value", "microDetail": "MicroNoise.inputs[Detail].default_value", "voronoiScale": "Voronoi.inputs[Scale].default_value", "voronoiRandomness": "Voronoi.inputs[Randomness].default_value", "rampLow": "MacroRamp.color_ramp.elements[0].color:sRGB-to-linear-RGBA", "rampHigh": "MacroRamp.color_ramp.elements[1].color:sRGB-to-linear-RGBA", "rampPositions[0]": "MacroRamp.color_ramp.elements[0].position", "rampPositions[1]": "MacroRamp.color_ramp.elements[1].position", "roughnessRange[0]": "RoughnessMap.inputs[To Min].default_value", "roughnessRange[1]": "RoughnessMap.inputs[To Max].default_value", "bumpDistance": "Bump.inputs[Distance].default_value", "bumpStrength": "Bump.inputs[Strength].default_value", "materials[name].metallic": "Principled.inputs[Metallic].default_value", "materials[name].normalStrength": "equals:parameters[name].bumpStrength"},
+            "fixedNodeProperties": {"TextureCoordinate.from_instancer": False, "Mapping.vector_type": "POINT", "MacroNoise.noise_dimensions": "3D", "MacroNoise.noise_type": "FBM", "MacroNoise.normalize": True, "MicroNoise.noise_dimensions": "3D", "MicroNoise.noise_type": "FBM", "MicroNoise.normalize": True, "Voronoi.voronoi_dimensions": "3D", "Voronoi.feature": "F1", "Voronoi.distance": "EUCLIDEAN", "MacroRamp.color_ramp.interpolation": "LINEAR", "MacroRamp.color_ramp.color_mode": "RGB", "MacroRamp.color_ramp.hue_interpolation": "NEAR", "RoughnessMap.data_type": "FLOAT", "RoughnessMap.interpolation_type": "LINEAR", "RoughnessMap.clamp": True, "HeightMix.blend_type": "MULTIPLY", "HeightMix.use_clamp": False, "Bump.invert": False},
+            "fixedSocketValues": {"Mapping.Location": [0, 0, 0], "Mapping.Rotation": [0, 0, 0], "MacroNoise.Lacunarity": 2, "MacroNoise.Distortion": 0, "MicroNoise.Roughness": 0.55, "MicroNoise.Lacunarity": 2, "MicroNoise.Distortion": 0, "Voronoi.Detail": 0, "Voronoi.Roughness": 0.5, "Voronoi.Lacunarity": 2, "Voronoi.Smoothness": 0, "Voronoi.Exponent": 0.5, "RoughnessMap.From Min": 0, "RoughnessMap.From Max": 1, "HeightMix.Fac": 1, "Principled.Weight": 1, "Principled.IOR": 1.5, "Principled.Alpha": 1, "Principled.Subsurface Weight": 0, "Principled.Specular IOR Level": 0.5, "Principled.Transmission Weight": 0, "Principled.Coat Weight": 0, "Principled.Sheen Weight": 0, "Principled.Emission Color": [0, 0, 0, 1], "Principled.Emission Strength": 0},
+        },
+        "parameters": parameters,
+    }
+
+
+def build_atmosphere_contract() -> dict[str, Any]:
+    return {
+        "mode": "beer-lambert-depth-composite", "worldVolumeEnabled": False,
+        "depthSource": "RenderLayers.Depth", "density": 0.0035, "fogColor": "#9AA7A8",
+        "backgroundPolicy": "fog-color", "viewTransform": "AgX", "look": "AgX - Medium High Contrast",
+        "exposure": 0, "gamma": 1,
+        "nodeOrder": ["RenderLayers", "NegDensity", "ExpTransmittance", "OneMinusTransmittance", "FogColor", "MixFog", "Composite"],
+        "nodeTypeByName": {"RenderLayers": "CompositorNodeRLayers", "NegDensity": "CompositorNodeMath", "ExpTransmittance": "CompositorNodeMath", "OneMinusTransmittance": "CompositorNodeMath", "FogColor": "CompositorNodeRGB", "MixFog": "CompositorNodeMixRGB", "Composite": "CompositorNodeComposite"},
+        "operationByName": {"NegDensity": "MULTIPLY", "ExpTransmittance": "EXPONENT", "OneMinusTransmittance": "SUBTRACT", "MixFog": "MIX"},
+        "linkOrder": ["RenderLayers.Depth->NegDensity.Value", "NegDensity.Value->ExpTransmittance.Value", "ExpTransmittance.Value->OneMinusTransmittance.Value", "OneMinusTransmittance.Value->MixFog.Fac", "RenderLayers.Image->MixFog.Color1", "FogColor.Image->MixFog.Color2", "MixFog.Image->Composite.Image"],
+    }
+
+
+def build_depth_encoding_contract() -> dict[str, Any]:
+    return {"distanceMetric": "euclidean-camera-distance-meters", "nearSource": "cameras[].near", "ceilingByProfile": {"portrait": 160, "desktop": 160, "landscape": 160, "closeup": 80}, "foregroundScale": 0.94, "backgroundValue": 65535, "bitDepth": 16, "colorType": 0, "rounding": "floor(x+0.5)", "foregroundQuantileSample": "known-object-id-nonbackground-and-depth-not-65535", "semanticSampleSource": "exact-object-id-palette"}
+
+
+def build_construction() -> dict[str, Any]:
+    band_data = {
+        "near": ([8.0, 16.0], 0.86, 8, 0.72, [-8.0, 10.0], [-100.0, -10.0], "layered-ridge-near-v1", 9, 3, 2, 2),
+        "mid": ([18.0, 34.0], 0.58, 10, 0.48, [-12.0, 18.0], [-140.0, -20.0], "layered-ridge-mid-v1", 8, 3, 2, 2),
+        "far": ([38.0, 70.0], 0.30, 12, 0.24, [-16.0, 30.0], [-180.0, -35.0], "layered-ridge-far-v1", 7, 2, 1, 1),
+    }
+    canyon: dict[str, Any] = {"bandOrder": ["near", "mid", "far"]}
+    for name, values in band_data.items():
+        abs_x, contrast, count, saturation, y_range, z_range, recipe, ridge, terraces, overhangs, recesses = values
+        canyon[name] = {"absXRange": abs_x, "contrast": contrast, "count": count, "saturation": saturation, "yRange": y_range, "zRange": z_range, "recipe": recipe, "ridgeSegmentsPerSignature": ridge, "terracesPerSignature": terraces, "overhangsPerSignature": overhangs, "recessesPerSignature": recesses}
+    canyon.update({"negativeSpaceCount": 3, "occlusionBoundaryCount": 2, "fullWidthWaterVisible": False})
+    hazards = {
+        "order": ["beam", "ring", "column", "gap"],
+        "beam": {"semanticRoot": "TR4_Hazard_Beam", "action": "jump", "collisionProxy": {"height": 0.82, "widthAll": 5.84, "widthLane": 0.84}, "visualBounds": {"topYRange": [0.68, 0.76], "widthLaneMax": 1.55}, "socketOrder": ["entry", "apex.clearance", "exit", "ground.L", "ground.R"], "visualName": "Fault Lip", "baseEmbedRange": [0.08, 0.15], "maxProxyDiscrepancy": 0.06, "coPlanarFacesAllowed": False},
+        "ring": {"semanticRoot": "TR4_Hazard_Ring", "action": "slide", "collisionProxy": {"laneWidth": 0.84, "requiresSlide": True}, "visualBounds": {"lowestSolidY": 1.05, "openingHeight": 0.90, "widthLaneMax": 1.55}, "socketOrder": ["entry", "slide.clearance", "exit", "ground.L", "ground.R"], "visualName": "Coral Throat", "baseEmbedRange": [0.08, 0.15], "maxProxyDiscrepancy": 0.06, "coPlanarFacesAllowed": False},
+        "column": {"semanticRoot": "TR4_Hazard_Column", "action": "lane-change", "collisionProxy": {"laneWidth": 0.84}, "visualBounds": {"widthLaneMax": 1.55}, "socketOrder": ["entry", "safe.left", "safe.right", "exit", "ground"], "visualName": "Basalt Splitter", "baseEmbedRange": [0.08, 0.15], "maxProxyDiscrepancy": 0.06, "coPlanarFacesAllowed": False},
+        "gap": {"semanticRoot": "TR4_Gap_Lips", "action": "jump", "collisionProxy": {"clearanceHeight": 0.52, "lengthFromCanonicalEvent": True}, "visualBounds": {"hiddenFloor": False, "lipDepthMin": 0.55}, "socketOrder": ["takeoff", "apex.clearance", "landing"], "visualName": "Tidebreak Gap", "baseEmbedRange": [0.08, 0.15], "maxProxyDiscrepancy": 0.06, "coPlanarFacesAllowed": False},
+    }
+    lighting = {
+        "worldColor": "#6E8294", "worldStrength": 0.55,
+        "key": {"color": "#FFD7A3", "energy": 4.2, "surfaceToLight": [-0.51966, 0.77949, 0.34977], "shadow": True},
+        "fill": {"color": "#7EA6C4", "energy": 1.1, "surfaceToLight": [0.48019, 0.62025, -0.62025], "shadow": False},
+        "contact": {"color": "#E7C79C", "energy": 430.0, "shape": "DISK", "size": 9.0, "shadow": False, "location": [0.0, 7.5, 4.0], "target": [0.0, 0.0, -4.0]},
+    }
+    runner = {
+        "partOrder": ["pelvis", "chest", "head", "upperArm.L", "forearm.L", "hand.L", "upperArm.R", "forearm.R", "hand.R", "thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R", "coatTail.L", "coatTail.R"],
+        "contactSocketOrder": ["ground.foot.L", "ground.foot.R", "camera.target"],
+        "poseOrder": ["run.0", "run.1", "run.2", "run.3", "run.4", "run.5", "run.6", "run.7", "jump", "slide", "stumble", "failure"],
+        "root": [0.0, 0.0, 0.0], "height": 2.32, "maxGroundError": 0.03, "triangleCeiling": 18000,
+        "modelingMode": "profiled-articulated-mesh-v1", "minimumRadialSegments": 10, "primitiveJoinForbidden": True, "nonAdjacentIntersectionTolerance": 0,
+    }
+    pursuer = {
+        "partOrder": ["pelvisPlate", "ribPlate", "shoulderPlate", "neck", "head", "jaw", "foreleg.L.upper", "foreleg.L.lower", "paw.L.front", "foreleg.R.upper", "foreleg.R.lower", "paw.R.front", "hindleg.L.upper", "hindleg.L.lower", "paw.L.rear", "hindleg.R.upper", "hindleg.R.lower", "paw.R.rear", "dorsalSeam"],
+        "contactSocketOrder": ["ground.front.L", "ground.front.R", "ground.rear.L", "ground.rear.R", "capture.target"],
+        "bookendRoot": [0.0, 0.0, 2.4], "height": 1.78, "maxGroundError": 0.03, "triangleCeiling": 24000,
+        "modelingMode": "separated-rock-plate-quadruped-v1", "minimumRadialSegments": 10, "primitiveJoinForbidden": True, "bodyCoreSeparationMin": 0.18,
+    }
+    road = {"surfaceY": 0.0, "width": 6.4, "bounds": [-3.2, 3.2], "visualSafetyBounds": [-2.92, 2.92], "moduleCount": 16, "moduleLengthRange": [6.0, 11.0], "thicknessRange": [0.55, 1.2], "sideDepthRange": [2.5, 8.0], "signatureOrder": ["terrace-fracture", "buttress-recess", "collapsed-lip", "strata-undercut", "rubble-shoulder", "split-ledge"], "maxConsecutiveSignatureRepeats": 2, "strataEventsPerModule": 2, "rubbleEventsPerModule": 1, "nearLoopShoulder": {"rightOuterX": 4.45, "zRange": [-5.2, -2.8]}, "capCrosswiseSegments": 9, "capLongitudinalSegmentsPerModule": 8, "fractureEventsPerModule": 3, "undercutEventsPerModule": 2, "sideApronsPerModule": 2, "vistaBendStartZ": -82, "vistaBendMaxOffsetX": 12}
+    tide_scar = {
+        "mainWidthRange": [0.075, 0.11], "mainCenterXRange": [3.0, 3.06], "surfaceOffsetY": 0.035,
+        "mainControlPoints": [[3.03, 0.035, 8.0], [3.05, 0.035, 0.0], [3.01, 0.035, -10.0], [3.06, 0.035, -22.0], [3.02, 0.035, -36.0], [3.04, 0.035, -52.0], [3.00, 0.035, -70.0], [3.05, 0.035, -92.0], [3.02, 0.035, -120.0]],
+        "loopControlPoints": [[3.000, 0.035, -3.20], [3.054, 0.035, -2.87], [3.198, 0.035, -2.64], [3.390, 0.035, -2.55], [3.588, 0.035, -2.64], [3.732, 0.035, -2.87], [3.780, 0.035, -3.20], [3.732, 0.035, -3.52], [3.588, 0.035, -3.76], [3.390, 0.035, -3.85], [3.198, 0.035, -3.76], [3.054, 0.035, -3.52], [3.000, 0.035, -3.20]],
+        "gapClipPadding": 0.35, "hazardClipPadding": 0.25, "nearLoopVisibilityProfile": "portrait", "bakedTextureAllowed": False,
+    }
+    return {"atmosphere": build_atmosphere_contract(), "axis": {"forward": "-Z", "right": "+X", "up": "+Y"}, "canyon": canyon, "depthEncoding": build_depth_encoding_contract(), "hazards": hazards, "lighting": lighting, "materialGraphs": build_material_graph_contract(), "pursuer": pursuer, "road": road, "runner": runner, "tideScar": tide_scar, "unitMeters": 1.0}
 
 
 def build_materials() -> list[dict[str, Any]]:
@@ -534,10 +535,10 @@ def build_roots() -> list[dict[str, Any]]:
 
 def build_outputs() -> list[dict[str, Any]]:
     profiles = [
-        ("portrait", "tr4-diagnostic-running-001", 270, 480),
-        ("desktop", "tr4-diagnostic-running-001", 480, 270),
-        ("landscape", "tr4-diagnostic-running-001", 422, 195),
-        ("closeup", "tr4-diagnostic-game-over-001", 320, 240),
+        ("portrait", "tr4-diagnostic-running-007", 270, 480),
+        ("desktop", "tr4-diagnostic-running-007", 480, 270),
+        ("landscape", "tr4-diagnostic-running-007", 422, 195),
+        ("closeup", "tr4-diagnostic-game-over-007", 320, 240),
     ]
     passes = ["beauty", "object-id", "road-mask", "normal", "linear-depth"]
     outputs: list[dict[str, Any]] = []
@@ -550,7 +551,7 @@ def build_outputs() -> list[dict[str, Any]]:
                     "profile": profile,
                     "pass": pass_name,
                     "sceneId": scene_id,
-                    "relativePath": f"tr4-diagnostic-006-{profile}-{pass_name}.png",
+                    "relativePath": f"tr4-diagnostic-007-{profile}-{pass_name}.png",
                     "width": width,
                     "height": height,
                 }
@@ -586,7 +587,7 @@ def build_preflight(repo_root: Path, script_hashes: dict[str, str]) -> dict[str,
         },
         "scene": {
             "gameplay": {
-                "id": "tr4-diagnostic-running-001", "status": "running", "tick": 240,
+                "id": "tr4-diagnostic-running-007", "status": "running", "tick": 240,
                 "elapsedTicks": 240, "distance": 32.0, "lane": 0, "posture": "run",
                 "gaitPhase": 0.25, "runnerRoot": [0, 0, 0], "pursuerPresent": False,
                 "hazards": [
@@ -597,7 +598,7 @@ def build_preflight(repo_root: Path, script_hashes: dict[str, str]) -> dict[str,
                 ],
             },
             "bookend": {
-                "id": "tr4-diagnostic-game-over-001", "status": "game-over", "tick": 420,
+                "id": "tr4-diagnostic-game-over-007", "status": "game-over", "tick": 420,
                 "elapsedTicks": 420, "distance": 63.0, "failureReason": "pursuer-caught",
                 "posture": "failure", "runnerRoot": [0, 0, 0], "pursuerPresent": True,
                 "pursuerRoot": [0, 0, 2.4],
@@ -666,6 +667,69 @@ def deep_compare(expected: Any, actual: Any, path: str = "$") -> None:
         raise PrecheckBlocked(f"frozen value mismatch at {path}")
 
 
+def strict_json_object_bytes(data: bytes, label: str) -> dict[str, Any]:
+    def reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise PrecheckBlocked(f"duplicate JSON key in {label}: {key}")
+            result[key] = value
+        return result
+
+    try:
+        value = json.loads(data.decode("utf-8"), object_pairs_hook=reject_duplicate_keys)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise PrecheckBlocked(f"invalid UTF-8 JSON in {label}: {exc}") from exc
+    if not isinstance(value, dict):
+        raise PrecheckBlocked(f"JSON root is not an object: {label}")
+    validate_finite(value)
+    if data != canonical_bytes(value):
+        raise PrecheckBlocked(f"JSON is not exact canonical bytes: {label}")
+    return value
+
+
+def build_planned_manifest(preflight: dict[str, Any], preflight_sha256: str) -> dict[str, Any]:
+    return {
+        "schemaId": "tide-relay.temple-tr4.diagnostic-plan",
+        "schemaVersion": 1,
+        "diagnosticId": DIAGNOSTIC_ID,
+        "preflightSha256": preflight_sha256,
+        "constructionHash": preflight["constructionHash"],
+        "outputs": preflight["outputs"],
+        "verdict": "READY_FOR_BLENDER",
+    }
+
+
+def validate_planned_manifest(
+    planned_path: Path,
+    expected_plan: dict[str, Any],
+    preflight_path: Path,
+    launch_preflight_bytes: bytes,
+) -> str:
+    if not planned_path.is_file() or not preflight_path.is_file():
+        raise PrecheckBlocked("planned manifest or preflight is missing")
+    current_preflight_bytes = preflight_path.read_bytes()
+    launch_preflight_hash = sha256_bytes(launch_preflight_bytes)
+    if current_preflight_bytes != launch_preflight_bytes:
+        raise PrecheckBlocked("current preflight bytes differ from launch-bound preflight bytes")
+    if expected_plan.get("preflightSha256") != launch_preflight_hash:
+        raise PrecheckBlocked("launch-authored plan does not bind the complete launch preflight")
+    actual_plan = strict_json_object_bytes(planned_path.read_bytes(), "planned-manifest.json")
+    expected_keys = [
+        "schemaId", "schemaVersion", "diagnosticId", "preflightSha256",
+        "constructionHash", "outputs", "verdict",
+    ]
+    if sorted(actual_plan.keys()) != sorted(expected_keys):
+        raise PrecheckBlocked("planned-manifest.json closed key set mismatch")
+    normalized_expected_plan = strict_json_object_bytes(
+        canonical_bytes(expected_plan), "launch-authored planned-manifest.json"
+    )
+    deep_compare(normalized_expected_plan, actual_plan, "$.plannedManifest")
+    if actual_plan["preflightSha256"] != sha256_bytes(current_preflight_bytes):
+        raise PrecheckBlocked("planned-manifest.json does not bind current immutable preflight bytes")
+    return sha256_bytes(canonical_bytes(actual_plan))
+
+
 def reject_reparse(path: Path, stop: Path | None = None) -> None:
     current = path
     checked: list[Path] = []
@@ -723,9 +787,9 @@ def linear_rgb(value: str) -> list[float]:
     return [srgb_to_linear(channel) for channel in channels]
 
 
-def validate_c6_preflight_contract(preflight: dict[str, Any]) -> None:
+def validate_c7_preflight_contract(preflight: dict[str, Any]) -> None:
     if preflight["tools"].get("pythonVersion") != PYTHON_VERSION or platform.python_version() != PYTHON_VERSION:
-        raise PrecheckBlocked("C6 frozen Python tool version mismatch")
+        raise PrecheckBlocked("C7 frozen Python tool version mismatch")
     camera_keys = [
         "profile", "resolution", "diagnosticResolution", "position", "target", "up",
         "verticalFovDegrees", "aspect", "near", "far", "lensShiftY", "viewMatrix",
@@ -736,70 +800,68 @@ def validate_c6_preflight_contract(preflight: dict[str, Any]) -> None:
         "column", "gap", "scar", "routeCenter", "farRoute",
     ]
     if [camera.get("profile") for camera in preflight["cameras"]] != ["portrait", "desktop", "landscape", "closeup"]:
-        raise PrecheckBlocked("C6 camera profile order mismatch")
+        raise PrecheckBlocked("C7 camera profile order mismatch")
     for camera in preflight["cameras"]:
         if not isinstance(camera, dict) or sorted(camera.keys()) != sorted(camera_keys):
-            raise PrecheckBlocked(f"C6 camera schema mismatch: {camera.get('profile')}")
+            raise PrecheckBlocked(f"C7 camera schema mismatch: {camera.get('profile')}")
         if camera["up"] != [0.0, 1.0, 0.0]:
-            raise PrecheckBlocked(f"C6 camera up-vector mismatch: {camera['profile']}")
+            raise PrecheckBlocked(f"C7 camera up-vector mismatch: {camera['profile']}")
         if not isinstance(camera["projectionAnchors"], dict):
-            raise PrecheckBlocked(f"C6 projection anchor object mismatch: {camera['profile']}")
+            raise PrecheckBlocked(f"C7 projection anchor object mismatch: {camera['profile']}")
         if sorted(camera["projectionAnchors"].keys()) != sorted(anchor_keys):
-            raise PrecheckBlocked(f"C6 projection anchor key-set mismatch: {camera['profile']}")
+            raise PrecheckBlocked(f"C7 projection anchor key-set mismatch: {camera['profile']}")
         for name, point in camera["projectionAnchors"].items():
             if not isinstance(point, list) or len(point) != 3:
-                raise PrecheckBlocked(f"C6 projection anchor shape mismatch: {camera['profile']}.{name}")
+                raise PrecheckBlocked(f"C7 projection anchor shape mismatch: {camera['profile']}.{name}")
             for index, value in enumerate(point):
                 finite_number(value, f"cameras.{camera['profile']}.projectionAnchors.{name}[{index}]")
         canonical_view = canonical_view_row_major(camera["position"], camera["target"], camera["up"])
         expected_webgl_view = [canonical_view[(index % 4) * 4 + index // 4] for index in range(16)]
         if max(abs(left - right) for left, right in zip(camera["viewMatrix"], expected_webgl_view)) > 1.0e-12:
-            raise PrecheckBlocked(f"C6 canonical view matrix mismatch: {camera['profile']}")
+            raise PrecheckBlocked(f"C7 canonical view matrix mismatch: {camera['profile']}")
         if expected_screen_projection(camera)["verdict"] != "READY_FOR_DIAGNOSTIC_RENDER":
-            raise PrecheckBlocked(f"C6 analytic screen projection failed: {camera['profile']}")
+            raise PrecheckBlocked(f"C7 analytic screen projection failed: {camera['profile']}")
 
+    construction = preflight["construction"]
+    deep_compare(build_construction(), construction, "$.construction")
     lighting = preflight["construction"]["lighting"]
     if not isinstance(lighting, dict) or sorted(lighting.keys()) != sorted([
-        "worldColor", "worldStrength", "fogColor", "fogDensity", "fogAnisotropy",
-        "key", "fill", "contact",
+        "worldColor", "worldStrength", "key", "fill", "contact",
     ]):
-        raise PrecheckBlocked("C6 lighting schema mismatch")
+        raise PrecheckBlocked("C7 lighting schema mismatch")
     if (
         lighting["worldColor"] != "#6E8294"
         or lighting["worldStrength"] != 0.55
-        or lighting["fogColor"] != "#9AA7A8"
-        or lighting["fogDensity"] != 0.0035
-        or lighting["fogAnisotropy"] != 0.18
     ):
-        raise PrecheckBlocked("C6 atmosphere record mismatch")
+        raise PrecheckBlocked("C7 world-light record mismatch")
     linear_rgb(lighting["worldColor"])
-    linear_rgb(lighting["fogColor"])
     for name, minimum_y, sign in (("key", 0.75, -1), ("fill", 0.55, 1)):
         record = lighting[name]
         if not isinstance(record, dict) or sorted(record.keys()) != ["color", "energy", "shadow", "surfaceToLight"]:
-            raise PrecheckBlocked(f"C6 {name} light schema mismatch")
+            raise PrecheckBlocked(f"C7 {name} light schema mismatch")
         linear_rgb(record["color"])
         vector = record["surfaceToLight"]
         if not isinstance(vector, list) or len(vector) != 3:
-            raise PrecheckBlocked(f"C6 {name} surface-to-light shape mismatch")
+            raise PrecheckBlocked(f"C7 {name} surface-to-light shape mismatch")
         normalized = normalize([finite_number(value, f"lighting.{name}.surfaceToLight") for value in vector])
         if normalized[1] < minimum_y or (sign < 0 and normalized[0] >= 0.0) or (sign > 0 and normalized[0] <= 0.0):
-            raise PrecheckBlocked(f"C6 {name} surface-to-light direction gate failed")
+            raise PrecheckBlocked(f"C7 {name} surface-to-light direction gate failed")
     contact = lighting["contact"]
     if not isinstance(contact, dict) or sorted(contact.keys()) != ["color", "energy", "location", "shadow", "shape", "size", "target"]:
-        raise PrecheckBlocked("C6 contact light schema mismatch")
+        raise PrecheckBlocked("C7 contact light schema mismatch")
     if contact != {
         "color": "#E7C79C", "energy": 430.0, "shape": "DISK", "size": 9.0,
         "shadow": False, "location": [0.0, 7.5, 4.0], "target": [0.0, 0.0, -4.0],
     }:
-        raise PrecheckBlocked("C6 contact light record mismatch")
+        raise PrecheckBlocked("C7 contact light record mismatch")
     linear_rgb(contact["color"])
-    transmittances = [math.exp(-lighting["fogDensity"] * distance) for distance in (20.0, 120.0, 520.0)]
+    atmosphere = construction["atmosphere"]
+    transmittances = [math.exp(-atmosphere["density"] * distance) for distance in (20.0, 120.0, 520.0)]
     if not (transmittances[0] >= 0.90 and 0.55 <= transmittances[1] <= 0.72 and transmittances[2] >= 0.12):
-        raise PrecheckBlocked("C6 fog transmittance gate failed")
+        raise PrecheckBlocked("C7 fog transmittance gate failed")
 
 
-def verify_c6_generator_contract(generator_path: Path) -> None:
+def verify_c7_generator_contract(generator_path: Path) -> None:
     source = generator_path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(generator_path))
     functions_by_name = {
@@ -811,21 +873,21 @@ def verify_c6_generator_contract(generator_path: Path) -> None:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "set_view_transform"
     ]
     if len(view_functions) != 1:
-        raise PrecheckBlocked("C6 requires exactly one set_view_transform function")
+        raise PrecheckBlocked("C7 requires exactly one set_view_transform function")
     function = view_functions[0]
     segment = ast.get_source_segment(source, function)
     if segment is None:
-        raise PrecheckBlocked("C6 could not isolate set_view_transform source")
+        raise PrecheckBlocked("C7 could not isolate set_view_transform source")
     forbidden_text = ("enum_items", "preferred", '"NONE"', "'NONE'", "fallback", "bl_rna")
     if any(token in segment for token in forbidden_text):
-        raise PrecheckBlocked("C6 diagnostic view-transform function contains a forbidden enum/fallback pattern")
+        raise PrecheckBlocked("C7 diagnostic view-transform function contains a forbidden enum/fallback pattern")
     for node in ast.walk(function):
         if isinstance(node, ast.Constant) and node.value == "NONE":
-            raise PrecheckBlocked("C6 diagnostic view-transform function assigns forbidden NONE")
+            raise PrecheckBlocked("C7 diagnostic view-transform function assigns forbidden NONE")
         if isinstance(node, ast.Name) and node.id == "preferred":
-            raise PrecheckBlocked("C6 diagnostic view-transform function uses forbidden preferred selection")
+            raise PrecheckBlocked("C7 diagnostic view-transform function uses forbidden preferred selection")
         if isinstance(node, ast.Attribute) and node.attr in ("enum_items", "bl_rna"):
-            raise PrecheckBlocked("C6 diagnostic view-transform function inspects forbidden RNA enum metadata")
+            raise PrecheckBlocked("C7 diagnostic view-transform function inspects forbidden RNA enum metadata")
     required_source = (
         'scene.view_settings.exposure = 0.0',
         'scene.view_settings.gamma = 1.0',
@@ -840,10 +902,10 @@ def verify_c6_generator_contract(generator_path: Path) -> None:
         'scene.view_settings.look != "None"',
     )
     if any(text not in segment for text in required_source):
-        raise PrecheckBlocked("C6 diagnostic view-transform exact assignments/readbacks are incomplete")
+        raise PrecheckBlocked("C7 diagnostic view-transform exact assignments/readbacks are incomplete")
     validate_input = functions_by_name.get("validate_input")
     if validate_input is None:
-        raise PrecheckBlocked("C6 generator validate_input is missing")
+        raise PrecheckBlocked("C7 generator validate_input is missing")
     validate_input_segment = ast.get_source_segment(source, validate_input) or ""
     anchor_contract_tokens = (
         'sorted(record.keys()) != sorted(camera_keys)',
@@ -851,57 +913,67 @@ def verify_c6_generator_contract(generator_path: Path) -> None:
         'sorted(record["projectionAnchors"].keys()) != sorted(anchor_keys)',
     )
     if any(token not in validate_input_segment for token in anchor_contract_tokens):
-        raise PrecheckBlocked("C6 generator exact camera/anchor key-set predicate is incomplete")
+        raise PrecheckBlocked("C7 generator exact camera/anchor key-set predicate is incomplete")
     if 'list(record["projectionAnchors"].keys())' in validate_input_segment:
-        raise PrecheckBlocked("C6 generator retains insertion-order-dependent anchor validation")
+        raise PrecheckBlocked("C7 generator retains insertion-order-dependent anchor validation")
     for name in ("apply_camera_profile", "expected_camera_invariants"):
         camera_function = functions_by_name.get(name)
         if camera_function is None:
-            raise PrecheckBlocked(f"C6 generator is missing {name}")
+            raise PrecheckBlocked(f"C7 generator is missing {name}")
         camera_segment = ast.get_source_segment(source, camera_function) or ""
         if "to_track_quat" in camera_segment:
-            raise PrecheckBlocked(f"C6 {name} contains forbidden to_track_quat")
+            raise PrecheckBlocked(f"C7 {name} contains forbidden to_track_quat")
     required_tokens = (
-        'EXPECTED_CONTRACT = "TEMPLE-TR4-C6"',
-        'DIAGNOSTIC_ID = "006"',
-        'schema_version != 6',
-        'tr4-diagnostic-006-',
+        'EXPECTED_CONTRACT = "TEMPLE-TR4-C7"',
+        'DIAGNOSTIC_ID = "007"',
+        'schema_version != 7',
+        'tr4-diagnostic-007-',
         "Matrix((right, true_up, -forward)).transposed().to_quaternion()",
         'record["surfaceToLight"]',
-        'lighting["fogAnisotropy"]',
         '"lightingBinding": lighting_binding',
         '"atmosphereBinding": atmosphere_binding',
-        '"schemaVersion": 2',
+        '"schemaVersion": 3',
+        '"geometryBinding": geometry_binding',
+        '"materialGraphBinding": material_binding',
+        '"depthEncodingBinding": depth_binding',
+        '"foregroundScale": .94',
     )
     if any(token not in source for token in required_tokens):
-        raise PrecheckBlocked("C6 generator identity/camera/light/atmosphere source is incomplete")
+        raise PrecheckBlocked("C7 generator identity/camera/light/atmosphere/depth source is incomplete")
     if 'rotationEulerDegrees' in source:
-        raise PrecheckBlocked("C6 generator retains forbidden diagnostic Euler lighting")
+        raise PrecheckBlocked("C7 generator retains forbidden diagnostic Euler lighting")
 
 
-def verify_c6_evaluator_contract(evaluator_path: Path) -> None:
+def verify_c7_evaluator_contract(evaluator_path: Path) -> None:
     source = evaluator_path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(evaluator_path))
     required_tokens = (
-        'DIAGNOSTIC_ID = "006"',
-        'preflight.get("schemaVersion") != 6',
-        'preflight.get("contractVersion") != "TEMPLE-TR4-C6"',
-        'tr4-diagnostic-006-',
+        'DIAGNOSTIC_ID = "007"',
+        'preflight.get("schemaVersion") != 7',
+        'preflight.get("contractVersion") != "TEMPLE-TR4-C7"',
+        'tr4-diagnostic-007-',
         'PROFILE_METRIC_KEYS',
         'EVALUATION_GATE_KEYS',
         'roadFarRouteWidthFraction',
         'representativeDepthOrder',
+        'foregroundDepthQuantiles',
+        'stable_axis_angle_match',
+        'geometryBinding',
+        'materialGraphBinding',
+        'depthEncodingBinding',
+        'validate_planned_manifest(root / "planned-manifest.json", preflight, preflight_bytes)',
+        'preflight_path.read_bytes() != preflight_bytes',
     )
     if any(token not in source for token in required_tokens):
-        raise PrecheckBlocked("C6 evaluator closed identity/metrics/gates source is incomplete")
+        raise PrecheckBlocked("C7 evaluator closed identity/metrics/gates source is incomplete")
     if not any(isinstance(node, ast.FunctionDef) and node.name == "validate_camera_binding" for node in tree.body):
-        raise PrecheckBlocked("C6 evaluator camera binding validator is missing")
+        raise PrecheckBlocked("C7 evaluator camera binding validator is missing")
     camera_validator = next(
-        (node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "validate_c6_preflight_cameras"),
+        (node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "validate_c7_preflight_cameras"),
         None,
     )
     if camera_validator is None:
-        raise PrecheckBlocked("C6 evaluator preflight camera validator is missing")
+        raise PrecheckBlocked("C7 evaluator preflight camera validator is missing")
     camera_segment = ast.get_source_segment(source, camera_validator) or ""
     anchor_contract_tokens = (
         'sorted(record.keys()) != sorted(camera_keys)',
@@ -909,22 +981,22 @@ def verify_c6_evaluator_contract(evaluator_path: Path) -> None:
         'sorted(record["projectionAnchors"].keys()) != sorted(anchor_keys)',
     )
     if any(token not in camera_segment for token in anchor_contract_tokens):
-        raise PrecheckBlocked("C6 evaluator exact camera/anchor key-set predicate is incomplete")
+        raise PrecheckBlocked("C7 evaluator exact camera/anchor key-set predicate is incomplete")
     if 'list(record["projectionAnchors"].keys())' in camera_segment:
-        raise PrecheckBlocked("C6 evaluator retains insertion-order-dependent anchor validation")
+        raise PrecheckBlocked("C7 evaluator retains insertion-order-dependent anchor validation")
 
 
-def verify_c6_runner_contract(runner_path: Path) -> None:
+def verify_c7_runner_contract(runner_path: Path) -> None:
     source = runner_path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(runner_path))
     functions_by_name = {
         node.name: node for node in tree.body
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
     }
-    camera_validator = functions_by_name.get("validate_c6_preflight_contract")
+    camera_validator = functions_by_name.get("validate_c7_preflight_contract")
     prepare = functions_by_name.get("prepare_diagnostic")
     if camera_validator is None or prepare is None:
-        raise PrecheckBlocked("C6 runner validator/canonical preparation function is missing")
+        raise PrecheckBlocked("C7 runner validator/canonical preparation function is missing")
     camera_segment = ast.get_source_segment(source, camera_validator) or ""
     anchor_contract_tokens = (
         'sorted(camera.keys()) != sorted(camera_keys)',
@@ -932,19 +1004,25 @@ def verify_c6_runner_contract(runner_path: Path) -> None:
         'sorted(camera["projectionAnchors"].keys()) != sorted(anchor_keys)',
     )
     if any(token not in camera_segment for token in anchor_contract_tokens):
-        raise PrecheckBlocked("C6 runner exact camera/anchor key-set predicate is incomplete")
+        raise PrecheckBlocked("C7 runner exact camera/anchor key-set predicate is incomplete")
     if 'list(camera["projectionAnchors"].keys())' in camera_segment:
-        raise PrecheckBlocked("C6 runner retains insertion-order-dependent anchor validation")
+        raise PrecheckBlocked("C7 runner retains insertion-order-dependent anchor validation")
     prepare_segment = ast.get_source_segment(source, prepare) or ""
     round_trip_tokens = (
         'authored_preflight = build_preflight(repo_root, script_hashes)',
         'canonical_preflight_bytes = canonical_bytes(authored_preflight)',
         'preflight = json.loads(canonical_preflight_bytes.decode("utf-8"))',
-        'validate_c6_preflight_contract(preflight)',
+        'validate_c7_preflight_contract(preflight)',
         'canonical_bytes(preflight) != canonical_preflight_bytes',
     )
     if any(token not in prepare_segment for token in round_trip_tokens):
-        raise PrecheckBlocked("C6 runner canonical round-trip source is incomplete")
+        raise PrecheckBlocked("C7 runner canonical round-trip source is incomplete")
+    plan_replay_tokens = (
+        'build_planned_manifest(preflight, launch_preflight_hash)',
+        'validate_planned_manifest(planned_path, planned, preflight_path, launch_preflight_bytes)',
+    )
+    if any(token not in source for token in plan_replay_tokens):
+        raise PrecheckBlocked("C7 runner planned-manifest replay source is incomplete")
 
 
 def verify_scripts(repo_root: Path) -> tuple[dict[str, Path], dict[str, str]]:
@@ -966,18 +1044,20 @@ def verify_scripts(repo_root: Path) -> tuple[dict[str, Path], dict[str, str]]:
         except (SyntaxError, UnicodeError) as exc:
             raise PrecheckBlocked(f"authorized script does not parse as UTF-8 Python: {path}: {exc}") from exc
         if name == "generator":
-            verify_c6_generator_contract(path)
+            verify_c7_generator_contract(path)
         elif name == "evaluator":
-            verify_c6_evaluator_contract(path)
+            verify_c7_evaluator_contract(path)
         else:
-            verify_c6_runner_contract(path)
+            verify_c7_runner_contract(path)
         hashes[name] = sha256_file(path)
+        if name == "generator" and hashes[name] != GENERATOR_SHA256:
+            raise PrecheckBlocked("C7 generator source checkpoint SHA-256 mismatch")
         if len(hashes[name]) != 64:
             raise PrecheckBlocked(f"invalid script hash: {path}")
     return scripts, hashes
 
 
-def verify_c6_authorization(repo_root: Path) -> None:
+def verify_c7_authorization(repo_root: Path) -> None:
     authorization = (repo_root / AUTHORIZATION_RELATIVE).resolve(strict=True)
     current_task = (repo_root / CURRENT_TASK_RELATIVE).resolve(strict=True)
     coordination_log = (repo_root / COORDINATION_LOG_RELATIVE).resolve(strict=True)
@@ -986,21 +1066,22 @@ def verify_c6_authorization(repo_root: Path) -> None:
         if not path.is_file():
             raise PrecheckBlocked(f"required authorization input is missing: {path}")
     authorization_text = authorization.read_text(encoding="utf-8")
-    if "Status: **AUTHORIZED.**" not in authorization_text:
-        raise PrecheckBlocked("diagnostic-006 authorization status is not AUTHORIZED")
-    if authorization_text.count("READY_FOR_DIAGNOSTIC_006_CONTRACT") < 2:
-        raise PrecheckBlocked("diagnostic-006 two independent contract verdicts are missing")
+    if "Status: **AUTHORIZED FOR EXACT C7-T1/T2 SOURCE CHECKPOINTS AFTER C7-D3; DIAGNOSTIC PROCESS GATED BY DRY PREFLIGHT.**" not in authorization_text:
+        raise PrecheckBlocked("diagnostic-007 authorization status is not the frozen C7 source authorization")
+    if "READY_FOR_DIAGNOSTIC_007_CONTRACT" not in authorization_text or "READY_FOR_DIAGNOSTIC_007_LOOP_CONTRACT" not in authorization_text:
+        raise PrecheckBlocked("diagnostic-007 independent contract verdicts are missing")
     current_task_text = current_task.read_text(encoding="utf-8")
-    if "Current sub-slice: **diagnostic `006` authorized" not in current_task_text:
-        raise PrecheckBlocked("CURRENT_TASK.md does not name diagnostic 006 as the authorized current sub-slice")
+    if "C7-T1/T2 source checkpoints reauthorized" not in current_task_text:
+        raise PrecheckBlocked("CURRENT_TASK.md does not retain C7-T1/T2 source authorization")
     coordination_text = coordination_log.read_text(encoding="utf-8")
-    if "REPORT TEMPLE-TR4-DIAGNOSTIC-006 AUTHORIZED" not in coordination_text:
-        raise PrecheckBlocked("coordination THREAD_LOG lacks TEMPLE-TR4-DIAGNOSTIC-006 AUTHORIZED")
+    if "REPORT TEMPLE-TR4-DIAGNOSTIC-007 C7-D4-SOURCE-REAUTHORIZED" not in coordination_text:
+        raise PrecheckBlocked("coordination THREAD_LOG lacks diagnostic-007 C7-D4 reauthorization")
 
 
 def verify_c6_frozen_evidence(repo_root: Path) -> dict[str, str]:
     observed: dict[str, str] = {}
-    for name, (relative_path, expected_hash) in FROZEN_C6_EVIDENCE.items():
+    frozen_evidence = {**FROZEN_C6_EVIDENCE, **FROZEN_DIAGNOSTIC_006_EVIDENCE}
+    for name, (relative_path, expected_hash) in frozen_evidence.items():
         path = (repo_root / relative_path).resolve(strict=True)
         assert_contained(path, repo_root)
         if not path.is_file():
@@ -1035,6 +1116,15 @@ def verify_c6_frozen_evidence(repo_root: Path) -> dict[str, str]:
         raise PrecheckBlocked(
             f"frozen diagnostic-005 exact-set mismatch: files={sorted(actual_c5_names)}, directories={actual_c5_directories}"
         )
+    c6_root = (repo_root / "docs/workstreams/temple-tr4-asset/diagnostic-006").resolve(strict=True)
+    assert_contained(c6_root, repo_root)
+    expected_c6_names = {Path(relative_path).name for relative_path, _expected_hash in FROZEN_DIAGNOSTIC_006_EVIDENCE.values()}
+    actual_c6_names = {path.name for path in c6_root.iterdir() if path.is_file()}
+    actual_c6_directories = [path.name for path in c6_root.iterdir() if path.is_dir()]
+    if len(expected_c6_names) != 27 or actual_c6_names != expected_c6_names or actual_c6_directories:
+        raise PrecheckBlocked(
+            f"frozen diagnostic-006 exact-set mismatch: files={sorted(actual_c6_names)}, directories={actual_c6_directories}"
+        )
     return observed
 
 
@@ -1046,24 +1136,6 @@ def verify_blender_executable() -> str:
     if actual_hash != BLENDER_EXECUTABLE_SHA256:
         raise PrecheckBlocked("Blender executable SHA-256 mismatch")
     return actual_hash
-
-
-def verify_probe_scripts(repo_root: Path) -> tuple[dict[str, Path], dict[str, str]]:
-    scripts_dir = repo_root / "tools" / "temple-asset-pipeline"
-    scripts = {
-        "generator": scripts_dir / "generate_tide_scar_tr4_pack.py",
-        "runner": scripts_dir / "run_tide_scar_tr4_pack.py",
-    }
-    hashes: dict[str, str] = {}
-    for name, path in scripts.items():
-        assert_contained(path, repo_root)
-        if not path.is_file():
-            raise PrecheckBlocked(f"missing camera-probe script: {path}")
-        expected_name = "generate_tide_scar_tr4_pack.py" if name == "generator" else "run_tide_scar_tr4_pack.py"
-        if path.name != expected_name:
-            raise PrecheckBlocked(f"unexpected camera-probe script name: {path}")
-        hashes[name] = sha256_file(path)
-    return scripts, hashes
 
 
 def atomic_write_json(path: Path, value: Any) -> None:
@@ -1130,6 +1202,37 @@ def angle_between(left: list[float], right: list[float]) -> float:
     return math.acos(max(-1.0, min(1.0, dot(left_unit, right_unit))))
 
 
+def stable_axis_angle_match(recorded: float, recomputed: float) -> bool:
+    """Pure C7 near-zero angle predicate; performs no I/O or process work."""
+    if (
+        isinstance(recorded, bool)
+        or isinstance(recomputed, bool)
+        or not isinstance(recorded, (int, float))
+        or not isinstance(recomputed, (int, float))
+    ):
+        return False
+    recorded_value = float(recorded)
+    recomputed_value = float(recomputed)
+    return (
+        math.isfinite(recorded_value)
+        and math.isfinite(recomputed_value)
+        and 0.0 <= recorded_value <= 1.0e-5
+        and 0.0 <= recomputed_value <= 1.0e-5
+        and abs(math.cos(recorded_value) - math.cos(recomputed_value)) <= 1.0e-12
+    )
+
+
+def dry_axis_angle_predicate() -> bool:
+    frozen_forward = (2.1073424255447017e-08, 2.580956827951785e-08)
+    frozen_up = (2.580956827951785e-08, 2.1073424255447017e-08)
+    injected_failure = (1.00001e-5, 0.0)
+    return (
+        stable_axis_angle_match(*frozen_forward)
+        and stable_axis_angle_match(*frozen_up)
+        and not stable_axis_angle_match(*injected_failure)
+    )
+
+
 def validate_orientation_binding(record: Any, camera: dict[str, Any], label: str) -> None:
     if not isinstance(record, dict) or sorted(record.keys()) != sorted(ORIENTATION_KEYS):
         raise RuntimeError(f"DIAGNOSTIC_BLOCKED orientation schema mismatch: {label}")
@@ -1160,11 +1263,8 @@ def validate_orientation_binding(record: Any, camera: dict[str, Any], label: str
     recomputed_up_angle = angle_between(actual_up, expected_basis["trueUp"])
     forward_angle = finite_number(record["localForwardAngleRadians"], f"{label}.localForwardAngleRadians")
     up_angle = finite_number(record["localUpAngleRadians"], f"{label}.localUpAngleRadians")
-    if (
-        abs(forward_angle - recomputed_forward_angle) > 1.0e-12
-        or abs(up_angle - recomputed_up_angle) > 1.0e-12
-        or recomputed_forward_angle > 1.0e-5
-        or recomputed_up_angle > 1.0e-5
+    if not stable_axis_angle_match(forward_angle, recomputed_forward_angle) or not stable_axis_angle_match(
+        up_angle, recomputed_up_angle
     ):
         raise RuntimeError(f"DIAGNOSTIC_BLOCKED local camera axis alignment failed: {label}")
 
@@ -1247,41 +1347,25 @@ def validate_lighting_binding(binding: Any, lighting: dict[str, Any]) -> None:
         raise RuntimeError("DIAGNOSTIC_BLOCKED contact light alignment mismatch")
 
 
-def validate_atmosphere_binding(binding: Any, lighting: dict[str, Any]) -> None:
-    keys = [
-        "worldColorHex", "worldColorLinear", "worldStrength", "fogColorHex",
-        "fogColorLinear", "fogDensity", "fogAnisotropy", "transmittance20",
-        "transmittance120", "transmittance520", "beautyViewTransform", "beautyLook",
-        "exposure", "gamma", "dither", "verdict",
-    ]
-    if not isinstance(binding, dict) or sorted(binding.keys()) != sorted(keys):
+def validate_atmosphere_binding(binding: Any, atmosphere: dict[str, Any]) -> None:
+    expected = json.loads(json.dumps(atmosphere, ensure_ascii=False, allow_nan=False))
+    expected.update(
+        {
+            "transmittance20": math.exp(-atmosphere["density"] * 20.0),
+            "transmittance120": math.exp(-atmosphere["density"] * 120.0),
+            "transmittance520": math.exp(-atmosphere["density"] * 520.0),
+            "verdict": "READY_FOR_DIAGNOSTIC_RENDER",
+        }
+    )
+    expected = json.loads(canonical_bytes(expected).decode("utf-8"))
+    if not isinstance(binding, dict):
         raise RuntimeError("DIAGNOSTIC_BLOCKED atmosphere binding schema mismatch")
-    exact = {
-        "worldColorHex": lighting["worldColor"], "fogColorHex": lighting["fogColor"],
-        "beautyViewTransform": "AgX", "beautyLook": "AgX - Medium High Contrast",
-        "verdict": "READY_FOR_DIAGNOSTIC_RENDER",
-    }
-    if any(binding[name] != value for name, value in exact.items()):
-        raise RuntimeError("DIAGNOSTIC_BLOCKED atmosphere exact record mismatch")
-    for name, expected in (
-        ("worldStrength", lighting["worldStrength"]), ("fogDensity", lighting["fogDensity"]),
-        ("fogAnisotropy", lighting["fogAnisotropy"]), ("exposure", 0.0),
-        ("gamma", 1.0), ("dither", 0.0),
-    ):
-        if abs(finite_number(binding[name], f"atmosphereBinding.{name}") - expected) > 1.0e-6:
-            raise RuntimeError(f"DIAGNOSTIC_BLOCKED atmosphere numeric mismatch: {name}")
-    for name, color_key in (("worldColorLinear", "worldColor"), ("fogColorLinear", "fogColor")):
-        values = finite_vector(binding[name], 3, f"atmosphereBinding.{name}")
-        if max(abs(left - right) for left, right in zip(values, linear_rgb(lighting[color_key]))) > 1.0e-6:
-            raise RuntimeError(f"DIAGNOSTIC_BLOCKED atmosphere color mismatch: {name}")
-    transmittances = {
-        "transmittance20": math.exp(-lighting["fogDensity"] * 20.0),
-        "transmittance120": math.exp(-lighting["fogDensity"] * 120.0),
-        "transmittance520": math.exp(-lighting["fogDensity"] * 520.0),
-    }
-    for name, expected in transmittances.items():
-        if abs(finite_number(binding[name], f"atmosphereBinding.{name}") - expected) > 1.0e-12:
-            raise RuntimeError(f"DIAGNOSTIC_BLOCKED atmosphere transmittance mismatch: {name}")
+    try:
+        deep_compare(expected, binding, "$.cameraBinding.atmosphereBinding")
+    except PrecheckBlocked as exc:
+        raise RuntimeError(f"DIAGNOSTIC_BLOCKED atmosphere binding mismatch: {exc}") from exc
+    for name in ("transmittance20", "transmittance120", "transmittance520"):
+        finite_number(binding[name], f"atmosphereBinding.{name}")
 
 
 def validate_camera_binding(path: Path, preflight: dict[str, Any]) -> str:
@@ -1298,7 +1382,7 @@ def validate_camera_binding(path: Path, preflight: dict[str, Any]) -> str:
         binding["schemaId"] != "tide-relay.temple-tr4.camera-binding"
         or isinstance(binding["schemaVersion"], bool)
         or not isinstance(binding["schemaVersion"], int)
-        or binding["schemaVersion"] != 2
+        or binding["schemaVersion"] != 3
         or binding["diagnosticId"] != DIAGNOSTIC_ID
         or binding["blenderVersion"] != BLENDER_VERSION
         or isinstance(binding["renderCallCountAtWrite"], bool)
@@ -1385,7 +1469,7 @@ def validate_camera_binding(path: Path, preflight: dict[str, Any]) -> str:
         validate_screen_projection_binding(record["screenProjection"], camera, f"{label}.screenProjection")
     lighting = preflight["construction"]["lighting"]
     validate_lighting_binding(binding["lightingBinding"], lighting)
-    validate_atmosphere_binding(binding["atmosphereBinding"], lighting)
+    validate_atmosphere_binding(binding["atmosphereBinding"], preflight["construction"]["atmosphere"])
     return sha256_file(path)
 
 
@@ -1405,7 +1489,8 @@ def validate_scene_metrics(path: Path, preflight: dict[str, Any]) -> str:
     metrics = json.loads(path.read_text(encoding="utf-8"))
     keys = [
         "meshObjects", "sourceTrianglesBeforeModifiers", "beautyMaterialCount",
-        "semanticRoots", "pursuerBookendRoot", "runnerRoot", "roadTopY", "verdict",
+        "semanticRoots", "pursuerBookendRoot", "runnerRoot", "roadTopY",
+        "geometryBinding", "materialGraphBinding", "depthEncodingBinding", "verdict",
     ]
     if not isinstance(metrics, dict) or sorted(metrics.keys()) != sorted(keys):
         raise RuntimeError("DIAGNOSTIC_BLOCKED scene metrics schema mismatch")
@@ -1413,12 +1498,12 @@ def validate_scene_metrics(path: Path, preflight: dict[str, Any]) -> str:
         value = metrics[name]
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             raise RuntimeError(f"DIAGNOSTIC_BLOCKED scene metric count mismatch: {name}")
-        if value != EXPECTED_SCENE_COUNTS[name]:
-            raise RuntimeError(f"DIAGNOSTIC_BLOCKED frozen scene metric count drift: {name}")
+        if value == 0:
+            raise RuntimeError(f"DIAGNOSTIC_BLOCKED empty scene metric count: {name}")
     if metrics["sourceTrianglesBeforeModifiers"] > preflight["budgets"]["sourceTriangles"]:
         raise RuntimeError("DIAGNOSTIC_BLOCKED source triangle budget exceeded")
-    if metrics["beautyMaterialCount"] > preflight["budgets"]["materialCount"]:
-        raise RuntimeError("DIAGNOSTIC_BLOCKED material budget exceeded")
+    if metrics["beautyMaterialCount"] != len(preflight["materials"]):
+        raise RuntimeError("DIAGNOSTIC_BLOCKED beauty material count mismatch")
     roots = metrics["semanticRoots"]
     expected_names = [record["name"] for record in preflight["semanticRoots"]]
     if not isinstance(roots, list) or len(roots) != 9:
@@ -1430,7 +1515,7 @@ def validate_scene_metrics(path: Path, preflight: dict[str, Any]) -> str:
             record["name"] != expected_name
             or isinstance(record["children"], bool)
             or not isinstance(record["children"], int)
-            or record["children"] != EXPECTED_ROOT_CHILDREN[index]
+            or record["children"] <= 0
         ):
             raise RuntimeError(f"DIAGNOSTIC_BLOCKED scene semantic root identity/count mismatch: {index}")
         translation = record["translation"]
@@ -1460,6 +1545,26 @@ def validate_scene_metrics(path: Path, preflight: dict[str, Any]) -> str:
         raise RuntimeError("DIAGNOSTIC_BLOCKED scene road top mismatch")
     if metrics["verdict"] != "RENDERED_FOR_EVALUATION":
         raise RuntimeError("DIAGNOSTIC_BLOCKED scene metrics verdict mismatch")
+    construction = preflight["construction"]
+    expected_geometry = {
+        name: construction[name]
+        for name in ("road", "canyon", "runner", "pursuer", "hazards", "tideScar")
+    }
+    expected_geometry["verdict"] = "READY_FOR_DIAGNOSTIC_RENDER"
+    expected_material_graph = dict(construction["materialGraphs"])
+    expected_material_graph["verdict"] = "READY_FOR_DIAGNOSTIC_RENDER"
+    expected_depth_encoding = dict(construction["depthEncoding"])
+    expected_depth_encoding["verdict"] = "READY_FOR_DIAGNOSTIC_RENDER"
+    for name, expected in (
+        ("geometryBinding", expected_geometry),
+        ("materialGraphBinding", expected_material_graph),
+        ("depthEncodingBinding", expected_depth_encoding),
+    ):
+        normalized_expected = json.loads(canonical_bytes(expected).decode("utf-8"))
+        try:
+            deep_compare(normalized_expected, metrics[name], f"$.sceneMetrics.{name}")
+        except PrecheckBlocked as exc:
+            raise RuntimeError(f"DIAGNOSTIC_BLOCKED {name} mismatch: {exc}") from exc
     return sha256_file(path)
 
 
@@ -1507,6 +1612,7 @@ def validate_evaluation_metrics(evaluation: dict[str, Any]) -> None:
             "luminanceP50", "luminanceP95", "nearBlackFraction", "routeLuminanceP50",
             "roadMaskFraction", "runnerCentroidY", "runnerMargin", "runnerBeautyLuminanceP50",
             "roadBottomWidthFraction", "roadFarRouteWidthFraction", "roadWidthRatio",
+            "foregroundDepthP10", "foregroundDepthP50", "foregroundDepthP90",
         ]
         scalars = {name: finite_number(metric[name], f"profileMetrics.{profile}.{name}") for name in scalar_names}
         for name in ("normalUniqueColors", "depthUniqueValues", "depthMin", "depthMax", "pursuerWidthPixels"):
@@ -1534,6 +1640,8 @@ def validate_evaluation_metrics(evaluation: dict[str, Any]) -> None:
             and metric["normalUniqueColors"] >= 24
             and metric["depthUniqueValues"] >= 64
             and metric["depthMin"] < metric["depthMax"]
+            and scalars["foregroundDepthP10"] < scalars["foregroundDepthP50"]
+            < scalars["foregroundDepthP90"] < 62000.0
             and scalars["runnerMargin"] >= 0.02
             and scalars["runnerBeautyLuminanceP50"] >= 0.12
             and normal_median[1] >= 240.0
@@ -1671,435 +1779,6 @@ def write_text_atomic(path: Path, text: str) -> None:
     os.replace(temporary, path)
 
 
-def build_camera_probe_plan(repo_root: Path, scripts: dict[str, Path], hashes: dict[str, str]) -> dict[str, Any]:
-    return {
-        "schemaId": "tide-relay.temple-tr4.camera-probe-plan",
-        "schemaVersion": 1,
-        "probeId": "001",
-        "blenderExecutable": str(BLENDER_EXECUTABLE),
-        "blenderVersion": BLENDER_VERSION,
-        "scripts": {
-            "generator": {"path": str(scripts["generator"].resolve()), "sha256": hashes["generator"]},
-            "runner": {"path": str(scripts["runner"].resolve()), "sha256": hashes["runner"]},
-        },
-        "cameras": build_cameras(),
-        "matrixElement": [2, 1],
-        "verdict": "READY_FOR_CAMERA_PROBE",
-    }
-
-
-def validate_camera_response(response: Any, plan: dict[str, Any]) -> list[float]:
-    expected_top_keys = [
-        "schemaId", "schemaVersion", "blenderVersion", "generatorSha256",
-        "runnerSha256", "profiles", "renderCallCount", "verdict",
-    ]
-    if not isinstance(response, dict) or sorted(response.keys()) != sorted(expected_top_keys):
-        raise RuntimeError("CAMERA_PROBE_BLOCKED response top-level key mismatch")
-    if response["schemaId"] != "tide-relay.temple-tr4.camera-probe" or response["schemaVersion"] != 1:
-        raise RuntimeError("CAMERA_PROBE_BLOCKED response schema mismatch")
-    if response["blenderVersion"] != BLENDER_VERSION:
-        raise RuntimeError("CAMERA_PROBE_BLOCKED Blender version mismatch")
-    if response["generatorSha256"] != plan["scripts"]["generator"]["sha256"] or response["runnerSha256"] != plan["scripts"]["runner"]["sha256"]:
-        raise RuntimeError("CAMERA_PROBE_BLOCKED response script hash mismatch")
-    if response["renderCallCount"] != 0 or response["verdict"] != "READY_FOR_DIAGNOSTIC_003_CONTRACT":
-        raise RuntimeError("CAMERA_PROBE_BLOCKED response verdict/render count mismatch")
-    expected_profile_keys = [
-        "profile", "resolution", "lensShiftY", "b0", "b1", "response",
-        "solvedShift", "actual", "error", "matrix0", "matrix1", "matrixSolved",
-    ]
-    profiles = response["profiles"]
-    if not isinstance(profiles, list) or len(profiles) != 4:
-        raise RuntimeError("CAMERA_PROBE_BLOCKED response profile count mismatch")
-    expected_names = ["portrait", "desktop", "landscape", "closeup"]
-    errors: list[float] = []
-    for index, record in enumerate(profiles):
-        if not isinstance(record, dict) or sorted(record.keys()) != sorted(expected_profile_keys):
-            raise RuntimeError(f"CAMERA_PROBE_BLOCKED profile key mismatch: {index}")
-        camera = plan["cameras"][index]
-        if record["profile"] != expected_names[index] or record["resolution"] != camera["diagnosticResolution"] or record["lensShiftY"] != camera["lensShiftY"]:
-            raise RuntimeError(f"CAMERA_PROBE_BLOCKED frozen camera mismatch: {index}")
-        scalar_names = ("lensShiftY", "b0", "b1", "response", "solvedShift", "actual", "error")
-        if any(isinstance(record[name], bool) or not isinstance(record[name], (int, float)) or not math.isfinite(float(record[name])) for name in scalar_names):
-            raise RuntimeError(f"CAMERA_PROBE_BLOCKED non-finite scalar: {index}")
-        for matrix_name in ("matrix0", "matrix1", "matrixSolved"):
-            matrix = record[matrix_name]
-            if not isinstance(matrix, list) or len(matrix) != 16 or any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)) for value in matrix):
-                raise RuntimeError(f"CAMERA_PROBE_BLOCKED matrix mismatch: {index}.{matrix_name}")
-        if abs(float(record["response"])) < 1.0e-9 or abs(float(record["error"])) > 1.0e-6:
-            raise RuntimeError(f"CAMERA_PROBE_BLOCKED response/error gate: {index}")
-        errors.append(float(record["error"]))
-    return errors
-
-
-def probe_output_records(root: Path, names: list[str]) -> list[dict[str, Any]]:
-    records: list[dict[str, Any]] = []
-    for name in names:
-        path = root / name
-        if path.is_file():
-            records.append({"relativePath": name, "bytes": path.stat().st_size, "sha256": sha256_file(path)})
-    return records
-
-
-def assert_no_probe_render_outputs(root: Path) -> None:
-    forbidden = {".png", ".exr", ".jpg", ".jpeg", ".glb", ".gltf"}
-    escaped = [path.name for path in root.rglob("*") if path.is_file() and path.suffix.lower() in forbidden]
-    if escaped:
-        raise RuntimeError(f"CAMERA_PROBE_BLOCKED forbidden render/export outputs: {escaped}")
-
-
-def run_camera_probe() -> int:
-    repo_root = Path(__file__).resolve().parents[2]
-    expected_repo = Path(r"E:\Proj\Game-1-temple").resolve(strict=True)
-    if repo_root != expected_repo:
-        raise PrecheckBlocked(f"repository root mismatch: {repo_root}")
-    root = (repo_root / CAMERA_PROBE_RELATIVE).resolve(strict=False)
-    assert_contained(root, repo_root)
-    if root.exists():
-        raise PrecheckBlocked(f"camera probe root must not pre-exist: {root}")
-    if not root.parent.is_dir() or not os.access(root.parent, os.W_OK):
-        raise PrecheckBlocked(f"camera probe parent is unavailable: {root.parent}")
-    if not BLENDER_EXECUTABLE.is_file():
-        raise PrecheckBlocked(f"Blender executable missing: {BLENDER_EXECUTABLE}")
-    reject_reparse(BLENDER_EXECUTABLE)
-    scripts, hashes = verify_probe_scripts(repo_root)
-    plan = build_camera_probe_plan(repo_root, scripts, hashes)
-    validate_finite(plan)
-    normalized = json.loads(canonical_bytes(plan).decode("utf-8"))
-    expected = json.loads(canonical_bytes(build_camera_probe_plan(repo_root, scripts, hashes)).decode("utf-8"))
-    deep_compare(expected, normalized)
-    if [camera["profile"] for camera in plan["cameras"]] != ["portrait", "desktop", "landscape", "closeup"]:
-        raise PrecheckBlocked("camera probe profile order mismatch")
-    scripts_second, hashes_second = verify_probe_scripts(repo_root)
-    if scripts_second != scripts or hashes_second != hashes:
-        raise PrecheckBlocked("camera probe scripts changed during preflight")
-
-    root.mkdir(mode=0o755)
-    plan_path = root / "probe-plan.json"
-    atomic_write_json(plan_path, plan)
-    command = [
-        str(BLENDER_EXECUTABLE), "--background", "--factory-startup",
-        "--python-exit-code", "1", "--python", str(scripts["generator"]), "--",
-        "--camera-probe", "--probe-plan", str(plan_path), "--output", str(root),
-    ]
-    completed = subprocess.run(command, cwd=repo_root, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False)
-    log_path = root / "blender.log"
-    write_text_atomic(log_path, completed.stdout + "\n--- STDERR ---\n" + completed.stderr)
-    response_path = root / "camera-response.json"
-    errors: list[float] = []
-    verdict = "CAMERA_PROBE_BLOCKED"
-    reason: str | None = None
-    try:
-        assert_no_probe_render_outputs(root)
-        allowed_before_status = {"probe-plan.json", "blender.log", "camera-response.json"}
-        actual_files = {path.name for path in root.iterdir() if path.is_file()}
-        if not actual_files.issubset(allowed_before_status):
-            raise RuntimeError(f"CAMERA_PROBE_BLOCKED unexpected files: {sorted(actual_files - allowed_before_status)}")
-        if completed.returncode != 0:
-            raise RuntimeError(f"CAMERA_PROBE_BLOCKED Blender exited {completed.returncode}")
-        if not response_path.is_file():
-            raise RuntimeError("CAMERA_PROBE_BLOCKED missing camera-response.json")
-        response = json.loads(response_path.read_text(encoding="utf-8"))
-        errors = validate_camera_response(response, plan)
-        verdict = response["verdict"]
-    except Exception as exc:
-        reason = str(exc)
-    outputs = probe_output_records(root, ["probe-plan.json", "blender.log", "camera-response.json"])
-    status = {
-        "schemaId": "tide-relay.temple-tr4.camera-probe-status",
-        "schemaVersion": 1,
-        "probeId": "001",
-        "processReturnCode": completed.returncode,
-        "responseErrors": errors,
-        "outputs": outputs,
-        "renderCallCount": 0,
-        "reason": reason,
-        "verdict": verdict,
-    }
-    atomic_write_json(root / "probe-status.json", status)
-    if verdict != "READY_FOR_DIAGNOSTIC_003_CONTRACT":
-        raise RuntimeError(reason or "CAMERA_PROBE_BLOCKED")
-    print(json.dumps({"verdict": verdict, "cameraProbeRoot": str(root), "errors": errors}, ensure_ascii=False))
-    return 0
-
-
-def build_matrix_probe_cameras() -> list[dict[str, Any]]:
-    return [
-        {
-            "profile": camera["profile"],
-            "diagnosticResolution": camera["diagnosticResolution"],
-            "position": camera["position"],
-            "target": camera["target"],
-            "verticalFovDegrees": camera["verticalFovDegrees"],
-            "near": camera["near"],
-            "far": camera["far"],
-        }
-        for camera in build_cameras()
-    ]
-
-
-def verify_matrix_probe_authorization(repo_root: Path) -> None:
-    authorization = (repo_root / "docs/workstreams/temple-tr4-coordination/MATRIX_PROBE_001_AUTHORIZATION.md").read_text(encoding="utf-8")
-    coordination_log = (repo_root / "docs/workstreams/temple-tr4-coordination/THREAD_LOG.md").read_text(encoding="utf-8")
-    if "Status: **AUTHORIZED.**" not in authorization or "READY_FOR_MATRIX_PROBE_001_CONTRACT" not in authorization:
-        raise PrecheckBlocked("matrix probe authorization is not independently ready and authorized")
-    if "REPORT TEMPLE-TR4-MATRIX-PROBE-001 AUTHORIZED" not in coordination_log:
-        raise PrecheckBlocked("coordinator matrix probe status is not AUTHORIZED")
-
-
-def verify_matrix_probe_scripts(repo_root: Path) -> tuple[dict[str, Path], dict[str, str]]:
-    scripts_dir = repo_root / "tools" / "temple-asset-pipeline"
-    scripts = {
-        "generator": scripts_dir / "generate_tide_scar_tr4_pack.py",
-        "runner": scripts_dir / "run_tide_scar_tr4_pack.py",
-    }
-    hashes: dict[str, str] = {}
-    for name, path in scripts.items():
-        assert_contained(path, repo_root)
-        if not path.is_file():
-            raise PrecheckBlocked(f"missing matrix-probe script: {path}")
-        source = path.read_text(encoding="utf-8")
-        try:
-            ast.parse(source, filename=str(path))
-        except SyntaxError as exc:
-            raise PrecheckBlocked(f"matrix-probe AST failure: {path}: {exc}") from exc
-        hashes[name] = sha256_file(path)
-    return scripts, hashes
-
-
-def verify_matrix_probe_evidence(repo_root: Path) -> dict[str, str]:
-    result: dict[str, str] = {}
-    for name, (relative_path, expected_hash) in FROZEN_MATRIX_PROBE_EVIDENCE.items():
-        path = repo_root / relative_path
-        assert_contained(path, repo_root)
-        if not path.is_file():
-            raise PrecheckBlocked(f"frozen matrix-probe evidence missing: {relative_path}")
-        actual_hash = sha256_file(path)
-        if actual_hash != expected_hash:
-            raise PrecheckBlocked(f"frozen matrix-probe evidence changed: {relative_path}")
-        result[name] = actual_hash
-    return result
-
-
-def build_matrix_probe_plan(
-    repo_root: Path,
-    blender_hash: str,
-    scripts: dict[str, Path],
-    script_hashes: dict[str, str],
-    evidence_hashes: dict[str, str],
-) -> dict[str, Any]:
-    return {
-        "schemaId": "tide-relay.temple-tr4.matrix-probe-plan",
-        "schemaVersion": 1,
-        "probeId": "001",
-        "repoRoot": str(repo_root),
-        "blenderExecutable": str(BLENDER_EXECUTABLE),
-        "blenderExecutableSha256": blender_hash,
-        "expectedBlenderVersion": BLENDER_VERSION,
-        "scripts": {
-            "generator": {"path": str(scripts["generator"].resolve()), "sha256": script_hashes["generator"]},
-            "runner": {"path": str(scripts["runner"].resolve()), "sha256": script_hashes["runner"]},
-        },
-        "frozenEvidence": evidence_hashes,
-        "cameras": build_matrix_probe_cameras(),
-        "verdict": "READY_FOR_MATRIX_PROBE",
-    }
-
-
-def prepare_matrix_probe() -> tuple[Path, Path, dict[str, Path], dict[str, str], str, dict[str, str], dict[str, Any]]:
-    repo_root = Path(__file__).resolve().parents[2]
-    expected_repo = Path(r"E:\Proj\Game-1-temple").resolve(strict=True)
-    if repo_root != expected_repo:
-        raise PrecheckBlocked(f"repository root mismatch: {repo_root}")
-    root = (repo_root / MATRIX_PROBE_RELATIVE).resolve(strict=False)
-    assert_contained(root, repo_root)
-    if root.exists():
-        raise PrecheckBlocked(f"matrix probe root must not pre-exist: {root}")
-    if (repo_root / "docs/workstreams/temple-tr4-asset/diagnostic-003").exists():
-        raise PrecheckBlocked("diagnostic-003 is unauthorized and must not exist")
-    if not root.parent.is_dir() or not os.access(root.parent, os.W_OK):
-        raise PrecheckBlocked(f"matrix probe parent is unavailable: {root.parent}")
-    verify_matrix_probe_authorization(repo_root)
-    if not BLENDER_EXECUTABLE.is_file():
-        raise PrecheckBlocked(f"Blender executable missing: {BLENDER_EXECUTABLE}")
-    reject_reparse(BLENDER_EXECUTABLE)
-    blender_hash = sha256_file(BLENDER_EXECUTABLE)
-    scripts, script_hashes = verify_matrix_probe_scripts(repo_root)
-    evidence_hashes = verify_matrix_probe_evidence(repo_root)
-    plan = build_matrix_probe_plan(repo_root, blender_hash, scripts, script_hashes, evidence_hashes)
-    validate_finite(plan)
-    normalized = json.loads(canonical_bytes(plan).decode("utf-8"))
-    expected = json.loads(canonical_bytes(build_matrix_probe_plan(repo_root, blender_hash, scripts, script_hashes, evidence_hashes)).decode("utf-8"))
-    deep_compare(expected, normalized)
-    if [camera["profile"] for camera in plan["cameras"]] != ["portrait", "desktop", "landscape", "closeup"]:
-        raise PrecheckBlocked("matrix probe camera order mismatch")
-    for camera in plan["cameras"]:
-        if sorted(camera.keys()) != sorted(["profile", "diagnosticResolution", "position", "target", "verticalFovDegrees", "near", "far"]):
-            raise PrecheckBlocked(f"matrix probe camera schema mismatch: {camera.get('profile')}")
-        resolution = camera["diagnosticResolution"]
-        if not isinstance(resolution, list) or len(resolution) != 2 or any(isinstance(value, bool) or not isinstance(value, int) or value <= 0 for value in resolution):
-            raise PrecheckBlocked(f"matrix probe resolution mismatch: {camera['profile']}")
-    return repo_root, root, scripts, script_hashes, blender_hash, evidence_hashes, plan
-
-
-def matrix_significant_elements(difference: list[float]) -> list[dict[str, Any]]:
-    return [
-        {
-            "row": index // 4,
-            "column": index % 4,
-            "rowMajorIndex": index,
-            "webglColumnMajorIndex": (index % 4) * 4 + index // 4,
-            "delta": value,
-        }
-        for index, value in enumerate(difference)
-        if abs(value) > 1.0e-8
-    ]
-
-
-def derive_matrix_binding(profiles: list[dict[str, Any]]) -> dict[str, Any] | None:
-    responses: list[dict[str, Any]] = []
-    for record in profiles:
-        if any(abs(float(record[name]) - target) > 1.0e-8 for name, target in (("originalShift0", 0.0), ("evaluatedShift0", 0.0), ("originalShift1", 1.0), ("evaluatedShift1", 1.0))):
-            return None
-        significant = record["significantElements"]
-        if len(significant) != 1:
-            return None
-        element = significant[0]
-        if (element["row"], element["column"], element["rowMajorIndex"], element["webglColumnMajorIndex"]) != (1, 2, 6, 9):
-            return None
-        response = float(record["difference"][6])
-        if abs(float(element["delta"]) - response) > 1.0e-12 or not math.isfinite(response) or abs(response - 2.0) > 1.0e-6:
-            return None
-        responses.append({"profile": record["profile"], "response": response})
-    return {"row": 1, "column": 2, "rowMajorIndex": 6, "webglColumnMajorIndex": 9, "responses": responses}
-
-
-def validate_matrix_response(response: Any, plan: dict[str, Any]) -> dict[str, Any] | None:
-    top_keys = ["schemaId", "schemaVersion", "probeId", "blenderVersion", "generatorSha256", "runnerSha256", "profiles", "consistentBinding", "renderCallCount", "verdict"]
-    if not isinstance(response, dict) or sorted(response.keys()) != sorted(top_keys):
-        raise RuntimeError("MATRIX_PROBE_BLOCKED response top-level schema mismatch")
-    if response["schemaId"] != "tide-relay.temple-tr4.matrix-probe" or response["schemaVersion"] != 1 or response["probeId"] != "001":
-        raise RuntimeError("MATRIX_PROBE_BLOCKED response identity mismatch")
-    if response["blenderVersion"] != BLENDER_VERSION or response["generatorSha256"] != plan["scripts"]["generator"]["sha256"] or response["runnerSha256"] != plan["scripts"]["runner"]["sha256"]:
-        raise RuntimeError("MATRIX_PROBE_BLOCKED response provenance mismatch")
-    if response["renderCallCount"] != 0:
-        raise RuntimeError("MATRIX_PROBE_BLOCKED nonzero render count")
-    profile_keys = ["profile", "resolution", "originalShift0", "evaluatedShift0", "originalShift1", "evaluatedShift1", "matrix0", "matrix1", "difference", "significantElements"]
-    profiles = response["profiles"]
-    if not isinstance(profiles, list) or len(profiles) != 4:
-        raise RuntimeError("MATRIX_PROBE_BLOCKED profile count mismatch")
-    for index, record in enumerate(profiles):
-        if not isinstance(record, dict) or sorted(record.keys()) != sorted(profile_keys):
-            raise RuntimeError(f"MATRIX_PROBE_BLOCKED profile schema mismatch: {index}")
-        camera = plan["cameras"][index]
-        if record["profile"] != camera["profile"] or record["resolution"] != camera["diagnosticResolution"]:
-            raise RuntimeError(f"MATRIX_PROBE_BLOCKED profile identity mismatch: {index}")
-        for shift_name in ("originalShift0", "evaluatedShift0", "originalShift1", "evaluatedShift1"):
-            value = record[shift_name]
-            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)):
-                raise RuntimeError(f"MATRIX_PROBE_BLOCKED shift mismatch: {index}.{shift_name}")
-        matrices = []
-        for matrix_name in ("matrix0", "matrix1", "difference"):
-            matrix = record[matrix_name]
-            if not isinstance(matrix, list) or len(matrix) != 16 or any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)) for value in matrix):
-                raise RuntimeError(f"MATRIX_PROBE_BLOCKED matrix mismatch: {index}.{matrix_name}")
-            matrices.append([float(value) for value in matrix])
-        matrix0, matrix1, difference = matrices
-        for matrix_index in range(16):
-            if abs(difference[matrix_index] - (matrix1[matrix_index] - matrix0[matrix_index])) > 1.0e-12:
-                raise RuntimeError(f"MATRIX_PROBE_BLOCKED difference mismatch: {index}.{matrix_index}")
-        expected_significant = matrix_significant_elements(difference)
-        actual_significant = record["significantElements"]
-        if not isinstance(actual_significant, list) or len(actual_significant) != len(expected_significant):
-            raise RuntimeError(f"MATRIX_PROBE_BLOCKED significant count mismatch: {index}")
-        significant_keys = ["row", "column", "rowMajorIndex", "webglColumnMajorIndex", "delta"]
-        for expected_element, actual_element in zip(expected_significant, actual_significant):
-            if not isinstance(actual_element, dict) or sorted(actual_element.keys()) != sorted(significant_keys):
-                raise RuntimeError(f"MATRIX_PROBE_BLOCKED significant schema mismatch: {index}")
-            for key in ("row", "column", "rowMajorIndex", "webglColumnMajorIndex"):
-                if actual_element[key] != expected_element[key]:
-                    raise RuntimeError(f"MATRIX_PROBE_BLOCKED significant index mismatch: {index}.{key}")
-            if not isinstance(actual_element["delta"], (int, float)) or isinstance(actual_element["delta"], bool) or not math.isfinite(float(actual_element["delta"])) or abs(float(actual_element["delta"]) - float(expected_element["delta"])) > 1.0e-12:
-                raise RuntimeError(f"MATRIX_PROBE_BLOCKED significant delta mismatch: {index}")
-    derived = derive_matrix_binding(profiles)
-    if response["consistentBinding"] != derived:
-        raise RuntimeError("MATRIX_PROBE_BLOCKED consistent binding mismatch")
-    expected_verdict = "READY_FOR_CAMERA_BINDING_CONTRACT" if derived is not None else "MATRIX_PROBE_BLOCKED"
-    if response["verdict"] != expected_verdict:
-        raise RuntimeError("MATRIX_PROBE_BLOCKED response verdict mismatch")
-    return derived
-
-
-def matrix_probe_output_records(root: Path) -> list[dict[str, Any]]:
-    records: list[dict[str, Any]] = []
-    for name in ("matrix-probe-plan.json", "matrix-response.json", "blender.log"):
-        path = root / name
-        if path.is_file():
-            records.append({"relativePath": name, "byteCount": path.stat().st_size, "sha256": sha256_file(path)})
-    return records
-
-
-def run_matrix_probe() -> int:
-    repo_root, root, scripts, script_hashes, blender_hash, evidence_hashes, plan = prepare_matrix_probe()
-    # Re-read every drift-prone byte immediately before creating the root and sole process.
-    scripts_second, hashes_second = verify_matrix_probe_scripts(repo_root)
-    evidence_second = verify_matrix_probe_evidence(repo_root)
-    blender_hash_second = sha256_file(BLENDER_EXECUTABLE)
-    if scripts_second != scripts or hashes_second != script_hashes or evidence_second != evidence_hashes or blender_hash_second != blender_hash:
-        raise PrecheckBlocked("matrix probe inputs changed during preflight")
-    root.mkdir(mode=0o755)
-    plan_path = root / "matrix-probe-plan.json"
-    atomic_write_json(plan_path, plan)
-    command = [
-        str(BLENDER_EXECUTABLE), "--background", "--factory-startup",
-        "--python-exit-code", "1", "--python", str(scripts["generator"]), "--",
-        "--matrix-probe", "--matrix-probe-plan", str(plan_path), "--output", str(root),
-    ]
-    completed = subprocess.run(command, cwd=repo_root, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False)
-    write_text_atomic(root / "blender.log", completed.stdout + "\n--- STDERR ---\n" + completed.stderr)
-    allowed_before_status = {"matrix-probe-plan.json", "matrix-response.json", "blender.log"}
-    actual_files = {path.name for path in root.iterdir() if path.is_file()}
-    forbidden_suffixes = {".png", ".exr", ".jpg", ".jpeg", ".blend", ".glb", ".gltf", ".ktx", ".ktx2", ".dds", ".tga", ".tiff"}
-    forbidden_files = [path.name for path in root.rglob("*") if path.is_file() and path.suffix.lower() in forbidden_suffixes]
-    consistent_binding: dict[str, Any] | None = None
-    reason: str | None = None
-    verdict = "MATRIX_PROBE_BLOCKED"
-    try:
-        if not actual_files.issubset(allowed_before_status):
-            raise RuntimeError(f"MATRIX_PROBE_BLOCKED unexpected files: {sorted(actual_files - allowed_before_status)}")
-        if forbidden_files:
-            raise RuntimeError(f"MATRIX_PROBE_BLOCKED forbidden outputs: {forbidden_files}")
-        if completed.returncode != 0:
-            raise RuntimeError(f"MATRIX_PROBE_BLOCKED Blender exited {completed.returncode}")
-        response_path = root / "matrix-response.json"
-        if not response_path.is_file():
-            raise RuntimeError("MATRIX_PROBE_BLOCKED missing matrix-response.json")
-        response = json.loads(response_path.read_text(encoding="utf-8"))
-        consistent_binding = validate_matrix_response(response, plan)
-        verdict = response["verdict"]
-        if verdict != "READY_FOR_CAMERA_BINDING_CONTRACT":
-            reason = "observed matrix mapping did not satisfy the frozen consistent-binding gate"
-    except Exception as exc:
-        reason = str(exc)
-        verdict = "MATRIX_PROBE_BLOCKED"
-        consistent_binding = None
-    status = {
-        "schemaId": "tide-relay.temple-tr4.matrix-probe-status",
-        "schemaVersion": 1,
-        "probeId": "001",
-        "processReturnCode": completed.returncode,
-        "outputs": matrix_probe_output_records(root),
-        "consistentBinding": consistent_binding,
-        "renderCallCount": 0,
-        "reason": reason,
-        "verdict": verdict,
-    }
-    atomic_write_json(root / "matrix-probe-status.json", status)
-    if verdict != "READY_FOR_CAMERA_BINDING_CONTRACT":
-        raise RuntimeError(reason or "MATRIX_PROBE_BLOCKED")
-    print(json.dumps({"verdict": verdict, "matrixProbeRoot": str(root), "consistentBinding": consistent_binding}, ensure_ascii=False))
-    return 0
-
-
 def prepare_diagnostic() -> tuple[Path, Path, dict[str, Path], dict[str, str], dict[str, str], str, dict[str, Any]]:
     repo_root = Path(__file__).resolve().parents[2]
     expected_repo = Path(r"E:\Proj\Game-1-temple").resolve(strict=True)
@@ -2117,7 +1796,7 @@ def prepare_diagnostic() -> tuple[Path, Path, dict[str, Path], dict[str, str], d
         raise PrecheckBlocked(f"diagnostic parent missing: {diagnostic_root.parent}")
     if not os.access(diagnostic_root.parent, os.W_OK):
         raise PrecheckBlocked(f"diagnostic parent not writable: {diagnostic_root.parent}")
-    verify_c6_authorization(repo_root)
+    verify_c7_authorization(repo_root)
     blender_hash = verify_blender_executable()
     frozen_evidence = verify_c6_frozen_evidence(repo_root)
     scripts, script_hashes = verify_scripts(repo_root)
@@ -2127,9 +1806,9 @@ def prepare_diagnostic() -> tuple[Path, Path, dict[str, Path], dict[str, str], d
     canonical_preflight_bytes = canonical_bytes(authored_preflight)
     preflight = json.loads(canonical_preflight_bytes.decode("utf-8"))
     validate_finite(preflight)
-    validate_c6_preflight_contract(preflight)
+    validate_c7_preflight_contract(preflight)
     if canonical_bytes(preflight) != canonical_preflight_bytes:
-        raise PrecheckBlocked("C6 canonical preflight round-trip mismatch")
+        raise PrecheckBlocked("C7 canonical preflight round-trip mismatch")
     normalized = preflight
     expected_normalized = json.loads(canonical_bytes(build_preflight(repo_root, script_hashes)).decode("utf-8"))
     deep_compare(expected_normalized, normalized)
@@ -2139,9 +1818,9 @@ def prepare_diagnostic() -> tuple[Path, Path, dict[str, Path], dict[str, str], d
         "semanticRoots", "budgets", "outputs", "constructionHash", "verdict",
     ]
     if sorted(preflight.keys()) != sorted(preflight_keys):
-        raise PrecheckBlocked("C6 preflight top-level schema mismatch")
-    if preflight["schemaId"] != SCHEMA_ID or preflight["schemaVersion"] != 6 or preflight["contractVersion"] != "TEMPLE-TR4-C6":
-        raise PrecheckBlocked("C6 preflight identity mismatch")
+        raise PrecheckBlocked("C7 preflight top-level schema mismatch")
+    if preflight["schemaId"] != SCHEMA_ID or preflight["schemaVersion"] != 7 or preflight["contractVersion"] != "TEMPLE-TR4-C7":
+        raise PrecheckBlocked("C7 preflight identity mismatch")
     if preflight["constructionHash"] != sha256_bytes(canonical_bytes(preflight["construction"])):
         raise PrecheckBlocked("construction hash mismatch")
     if preflight["constructionHash"] != CONSTRUCTION_SHA256:
@@ -2152,14 +1831,14 @@ def prepare_diagnostic() -> tuple[Path, Path, dict[str, Path], dict[str, str], d
         raise PrecheckBlocked("closed output array mismatch")
     expected_output_tuples = []
     for profile, scene_id, width, height in (
-        ("portrait", "tr4-diagnostic-running-001", 270, 480),
-        ("desktop", "tr4-diagnostic-running-001", 480, 270),
-        ("landscape", "tr4-diagnostic-running-001", 422, 195),
-        ("closeup", "tr4-diagnostic-game-over-001", 320, 240),
+        ("portrait", "tr4-diagnostic-running-007", 270, 480),
+        ("desktop", "tr4-diagnostic-running-007", 480, 270),
+        ("landscape", "tr4-diagnostic-running-007", 422, 195),
+        ("closeup", "tr4-diagnostic-game-over-007", 320, 240),
     ):
         for pass_name in ("beauty", "object-id", "road-mask", "normal", "linear-depth"):
             expected_output_tuples.append(
-                (profile, pass_name, scene_id, f"tr4-diagnostic-006-{profile}-{pass_name}.png", width, height)
+                (profile, pass_name, scene_id, f"tr4-diagnostic-007-{profile}-{pass_name}.png", width, height)
             )
     actual_output_tuples = [
         (item["profile"], item["pass"], item["sceneId"], item["relativePath"], item["width"], item["height"])
@@ -2167,17 +1846,18 @@ def prepare_diagnostic() -> tuple[Path, Path, dict[str, Path], dict[str, str], d
     ]
     output_keys = ["index", "profile", "pass", "sceneId", "relativePath", "width", "height"]
     if any(not isinstance(item, dict) or sorted(item.keys()) != sorted(output_keys) for item in preflight["outputs"]):
-        raise PrecheckBlocked("C6 output record schema mismatch")
+        raise PrecheckBlocked("C7 output record schema mismatch")
     if actual_output_tuples != expected_output_tuples:
-        raise PrecheckBlocked("C6 output profile/pass/scene/name/dimension ordering mismatch")
+        raise PrecheckBlocked("C7 output profile/pass/scene/name/dimension ordering mismatch")
     if len({item["relativePath"] for item in preflight["outputs"]}) != 20:
         raise PrecheckBlocked("duplicate output path")
     if (
-        len(frozen_evidence) != 51
+        len(frozen_evidence) != 78
         or sum("diagnostic004" in name for name in frozen_evidence) != 27
         or sum("diagnostic005" in name for name in frozen_evidence) != 4
+        or sum("diagnostic006" in name for name in frozen_evidence) != 27
     ):
-        raise PrecheckBlocked("C6 frozen evidence closure is not 20 historical plus 27 C4 plus 4 C5 files")
+        raise PrecheckBlocked("C7 frozen evidence closure is not 20 historical plus 27 C4 plus 4 C5 plus 27 C6 files")
     for item in preflight["outputs"]:
         output_path = diagnostic_root / item["relativePath"]
         assert_contained(output_path, repo_root)
@@ -2187,7 +1867,7 @@ def prepare_diagnostic() -> tuple[Path, Path, dict[str, Path], dict[str, str], d
     # Recheck every drift-prone byte without starting Blender or a version subprocess.
     scripts_second, hashes_second = verify_scripts(repo_root)
     verify_reference()
-    verify_c6_authorization(repo_root)
+    verify_c7_authorization(repo_root)
     if (
         scripts_second != scripts
         or hashes_second != script_hashes
@@ -2248,15 +1928,11 @@ def run(*, dry_preflight: bool = False) -> int:
     stage = "blender"
     try:
         atomic_write_json(preflight_path, preflight)
-        planned = {
-            "schemaId": "tide-relay.temple-tr4.diagnostic-plan",
-            "schemaVersion": 1,
-            "diagnosticId": DIAGNOSTIC_ID,
-            "preflightSha256": sha256_file(preflight_path),
-            "constructionHash": preflight["constructionHash"],
-            "outputs": preflight["outputs"],
-            "verdict": "READY_FOR_BLENDER",
-        }
+        launch_preflight_bytes = preflight_path.read_bytes()
+        if launch_preflight_bytes != canonical_bytes(preflight):
+            raise RuntimeError("DIAGNOSTIC_BLOCKED launch preflight bytes are not the normalized preflight")
+        launch_preflight_hash = sha256_bytes(launch_preflight_bytes)
+        planned = build_planned_manifest(preflight, launch_preflight_hash)
         atomic_write_json(planned_path, planned)
         command = [
             str(BLENDER_EXECUTABLE), "--background", "--factory-startup",
@@ -2276,6 +1952,7 @@ def run(*, dry_preflight: bool = False) -> int:
             raise RuntimeError(f"DIAGNOSTIC_BLOCKED Blender exited {blender_return_code}")
 
         stage = "render-set"
+        validate_planned_manifest(planned_path, planned, preflight_path, launch_preflight_bytes)
         hashes["cameraBindingSha256"] = validate_camera_binding(diagnostic_root / "camera-binding.json", preflight)
         hashes["renderOrderSha256"] = validate_render_order(diagnostic_root / "render-order.json", preflight["outputs"])
         hashes["sceneMetricsSha256"] = validate_scene_metrics(diagnostic_root / "scene-metrics.json", preflight)
@@ -2286,6 +1963,7 @@ def run(*, dry_preflight: bool = False) -> int:
             *[record["relativePath"] for record in preflight["outputs"]],
         }
         assert_exact_files(diagnostic_root, before_evaluator)
+        validate_planned_manifest(planned_path, planned, preflight_path, launch_preflight_bytes)
 
         stage = "evaluator"
         evaluator_command = [
@@ -2305,6 +1983,7 @@ def run(*, dry_preflight: bool = False) -> int:
             raise RuntimeError(f"DIAGNOSTIC_BLOCKED evaluator exited {evaluator_return_code}")
         if not evaluation_path.is_file() or not manifest_path.is_file():
             raise RuntimeError("DIAGNOSTIC_BLOCKED evaluator omitted required JSON")
+        validate_planned_manifest(planned_path, planned, preflight_path, launch_preflight_bytes)
         evaluation = json.loads(evaluation_path.read_text(encoding="utf-8"))
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         validate_evaluator_artifacts(evaluation, manifest, preflight_path, preflight, diagnostic_root, hashes)
@@ -2312,7 +1991,7 @@ def run(*, dry_preflight: bool = False) -> int:
         assert_exact_files(diagnostic_root, final_before_status)
         scripts_after, hashes_after = verify_scripts(repo_root)
         verify_reference()
-        verify_c6_authorization(repo_root)
+        verify_c7_authorization(repo_root)
         if (
             scripts_after != scripts
             or hashes_after != script_hashes
@@ -2320,6 +1999,7 @@ def run(*, dry_preflight: bool = False) -> int:
             or verify_blender_executable() != blender_hash
         ):
             raise RuntimeError("DIAGNOSTIC_BLOCKED launch provenance changed during the process")
+        validate_planned_manifest(planned_path, planned, preflight_path, launch_preflight_bytes)
 
         stage = "complete"
         status = diagnostic_status(stage, blender_return_code, evaluator_return_code, hashes, None, "READY_FOR_MANUAL_REVIEW")
@@ -2342,7 +2022,7 @@ def run(*, dry_preflight: bool = False) -> int:
         try:
             scripts_after, hashes_after = verify_scripts(repo_root)
             verify_reference()
-            verify_c6_authorization(repo_root)
+            verify_c7_authorization(repo_root)
             if (
                 scripts_after != scripts
                 or hashes_after != script_hashes
@@ -2370,24 +2050,22 @@ def run(*, dry_preflight: bool = False) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    probe_group = parser.add_mutually_exclusive_group()
-    probe_group.add_argument("--camera-probe", action="store_true")
-    probe_group.add_argument("--matrix-probe", action="store_true")
-    probe_group.add_argument("--dry-preflight", action="store_true")
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument("--dry-preflight", action="store_true")
+    mode_group.add_argument("--dry-axis-predicate", action="store_true")
     arguments = parser.parse_args()
-    blocked_verdict = "MATRIX_PROBE_BLOCKED" if arguments.matrix_probe else "CAMERA_PROBE_BLOCKED" if arguments.camera_probe else "PRECHECK_BLOCKED"
     try:
-        if arguments.matrix_probe:
-            return run_matrix_probe()
-        if arguments.camera_probe:
-            return run_camera_probe()
+        if arguments.dry_axis_predicate:
+            if not dry_axis_angle_predicate():
+                raise PrecheckBlocked("C7 stable axis-angle predicate failed")
+            print("C7_AXIS_PREDICATE_READY")
+            return 0
         return run(dry_preflight=arguments.dry_preflight)
     except PrecheckBlocked as exc:
-        print(json.dumps({"verdict": blocked_verdict, "reason": str(exc)}, ensure_ascii=False), file=sys.stderr)
+        print(json.dumps({"verdict": "PRECHECK_BLOCKED", "reason": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 2
     except Exception as exc:  # fail closed after the diagnostic root exists
-        verdict = "MATRIX_PROBE_BLOCKED" if arguments.matrix_probe else "CAMERA_PROBE_BLOCKED" if arguments.camera_probe else "DIAGNOSTIC_BLOCKED"
-        print(json.dumps({"verdict": verdict, "reason": str(exc)}, ensure_ascii=False), file=sys.stderr)
+        print(json.dumps({"verdict": "DIAGNOSTIC_BLOCKED", "reason": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 3
 
 

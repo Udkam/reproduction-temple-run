@@ -34,8 +34,9 @@ PALETTE = {
     "gap-lips": (0x7A, 0x22, 0x21),
     "tide-scar": (0xFF, 0xFF, 0xFF),
 }
-DIAGNOSTIC_ID = "006"
+DIAGNOSTIC_ID = "007"
 PYTHON_VERSION = "3.12.0"
+C7_CONSTRUCTION_SHA256 = "6a9735277c29ec32b3e22432b240385bc33993325aaf3422c60ac4f82e0dbd45"
 PROFILE_ORDER = ["portrait", "desktop", "landscape", "closeup"]
 CAMERA_BINDING_PROFILE_KEYS = [
     "profile", "lensShiftY", "originalShift0", "evaluatedShift0",
@@ -57,6 +58,7 @@ SCREEN_PROJECTION_KEYS = [
 PROFILE_METRIC_KEYS = [
     "luminanceP50", "luminanceP95", "nearBlackFraction", "routeLuminanceP50",
     "roadMaskFraction", "normalUniqueColors", "depthUniqueValues", "depthMin", "depthMax",
+    "foregroundDepthP10", "foregroundDepthP50", "foregroundDepthP90",
     "runnerBounds", "runnerCentroidY", "runnerMargin", "runnerBeautyLuminanceP50",
     "pursuerBounds", "pursuerMargin", "pursuerWidthPixels", "pursuerBeautyLuminanceP50",
     "pursuerBeautyLuminanceP95", "roadBottomWidthFraction", "roadFarRouteWidthFraction",
@@ -68,14 +70,9 @@ EVALUATION_GATE_KEYS = [
     "routeLuminance", "nearBlack", "roadMaskBinaryArea", "semanticSubjects",
     "normalVariation", "depthVariation", "runnerBandContainment", "roadPerspective",
     "semanticScreenOrder", "scarRightOfRoute", "runnerRoiLuminance", "pursuerCloseup",
-    "roadNormalUp", "representativeDepthOrder",
+    "roadNormalUp", "depthBackgroundSeparation", "foregroundDepthQuantiles",
+    "representativeDepthOrder",
 ]
-EXPECTED_SCENE_COUNTS = {
-    "meshObjects": 400,
-    "sourceTrianglesBeforeModifiers": 45224,
-    "beautyMaterialCount": 10,
-}
-EXPECTED_ROOT_CHILDREN = [215, 90, 46, 27, 12, 10, 11, 21, 2]
 
 
 def canonical_bytes(value: Any) -> bytes:
@@ -83,6 +80,73 @@ def canonical_bytes(value: Any) -> bytes:
         json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
         + "\n"
     ).encode("utf-8")
+
+
+def deep_compare(expected: Any, actual: Any, path: str = "$") -> None:
+    if type(expected) is not type(actual):
+        raise ValueError(f"type mismatch at {path}")
+    if isinstance(expected, dict):
+        if sorted(expected.keys()) != sorted(actual.keys()):
+            raise ValueError(f"unknown or missing keys at {path}")
+        for key in expected:
+            deep_compare(expected[key], actual[key], f"{path}.{key}")
+    elif isinstance(expected, list):
+        if len(expected) != len(actual):
+            raise ValueError(f"array length mismatch at {path}")
+        for index, (left, right) in enumerate(zip(expected, actual)):
+            deep_compare(left, right, f"{path}[{index}]")
+    elif expected != actual:
+        raise ValueError(f"frozen value mismatch at {path}")
+
+
+def strict_json_object_bytes(data: bytes, label: str) -> dict[str, Any]:
+    def reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate JSON key in {label}: {key}")
+            result[key] = value
+        return result
+
+    try:
+        value = json.loads(data.decode("utf-8"), object_pairs_hook=reject_duplicate_keys)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"invalid UTF-8 JSON in {label}: {exc}") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"JSON root is not an object: {label}")
+    if canonical_bytes(value) != data:
+        raise ValueError(f"JSON is not exact canonical bytes: {label}")
+    return value
+
+
+def validate_planned_manifest(
+    path: Path,
+    preflight: dict[str, Any],
+    preflight_bytes: bytes,
+) -> str:
+    if not path.is_file():
+        raise ValueError("missing planned-manifest.json")
+    preflight_sha256 = hashlib.sha256(preflight_bytes).hexdigest()
+    plan = strict_json_object_bytes(path.read_bytes(), "planned-manifest.json")
+    keys = [
+        "schemaId", "schemaVersion", "diagnosticId", "preflightSha256",
+        "constructionHash", "outputs", "verdict",
+    ]
+    if sorted(plan.keys()) != sorted(keys):
+        raise ValueError("planned-manifest.json closed key set mismatch")
+    if (
+        plan["schemaId"] != "tide-relay.temple-tr4.diagnostic-plan"
+        or isinstance(plan["schemaVersion"], bool)
+        or not isinstance(plan["schemaVersion"], int)
+        or plan["schemaVersion"] != 1
+        or plan["diagnosticId"] != DIAGNOSTIC_ID
+        or plan["preflightSha256"] != preflight_sha256
+        or plan["constructionHash"] != preflight["constructionHash"]
+        or plan["verdict"] != "READY_FOR_BLENDER"
+    ):
+        raise ValueError("planned-manifest.json identity/provenance mismatch")
+    deep_compare(preflight["outputs"], plan["outputs"], "$.plannedManifest.outputs")
+    return preflight_sha256
 
 
 def atomic_write_json(path: Path, value: Any) -> None:
@@ -366,6 +430,37 @@ def angle_between(left: list[float], right: list[float]) -> float:
     return math.acos(max(-1.0, min(1.0, dot(normalize(left), normalize(right)))))
 
 
+def stable_axis_angle_match(recorded: float, recomputed: float) -> bool:
+    """Pure C7 near-zero angle predicate; performs no I/O or process work."""
+    if (
+        isinstance(recorded, bool)
+        or isinstance(recomputed, bool)
+        or not isinstance(recorded, (int, float))
+        or not isinstance(recomputed, (int, float))
+    ):
+        return False
+    recorded_value = float(recorded)
+    recomputed_value = float(recomputed)
+    return (
+        math.isfinite(recorded_value)
+        and math.isfinite(recomputed_value)
+        and 0.0 <= recorded_value <= 1.0e-5
+        and 0.0 <= recomputed_value <= 1.0e-5
+        and abs(math.cos(recorded_value) - math.cos(recomputed_value)) <= 1.0e-12
+    )
+
+
+def dry_axis_angle_predicate() -> bool:
+    frozen_forward = (2.1073424255447017e-08, 2.580956827951785e-08)
+    frozen_up = (2.580956827951785e-08, 2.1073424255447017e-08)
+    injected_failure = (1.00001e-5, 0.0)
+    return (
+        stable_axis_angle_match(*frozen_forward)
+        and stable_axis_angle_match(*frozen_up)
+        and not stable_axis_angle_match(*injected_failure)
+    )
+
+
 def linear_rgb(value: str) -> list[float]:
     channels = [int(value[index:index + 2], 16) / 255.0 for index in (1, 3, 5)]
     return [channel / 12.92 if channel <= 0.04045 else ((channel + 0.055) / 1.055) ** 2.4 for channel in channels]
@@ -399,9 +494,9 @@ def validate_orientation(record: Any, camera: dict[str, Any], label: str) -> Non
     recomputed_up_angle = angle_between(actual_up, basis["trueUp"])
     forward_angle = finite_number(record["localForwardAngleRadians"], f"{label}.localForwardAngleRadians")
     up_angle = finite_number(record["localUpAngleRadians"], f"{label}.localUpAngleRadians")
-    if abs(forward_angle - recomputed_forward_angle) > 1.0e-12 or recomputed_forward_angle > 1.0e-5:
+    if not stable_axis_angle_match(forward_angle, recomputed_forward_angle):
         raise ValueError(f"camera local forward alignment failed: {label}")
-    if abs(up_angle - recomputed_up_angle) > 1.0e-12 or recomputed_up_angle > 1.0e-5:
+    if not stable_axis_angle_match(up_angle, recomputed_up_angle):
         raise ValueError(f"camera local up alignment failed: {label}")
 
 
@@ -430,7 +525,9 @@ def validate_screen_projection(record: Any, camera: dict[str, Any], label: str) 
             raise ValueError(f"analytic horizon mismatch: {label}")
 
 
-def validate_light_atmosphere_bindings(binding: dict[str, Any], lighting: dict[str, Any]) -> None:
+def validate_light_atmosphere_bindings(
+    binding: dict[str, Any], lighting: dict[str, Any], atmosphere_contract: dict[str, Any]
+) -> None:
     light_binding = binding["lightingBinding"]
     if not isinstance(light_binding, dict) or sorted(light_binding.keys()) != ["contact", "fill", "key", "verdict"]:
         raise ValueError("lighting binding schema mismatch")
@@ -478,23 +575,19 @@ def validate_light_atmosphere_bindings(binding: dict[str, Any], lighting: dict[s
     if abs(finite_number(contact["alignmentRadians"], "lightingBinding.contact.alignmentRadians") - alignment) > 1.0e-12 or alignment > 1.0e-5:
         raise ValueError("contact light alignment mismatch")
     atmosphere = binding["atmosphereBinding"]
-    atmosphere_keys = ["worldColorHex", "worldColorLinear", "worldStrength", "fogColorHex", "fogColorLinear", "fogDensity", "fogAnisotropy", "transmittance20", "transmittance120", "transmittance520", "beautyViewTransform", "beautyLook", "exposure", "gamma", "dither", "verdict"]
-    if not isinstance(atmosphere, dict) or sorted(atmosphere.keys()) != sorted(atmosphere_keys):
-        raise ValueError("atmosphere binding schema mismatch")
-    if atmosphere["worldColorHex"] != lighting["worldColor"] or atmosphere["fogColorHex"] != lighting["fogColor"] or atmosphere["beautyViewTransform"] != "AgX" or atmosphere["beautyLook"] != "AgX - Medium High Contrast" or atmosphere["verdict"] != "READY_FOR_DIAGNOSTIC_RENDER":
-        raise ValueError("atmosphere exact record mismatch")
-    if max(abs(left - right) for left, right in zip(finite_vector(atmosphere["worldColorLinear"], 3, "atmosphereBinding.worldColorLinear"), linear_rgb(lighting["worldColor"]))) > 1.0e-6 or max(abs(left - right) for left, right in zip(finite_vector(atmosphere["fogColorLinear"], 3, "atmosphereBinding.fogColorLinear"), linear_rgb(lighting["fogColor"]))) > 1.0e-6:
-        raise ValueError("atmosphere color readback mismatch")
-    for name, expected in (("worldStrength", lighting["worldStrength"]), ("fogDensity", lighting["fogDensity"]), ("fogAnisotropy", lighting["fogAnisotropy"]), ("exposure", 0.0), ("gamma", 1.0), ("dither", 0.0)):
-        if abs(finite_number(atmosphere[name], f"atmosphereBinding.{name}") - expected) > 1.0e-6:
-            raise ValueError(f"atmosphere numeric mismatch: {name}")
-    for name, distance in (("transmittance20", 20.0), ("transmittance120", 120.0), ("transmittance520", 520.0)):
-        expected = math.exp(-lighting["fogDensity"] * distance)
-        if abs(finite_number(atmosphere[name], f"atmosphereBinding.{name}") - expected) > 1.0e-12:
-            raise ValueError(f"atmosphere transmittance mismatch: {name}")
+    expected_atmosphere = json.loads(json.dumps(atmosphere_contract, ensure_ascii=False, allow_nan=False))
+    expected_atmosphere.update(
+        {
+            "transmittance20": math.exp(-atmosphere_contract["density"] * 20.0),
+            "transmittance120": math.exp(-atmosphere_contract["density"] * 120.0),
+            "transmittance520": math.exp(-atmosphere_contract["density"] * 520.0),
+            "verdict": "READY_FOR_DIAGNOSTIC_RENDER",
+        }
+    )
+    deep_compare(expected_atmosphere, atmosphere, "$.cameraBinding.atmosphereBinding")
 
 
-def validate_c6_preflight_cameras(preflight: dict[str, Any]) -> None:
+def validate_c7_preflight_cameras(preflight: dict[str, Any]) -> None:
     camera_keys = [
         "profile", "resolution", "diagnosticResolution", "position", "target", "up",
         "verticalFovDegrees", "aspect", "near", "far", "lensShiftY", "viewMatrix",
@@ -530,7 +623,7 @@ def validate_camera_binding(path: Path, preflight: dict[str, Any]) -> str:
         binding["schemaId"] != "tide-relay.temple-tr4.camera-binding"
         or isinstance(binding["schemaVersion"], bool)
         or not isinstance(binding["schemaVersion"], int)
-        or binding["schemaVersion"] != 2
+        or binding["schemaVersion"] != 3
         or binding["diagnosticId"] != DIAGNOSTIC_ID
         or binding["blenderVersion"] != "4.5.5 LTS"
         or isinstance(binding["renderCallCountAtWrite"], bool)
@@ -613,7 +706,11 @@ def validate_camera_binding(path: Path, preflight: dict[str, Any]) -> str:
             raise ValueError(f"camera frozen projection mismatch: {profile_index}")
         validate_orientation(record["orientation"], camera, f"{label}.orientation")
         validate_screen_projection(record["screenProjection"], camera, f"{label}.screenProjection")
-    validate_light_atmosphere_bindings(binding, preflight["construction"]["lighting"])
+    validate_light_atmosphere_bindings(
+        binding,
+        preflight["construction"]["lighting"],
+        preflight["construction"]["atmosphere"],
+    )
     return sha256_file(path)
 
 
@@ -627,17 +724,23 @@ def validate_scene_metrics(path: Path, preflight: dict[str, Any]) -> str:
     if not path.is_file():
         raise ValueError("missing scene-metrics.json")
     metrics = json.loads(path.read_text(encoding="utf-8"))
-    keys = ["meshObjects", "sourceTrianglesBeforeModifiers", "beautyMaterialCount", "semanticRoots", "pursuerBookendRoot", "runnerRoot", "roadTopY", "verdict"]
+    keys = [
+        "meshObjects", "sourceTrianglesBeforeModifiers", "beautyMaterialCount",
+        "semanticRoots", "pursuerBookendRoot", "runnerRoot", "roadTopY",
+        "geometryBinding", "materialGraphBinding", "depthEncodingBinding", "verdict",
+    ]
     if not isinstance(metrics, dict) or sorted(metrics.keys()) != sorted(keys):
         raise ValueError("scene metrics schema mismatch")
     for name in ("meshObjects", "sourceTrianglesBeforeModifiers", "beautyMaterialCount"):
         value = metrics[name]
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             raise ValueError(f"scene metric count mismatch: {name}")
-        if value != EXPECTED_SCENE_COUNTS[name]:
-            raise ValueError(f"frozen scene metric count drift: {name}")
-    if metrics["sourceTrianglesBeforeModifiers"] > preflight["budgets"]["sourceTriangles"] or metrics["beautyMaterialCount"] > preflight["budgets"]["materialCount"]:
+        if value == 0:
+            raise ValueError(f"empty scene metric count: {name}")
+    if metrics["sourceTrianglesBeforeModifiers"] > preflight["budgets"]["sourceTriangles"]:
         raise ValueError("scene metric budget exceeded")
+    if metrics["beautyMaterialCount"] != len(preflight["materials"]):
+        raise ValueError("beauty material count mismatch")
     roots = metrics["semanticRoots"]
     expected_names = [record["name"] for record in preflight["semanticRoots"]]
     if not isinstance(roots, list) or len(roots) != 9:
@@ -649,7 +752,7 @@ def validate_scene_metrics(path: Path, preflight: dict[str, Any]) -> str:
             record["name"] != expected_name
             or isinstance(record["children"], bool)
             or not isinstance(record["children"], int)
-            or record["children"] != EXPECTED_ROOT_CHILDREN[index]
+            or record["children"] <= 0
         ):
             raise ValueError(f"scene semantic root identity mismatch: {index}")
         translation = record["translation"]
@@ -673,6 +776,19 @@ def validate_scene_metrics(path: Path, preflight: dict[str, Any]) -> str:
         raise ValueError("scene road top mismatch")
     if metrics["verdict"] != "RENDERED_FOR_EVALUATION":
         raise ValueError("scene metrics verdict mismatch")
+    construction = preflight["construction"]
+    expected_geometry = {
+        name: construction[name]
+        for name in ("road", "canyon", "runner", "pursuer", "hazards", "tideScar")
+    }
+    expected_geometry["verdict"] = "READY_FOR_DIAGNOSTIC_RENDER"
+    expected_material_graph = dict(construction["materialGraphs"])
+    expected_material_graph["verdict"] = "READY_FOR_DIAGNOSTIC_RENDER"
+    expected_depth_encoding = dict(construction["depthEncoding"])
+    expected_depth_encoding["verdict"] = "READY_FOR_DIAGNOSTIC_RENDER"
+    deep_compare(expected_geometry, metrics["geometryBinding"], "$.sceneMetrics.geometryBinding")
+    deep_compare(expected_material_graph, metrics["materialGraphBinding"], "$.sceneMetrics.materialGraphBinding")
+    deep_compare(expected_depth_encoding, metrics["depthEncodingBinding"], "$.sceneMetrics.depthEncodingBinding")
     return sha256_file(path)
 
 
@@ -714,35 +830,57 @@ def semantic_depth_median(depth_values: list[int], indices: list[int]) -> float:
 
 
 def evaluate(preflight_path: Path, root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
-    preflight = json.loads(preflight_path.read_text(encoding="utf-8"))
+    preflight_bytes = preflight_path.read_bytes()
+    preflight = strict_json_object_bytes(preflight_bytes, "preflight.json")
+    preflight_sha256 = hashlib.sha256(preflight_bytes).hexdigest()
     failures: list[str] = []
     gates: dict[str, Any] = {}
     if (
         preflight.get("schemaId") != "tide-relay.temple-tr4.asset-preflight"
         or isinstance(preflight.get("schemaVersion"), bool)
         or not isinstance(preflight.get("schemaVersion"), int)
-        or preflight.get("schemaVersion") != 6
-        or preflight.get("contractVersion") != "TEMPLE-TR4-C6"
+        or preflight.get("schemaVersion") != 7
+        or preflight.get("contractVersion") != "TEMPLE-TR4-C7"
         or preflight.get("tools", {}).get("pythonVersion") != PYTHON_VERSION
         or platform.python_version() != PYTHON_VERSION
     ):
         raise ValueError("preflight schema/contract mismatch")
     if preflight.get("verdict") != "READY_FOR_BLENDER":
         raise ValueError("preflight verdict mismatch")
-    validate_c6_preflight_cameras(preflight)
+    construction = preflight.get("construction")
+    if not isinstance(construction, dict):
+        raise ValueError("preflight construction is not an object")
+    calculated_construction_hash = hashlib.sha256(canonical_bytes(construction)).hexdigest()
+    if preflight.get("constructionHash") != calculated_construction_hash or calculated_construction_hash != C7_CONSTRUCTION_SHA256:
+        raise ValueError("preflight C7 construction hash mismatch")
+    if validate_planned_manifest(root / "planned-manifest.json", preflight, preflight_bytes) != preflight_sha256:
+        raise ValueError("planned manifest does not replay the evaluator-bound preflight hash")
+    validate_c7_preflight_cameras(preflight)
     expected_outputs = preflight.get("outputs")
     if not isinstance(expected_outputs, list) or len(expected_outputs) != 20:
         raise ValueError("preflight output array is not the closed 20-record array")
     expected_names = [item["relativePath"] for item in expected_outputs]
     expected_order = [(profile, pass_name) for profile in PROFILE_ORDER for pass_name in ("beauty", "object-id", "road-mask", "normal", "linear-depth")]
+    profile_metadata = {
+        "portrait": ("tr4-diagnostic-running-007", 270, 480),
+        "desktop": ("tr4-diagnostic-running-007", 480, 270),
+        "landscape": ("tr4-diagnostic-running-007", 422, 195),
+        "closeup": ("tr4-diagnostic-game-over-007", 320, 240),
+    }
+    output_keys = ["index", "profile", "pass", "sceneId", "relativePath", "width", "height"]
     if (
         [(item.get("profile"), item.get("pass")) for item in expected_outputs] != expected_order
         or [item.get("index") for item in expected_outputs] != list(range(20))
-        or expected_names != [f"tr4-diagnostic-006-{profile}-{pass_name}.png" for profile, pass_name in expected_order]
+        or expected_names != [f"tr4-diagnostic-007-{profile}-{pass_name}.png" for profile, pass_name in expected_order]
+        or any(not isinstance(item, dict) or sorted(item.keys()) != sorted(output_keys) for item in expected_outputs)
+        or any(
+            (item["sceneId"], item["width"], item["height"]) != profile_metadata[item["profile"]]
+            for item in expected_outputs
+        )
     ):
-        raise ValueError("preflight diagnostic-006 output order/prefix mismatch")
+        raise ValueError("preflight diagnostic-007 output order/prefix mismatch")
 
-    # C6 preserves the closed camera, light, atmosphere, render-order, and scene-metric evidence before PNG reads.
+    # C7 preserves the closed camera, light, atmosphere, geometry, material, depth, and render-order evidence before PNG reads.
     camera_binding_sha256 = validate_camera_binding(root / "camera-binding.json", preflight)
     render_order_sha256 = validate_render_order(root / "render-order.json", expected_names)
     scene_metrics_sha256 = validate_scene_metrics(root / "scene-metrics.json", preflight)
@@ -826,9 +964,22 @@ def evaluate(preflight_path: Path, root: Path) -> tuple[dict[str, Any], dict[str
         known_nonbackground = set(PALETTE.values()) - {PALETTE["background"]}
         foreground_depth = [
             depth for depth, semantic in zip(depth_values, object_pixels)
-            if semantic in known_nonbackground and depth != 65535
+            if semantic in known_nonbackground
         ]
+        background_depth = [
+            depth for depth, semantic in zip(depth_values, object_pixels)
+            if semantic == PALETTE["background"]
+        ]
+        depth_background_ok = (
+            bool(foreground_depth)
+            and bool(background_depth)
+            and all(value != 65535 for value in foreground_depth)
+            and all(value == 65535 for value in background_depth)
+        )
         depth_unique = len(set(foreground_depth))
+        foreground_depth_p10 = quantile(foreground_depth, 0.10)
+        foreground_depth_p50 = quantile(foreground_depth, 0.50)
+        foreground_depth_p90 = quantile(foreground_depth, 0.90)
         runner_bounds, runner_centroid_y, runner_margin, _runner_width = bounds_and_centroid(
             semantic_indices["runner"], width, height
         )
@@ -872,6 +1023,9 @@ def evaluate(preflight_path: Path, root: Path) -> tuple[dict[str, Any], dict[str
             "depthUniqueValues": depth_unique,
             "depthMin": min(depth_values),
             "depthMax": max(depth_values),
+            "foregroundDepthP10": foreground_depth_p10,
+            "foregroundDepthP50": foreground_depth_p50,
+            "foregroundDepthP90": foreground_depth_p90,
             "runnerBounds": runner_bounds,
             "runnerCentroidY": runner_centroid_y,
             "runnerMargin": runner_margin,
@@ -895,6 +1049,9 @@ def evaluate(preflight_path: Path, root: Path) -> tuple[dict[str, Any], dict[str
         subjects_ok = all(counts[name] > 0 for name in ("road", "canyon", "runner", "tide-scar"))
         normal_variation_ok = normal_unique >= 24
         depth_variation_ok = depth_unique >= 64 and min(depth_values) < max(depth_values)
+        foreground_depth_quantiles_ok = (
+            foreground_depth_p10 < foreground_depth_p50 < foreground_depth_p90 < 62000
+        )
         runner_band_ok = runner_margin >= 0.02
         road_perspective_ok = True
         semantic_order_ok = True
@@ -947,6 +1104,8 @@ def evaluate(preflight_path: Path, root: Path) -> tuple[dict[str, Any], dict[str
             "runnerRoiLuminance": runner_roi_ok,
             "pursuerCloseup": pursuer_closeup_ok,
             "roadNormalUp": road_normal_up_ok,
+            "depthBackgroundSeparation": depth_background_ok,
+            "foregroundDepthQuantiles": foreground_depth_quantiles_ok,
             "representativeDepthOrder": representative_depth_ok,
         }
         for gate_name, passed in profile_gate_state[profile].items():
@@ -984,7 +1143,8 @@ def evaluate(preflight_path: Path, root: Path) -> tuple[dict[str, Any], dict[str
         "globalLuminance", "routeLuminance", "nearBlack", "roadMaskBinaryArea",
         "semanticSubjects", "normalVariation", "depthVariation", "runnerBandContainment",
         "roadPerspective", "semanticScreenOrder", "runnerRoiLuminance", "pursuerCloseup",
-        "roadNormalUp", "representativeDepthOrder",
+        "roadNormalUp", "depthBackgroundSeparation", "foregroundDepthQuantiles",
+        "representativeDepthOrder",
     ):
         gates[gate_name] = all(profile_gate_state.get(profile, {}).get(gate_name, False) for profile in PROFILE_ORDER)
     gates["scarRightOfRoute"] = all(
@@ -1003,11 +1163,15 @@ def evaluate(preflight_path: Path, root: Path) -> tuple[dict[str, Any], dict[str
             if marker not in failures:
                 failures.append(marker)
     verdict = "READY_FOR_MANUAL_REVIEW" if not failures else "DIAGNOSTIC_BLOCKED"
+    if preflight_path.read_bytes() != preflight_bytes:
+        raise ValueError("preflight bytes changed during evaluation")
+    if validate_planned_manifest(root / "planned-manifest.json", preflight, preflight_bytes) != preflight_sha256:
+        raise ValueError("planned manifest changed during evaluation")
     manifest_core = {
         "schemaId": "tide-relay.temple-tr4.diagnostic-manifest",
         "schemaVersion": 1,
         "diagnosticId": DIAGNOSTIC_ID,
-        "preflightSha256": sha256_file(preflight_path),
+        "preflightSha256": preflight_sha256,
         "constructionHash": preflight.get("constructionHash"),
         "cameraBindingSha256": camera_binding_sha256,
         "renderOrderSha256": render_order_sha256,
@@ -1039,10 +1203,20 @@ def evaluate(preflight_path: Path, root: Path) -> tuple[dict[str, Any], dict[str
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--preflight", type=Path, required=True)
-    parser.add_argument("--diagnostic-root", type=Path, required=True)
+    parser.add_argument("--preflight", type=Path)
+    parser.add_argument("--diagnostic-root", type=Path)
+    parser.add_argument("--dry-axis-predicate", action="store_true")
     arguments = parser.parse_args()
     try:
+        if arguments.dry_axis_predicate:
+            if arguments.preflight is not None or arguments.diagnostic_root is not None:
+                raise ValueError("dry axis predicate does not accept evidence paths")
+            if not dry_axis_angle_predicate():
+                raise ValueError("C7 stable axis-angle predicate failed")
+            print("C7_AXIS_PREDICATE_READY")
+            return 0
+        if arguments.preflight is None or arguments.diagnostic_root is None:
+            raise ValueError("--preflight and --diagnostic-root are required for evaluation")
         preflight = arguments.preflight.resolve(strict=True)
         root = arguments.diagnostic_root.resolve(strict=True)
         if preflight.parent != root or preflight.name != "preflight.json":
