@@ -1,0 +1,23 @@
+{
+  "schema": "tide-scar-d4-runtime-v1",
+  "usageRights": "Clean-room project-bound D4A runtime derivatives only. The D4 composite, north-star, and source PNGs are excluded.",
+  "selector": {
+    "mobileOrLowGpu": "cssWidth <= 430 || deviceMemory <= 4 || (coarsePointer && shortLandscape)",
+    "policy": "Select one tier before TextureLoader upload; never upload both tiers."
+  },
+  "textures": {
+    "desktop": {
+      "sandstone": { "file": "tide-sandstone-base-1024.webp", "sha256": "55d83ccede95aaf4a25599cf21485e0ccdb18952a53a86db977838bc6126115f", "rgba8MipBytes": 5592404, "colorSpace": "srgb" },
+      "basalt": { "file": "tide-basalt-base-1024.webp", "sha256": "2369e446c2356e638e05fe327b8fafa6ccab147ac3dfca572f4515177019a704", "rgba8MipBytes": 5592404, "colorSpace": "srgb" },
+      "canyon": { "file": "tide-distant-canyon-2048x1024.webp", "sha256": "319108622d5e4eb03dd1a77baa6d689d3c8fbb36fc556e69667b353b0538fe0b", "rgba8MipBytes": 11184812, "colorSpace": "srgb" }
+    },
+    "mobile": {
+      "sandstone": { "file": "tide-sandstone-base-mobile-512.webp", "sha256": "2783edb30e2837aa2c91f562254658b00d5d638248c2781144737cf2b6fb1a01", "rgba8MipBytes": 1398100, "colorSpace": "srgb" },
+      "basalt": { "file": "tide-basalt-base-mobile-512.webp", "sha256": "3c9fb25dcd0372001c723deb8b2a5cbf47cb92c9f4560f662494d5f541dab1c0", "rgba8MipBytes": 1398100, "colorSpace": "srgb" },
+      "canyon": { "file": "tide-distant-canyon-mobile-1024x512.webp", "sha256": "42d279146d55084f733736d7ff44ad45cadc040111f5111092453469c7ef3ae9", "rgba8MipBytes": 2796204, "colorSpace": "srgb" }
+    },
+    "coral": { "file": "tide-coral-mask-512.png", "sha256": "12390b045165e609cb6990fc365ffedfd3b53012e780222943547c6d3c255b7f", "rgba8MipBytes": 1398100, "colorSpace": "none" }
+  },
+  "gpuMemory": { "desktopEnvironmentMiB": 22.667, "mobileEnvironmentMiB": 6.667, "mobileBudgetMiB": 18 },
+  "tideScar": { "analytic": true, "bitmap": false }
+}
