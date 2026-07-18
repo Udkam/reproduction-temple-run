@@ -1,0 +1,21 @@
+{
+  "schema": "temple-tr3-a5-clay-verifier-v1",
+  "verdict": "BLOCKED",
+  "passed": false,
+  "sourceChecks": {},
+  "geometryChecks": {},
+  "frames": {},
+  "baselineFailures": {},
+  "manualReview": {
+    "required": true,
+    "state": "PENDING_SINGLE_INSPECTION",
+    "cannotOverrideFailure": true,
+    "cannotClaimFinalAcceptance": true
+  },
+  "failures": [
+    "generator did not write a5-clay-metadata.json; the sole Blender batch ended after image emission"
+  ],
+  "notes": [
+    "Fail-closed recovery verdict. No rerender or metadata reconstruction is authorized after the one Blender process."
+  ]
+}
