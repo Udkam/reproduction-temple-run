@@ -1,0 +1,294 @@
+{
+  "schema": "temple-tr3-a4-clay-verifier-v1",
+  "passed": false,
+  "sourceChecks": {
+    "a3GeneratorHash": true,
+    "routeExact": true,
+    "canyonExact": true,
+    "tideScarExact": true,
+    "semanticRoots": true,
+    "triangles": true,
+    "blender455": true
+  },
+  "portraitActorSeparationPx": 11.98,
+  "portraitHorizontalRoadBandOverlap": -0.0213,
+  "frames": {
+    "portrait": {
+      "width": 540,
+      "height": 960,
+      "sha256": "cd4560a8caa7debb70bc98eab595d96f84e0fffe8d44cde0849b9d84701afdbc",
+      "projections": {
+        "courier": {
+          "x": 0.21689,
+          "y": 0.58571,
+          "width": 0.05143,
+          "height": 0.06707,
+          "pixelWidth": 27.77,
+          "pixelHeight": 64.39,
+          "centerY": 0.61925
+        },
+        "pursuer": {
+          "x": 0.04146,
+          "y": 0.66526,
+          "width": 0.15413,
+          "height": 0.10247,
+          "pixelWidth": 83.23,
+          "pixelHeight": 98.37,
+          "centerY": 0.71649
+        },
+        "ring": {
+          "x": 0.50699,
+          "y": 0.36894,
+          "width": 0.21522,
+          "height": 0.11493,
+          "pixelWidth": 116.22,
+          "pixelHeight": 110.33,
+          "centerY": 0.42641
+        },
+        "arch": {
+          "x": 0.52497,
+          "y": 0.36894,
+          "width": 0.17519,
+          "height": 0.06472,
+          "pixelWidth": 94.6,
+          "pixelHeight": 62.13,
+          "centerY": 0.4013
+        },
+        "supportLeft": {
+          "x": 0.50699,
+          "y": 0.41148,
+          "width": 0.07192,
+          "height": 0.05999,
+          "pixelWidth": 38.84,
+          "pixelHeight": 57.59,
+          "centerY": 0.44148
+        },
+        "supportRight": {
+          "x": 0.64719,
+          "y": 0.42212,
+          "width": 0.07502,
+          "height": 0.06175,
+          "pixelWidth": 40.51,
+          "pixelHeight": 59.28,
+          "centerY": 0.453
+        },
+        "causeway": {
+          "x": 0.0,
+          "y": 0.19406,
+          "width": 1.0,
+          "height": 0.80594,
+          "pixelWidth": 540.0,
+          "pixelHeight": 773.7,
+          "centerY": 0.59703
+        },
+        "tideScar": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0,
+          "pixelWidth": 0.0,
+          "pixelHeight": 0.0,
+          "centerY": 0.0
+        }
+      },
+      "aperture": {
+        "x": 0.55336,
+        "width": 0.11666,
+        "pixelWidth": 63.0
+      }
+    },
+    "desktop": {
+      "width": 960,
+      "height": 540,
+      "sha256": "d2d1312f1e165efe40ff260a59762b5a341ad53152eba33a5c0954d1915f533d",
+      "projections": {
+        "courier": {
+          "x": 0.20692,
+          "y": 0.60472,
+          "width": 0.02999,
+          "height": 0.12719,
+          "pixelWidth": 28.79,
+          "pixelHeight": 68.68,
+          "centerY": 0.66832
+        },
+        "pursuer": {
+          "x": 0.07473,
+          "y": 0.73402,
+          "width": 0.10048,
+          "height": 0.17732,
+          "pixelWidth": 96.46,
+          "pixelHeight": 95.76,
+          "centerY": 0.82268
+        },
+        "ring": {
+          "x": 0.42434,
+          "y": 0.26805,
+          "width": 0.12344,
+          "height": 0.20968,
+          "pixelWidth": 118.51,
+          "pixelHeight": 113.23,
+          "centerY": 0.37289
+        },
+        "arch": {
+          "x": 0.43404,
+          "y": 0.26805,
+          "width": 0.09883,
+          "height": 0.11601,
+          "pixelWidth": 94.88,
+          "pixelHeight": 62.64,
+          "centerY": 0.32605
+        },
+        "supportLeft": {
+          "x": 0.42434,
+          "y": 0.35009,
+          "width": 0.04313,
+          "height": 0.10897,
+          "pixelWidth": 41.41,
+          "pixelHeight": 58.85,
+          "centerY": 0.40458
+        },
+        "supportRight": {
+          "x": 0.50298,
+          "y": 0.3651,
+          "width": 0.0448,
+          "height": 0.11263,
+          "pixelWidth": 43.01,
+          "pixelHeight": 60.82,
+          "centerY": 0.42142
+        },
+        "causeway": {
+          "x": 0.0,
+          "y": 0.05577,
+          "width": 0.786,
+          "height": 0.94423,
+          "pixelWidth": 754.56,
+          "pixelHeight": 509.88,
+          "centerY": 0.52789
+        },
+        "tideScar": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0,
+          "pixelWidth": 0.0,
+          "pixelHeight": 0.0,
+          "centerY": 0.0
+        }
+      },
+      "aperture": {
+        "x": 0.45055,
+        "width": 0.06503,
+        "pixelWidth": 62.43
+      }
+    },
+    "closeup": {
+      "width": 640,
+      "height": 480,
+      "sha256": "398def628bfd0553b0ec6c380c6d14ac2578987fe8b2c5ad7d362ceb5c2e1cfc",
+      "projections": {
+        "courier": {
+          "x": 0.25681,
+          "y": 0.33939,
+          "width": 0.05581,
+          "height": 0.17606,
+          "pixelWidth": 35.72,
+          "pixelHeight": 84.51,
+          "centerY": 0.42742
+        },
+        "pursuer": {
+          "x": 0.0,
+          "y": 0.50829,
+          "width": 0.17269,
+          "height": 0.28514,
+          "pixelWidth": 110.52,
+          "pixelHeight": 136.87,
+          "centerY": 0.65086
+        },
+        "ring": {
+          "x": 0.61242,
+          "y": 0.01819,
+          "width": 0.18728,
+          "height": 0.23778,
+          "pixelWidth": 119.86,
+          "pixelHeight": 114.14,
+          "centerY": 0.13709
+        },
+        "arch": {
+          "x": 0.63028,
+          "y": 0.01819,
+          "width": 0.15419,
+          "height": 0.12904,
+          "pixelWidth": 98.68,
+          "pixelHeight": 61.94,
+          "centerY": 0.08271
+        },
+        "supportLeft": {
+          "x": 0.61242,
+          "y": 0.11862,
+          "width": 0.06216,
+          "height": 0.1191,
+          "pixelWidth": 39.79,
+          "pixelHeight": 57.17,
+          "centerY": 0.17817
+        },
+        "supportRight": {
+          "x": 0.73253,
+          "y": 0.12893,
+          "width": 0.06717,
+          "height": 0.12705,
+          "pixelWidth": 42.99,
+          "pixelHeight": 60.99,
+          "centerY": 0.19245
+        },
+        "causeway": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0,
+          "pixelWidth": 640.0,
+          "pixelHeight": 480.0,
+          "centerY": 0.5
+        },
+        "tideScar": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0,
+          "pixelWidth": 0.0,
+          "pixelHeight": 0.0,
+          "centerY": 0.0
+        }
+      },
+      "aperture": {
+        "x": 0.65471,
+        "width": 0.10203,
+        "pixelWidth": 65.3
+      }
+    }
+  },
+  "ring": {
+    "outerSpanToDeckWidth": 0.54,
+    "thicknessToOuterSpan": 0.126,
+    "openingToOuterArea": 0.464,
+    "apertureWidthMetres": 2.48,
+    "supportCount": 2,
+    "baseContactsDeck": true,
+    "manualReadTarget": "supported broken-stone opening"
+  },
+  "manualReview": {
+    "verdict": "PASS",
+    "note": "Reviewed the one-shot portrait, desktop, and closeup frames at native resolution: the pursuer reads as a separate behind-courier quadruped, and the ring reads immediately as a broken-stone span carried by two grounded supports with a clear opening.",
+    "requiredRead": "supported broken-stone opening"
+  },
+  "failures": [
+    "portrait actor separation",
+    "portrait actor road-band overlap",
+    "portrait arch height",
+    "desktop arch height",
+    "desktop aperture width"
+  ],
+  "notes": [
+    "Projection bounds come from the actual one-shot Blender scene; image dimensions and hashes bind the evidence to the rendered frames.",
+    "No final materials, export, runtime, browser, commit, push, or QA activity follows this clay gate."
+  ]
+}

@@ -1,0 +1,1275 @@
+{
+  "schema": "temple-tr3-a4-inherited-dirty-snapshot-v1",
+  "capturedAt": "2026-07-14T19:04:27.784066+08:00",
+  "branch": "codex/temple-run",
+  "head": "52ae9ae631fa3761f8f8737978af1840ba2df8a4",
+  "note": "Captured before any A4 documentation or source edit. A4 may modify only the four append-only contracts, its new generator/evaluator, and asset-proof/a4 outputs.",
+  "statusRecordCount": 158,
+  "hashedFileCount": 158,
+  "entries": [
+    {
+      "path": "CURRENT_TASK.md",
+      "status": [
+        " M"
+      ],
+      "bytes": 6254,
+      "sha256": "e69055262dc17dec29de4ebbf2004b167f78b5c3877f9ce287202e878f67b1c7"
+    },
+    {
+      "path": "DESIGN.md",
+      "status": [
+        " M"
+      ],
+      "bytes": 12136,
+      "sha256": "5dd53dfe1a9efd9abba8092a60f294e71c434b841c9ec3bc6de12720535b5daf"
+    },
+    {
+      "path": "docs/qa/TEMPLE_ACCEPTANCE.md",
+      "status": [
+        " M"
+      ],
+      "bytes": 9739,
+      "sha256": "d0de410201dd74d621c57c59ae19f22ec03b66487b7e12eec40fe5d512334c1b"
+    },
+    {
+      "path": "docs/qa/temple-tr3-browser-diagnostic.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 66063,
+      "sha256": "d1aa5484423079f1380d1f1bd2be642dd90006ceb454f7176deedb3de5fee489"
+    },
+    {
+      "path": "docs/qa/temple-tr3-browser-failure.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 337,
+      "sha256": "e42264937698cda1bc2a990c0632218e693be3c6b3c3ee405cfaadc7f9b6f251"
+    },
+    {
+      "path": "docs/screenshots/temple/final/beam-preview.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 112703,
+      "sha256": "66d2eada3ab7b61992ad82d4f9af28066d91f61b3d417f1d567730d63147a7da"
+    },
+    {
+      "path": "docs/screenshots/temple/final/chase-close.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 107256,
+      "sha256": "2a9c2d2d7ee1f3d56e57921f1af0f7d5e8c25e7e07653c12ea5f4ec40e4103f0"
+    },
+    {
+      "path": "docs/screenshots/temple/final/collision.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 358126,
+      "sha256": "3acc7aae05446ce8ed74ecc1a50a0b8ca2aa1429d7d569112970e9be41b3c84e"
+    },
+    {
+      "path": "docs/screenshots/temple/final/column-preview.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 274205,
+      "sha256": "4e575cbccc926dd073ea0fe5911679a8a444481a3215b3c58cbc7a4669ff7a5c"
+    },
+    {
+      "path": "docs/screenshots/temple/final/gap-preview.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 105421,
+      "sha256": "e5c68513cee155518c425ecb305550568bdd836328870cae6d3137b1eea9aed1"
+    },
+    {
+      "path": "docs/screenshots/temple/final/jump-apex.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 93871,
+      "sha256": "523f830df36247ec87119e7d32ae796a1747237b1236dcbbc8bba1c79f432069"
+    },
+    {
+      "path": "docs/screenshots/temple/final/lane-end.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 102965,
+      "sha256": "b55ca87dc607fbc1417d73295ce9fbec2753f51aabd1e40262a3b9d04cb57c55"
+    },
+    {
+      "path": "docs/screenshots/temple/final/lane-mid.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 102780,
+      "sha256": "ef7b3a468254d0c17a884f10b7358a93d231ff87c70b75102a8a4b7e727635a3"
+    },
+    {
+      "path": "docs/screenshots/temple/final/milestone.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 136131,
+      "sha256": "40fe182e3b13ffe80d9e5e0d618c7b7f458b80c2140bd7996d3fdad4da997046"
+    },
+    {
+      "path": "docs/screenshots/temple/final/mobile-landscape.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 261376,
+      "sha256": "63189ba592355cf67cc7537a052acd629b23b00166411ea0bf80f091c3d4fbfe"
+    },
+    {
+      "path": "docs/screenshots/temple/final/mobile-portrait.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 333709,
+      "sha256": "c6a5ce35bd1d066c72b2714e701cc84013a12f2931a45e494de19ed7f4005366"
+    },
+    {
+      "path": "docs/screenshots/temple/final/pause-high-contrast.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 350786,
+      "sha256": "0f7d6344b0dce620b3ba6c59ca1a0286d133eef602169d6ccc8e3c8c5dfc7368"
+    },
+    {
+      "path": "docs/screenshots/temple/final/ready-desktop.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 390781,
+      "sha256": "451609bcfb152fa6cd118bae31ed7fef9c268f7fdb226df3611407d1674b823a"
+    },
+    {
+      "path": "docs/screenshots/temple/final/reduced-motion.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 98637,
+      "sha256": "53a54f098924778f35a06cbd8515c7457f2e834561501ed846ed81baab70765c"
+    },
+    {
+      "path": "docs/screenshots/temple/final/ring-preview.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 383998,
+      "sha256": "94b634f399fd9993dbdf5de889496601167c2ea986134c86233a27b5d5265626"
+    },
+    {
+      "path": "docs/screenshots/temple/final/running-desktop.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 99950,
+      "sha256": "d89f163c7e89e03e34a911da7d8aad9de503edc665c41d7acbcd3e05717176a3"
+    },
+    {
+      "path": "docs/screenshots/temple/final/slide-mid.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 100936,
+      "sha256": "4458b357131939548873726e5100879936b65162d4ec469bc8d682556a6541e1"
+    },
+    {
+      "path": "docs/screenshots/temple/final/turn-lane-change.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 109104,
+      "sha256": "b3fabb0739f3eab09ea98ddd7ddc9d8e7f8325c63632f8e89e5eedbab3074efe"
+    },
+    {
+      "path": "docs/screenshots/temple/final/turn-mid.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 77892,
+      "sha256": "4be2196511905cf18256ff541441a3dabf97365b4c81abbd2f156f897c542995"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-d4-dev/desktop-column.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 501486,
+      "sha256": "4991c820b21e880e180a6250ca9bdc3353d4243fef5c981e6f6b012b2994764e"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-d4-dev/desktop-normal.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 302428,
+      "sha256": "f45097e7f8ad01bffac5cbfd69e5a91254468e2973b094779641ea5764381e6b"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-d4-dev/failure.json",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 147528,
+      "sha256": "9609366a81f4d55187ae0578b02b70f10f591342078cd1a8179a88d59bcdbd56"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-d4-dev/landscape-running.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 383441,
+      "sha256": "bafd7f6575ce1b19db48f5920c026a65f59fd0476b215a32631ae1062ef7d8f3"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-d4-dev/mobile-close-chase.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 1597026,
+      "sha256": "1f4cbd253397a821ba6399cddf7b77c5a686ee59a5293180e4ab59cfacf22c29"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-d4-dev/mobile-normal.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 816202,
+      "sha256": "53df2c2d76692fb2bf2abaf45fd1a197ddbf37e539d37159ed1da1b67934a95c"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-diagnostic/desktop-close-chase.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 136546,
+      "sha256": "77437b4a4c63d1c62703f5ea3376d4a1eab8ef1dc0c0e3353af53c7d4911ea73"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-diagnostic/desktop-normal.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 127728,
+      "sha256": "a86245fc324a86d2281b15d615135c1878ab565cbfc8820fbc7956c958f4bd8b"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-diagnostic/landscape-running.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 352545,
+      "sha256": "de5fb16707b12b3fb0174f93d14199e9bf8c56575ffe2c88226dc11a12005697"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-diagnostic/mobile-close-chase.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 280285,
+      "sha256": "c722231c7463c0cb328d93ea2aeb882ef061c0c7547db22214d99a99b4580290"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3-diagnostic/mobile-normal.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 286575,
+      "sha256": "2b7aeee57c919e9d2f88d83bbf9123f640afa1c8f36c7924cfeb8ec33258ffe0"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/beam-preview.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 134386,
+      "sha256": "acb144d556fbc24596abb4369050278b7ffc3bf079d089bba57037033f6581ef"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/chase-close.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 136365,
+      "sha256": "f8add09c95a137c13bc5c0ed884d1bab7ee332e7ee1961d71c2609e9ffcfc799"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/collision.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 372593,
+      "sha256": "b0c47839be86f83d1e892ad6e4e1e5b86b06ead88a876667e701b0273fb45630"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/column-preview.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 377987,
+      "sha256": "262527c74f7974d8cba8df192d9303adf2a35662e678fe390992c359fce93e73"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/desktop-beam.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 133862,
+      "sha256": "8435352fe5dd0f758dd2dcfa0e7d27b2a04b7773d304f707e560af1cfa186157"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/desktop-close-chase.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 135799,
+      "sha256": "5c454a1bffbae5d100ad041f3003a147ffd7c0642ba53e987ba451e2607311e0"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/desktop-column.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 136627,
+      "sha256": "0349b42878ff30169a79132cbd89ac5ed63538e890c78bda0d14939aa1f808c2"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/desktop-gap.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 136161,
+      "sha256": "b8e3d0f2cb9d58694a4416e8661d3320b4868b3d3789d8dfd79d982abfe88d8d"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/desktop-milestone.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 164800,
+      "sha256": "25cbf51d4341bf4068da620874d182178d2af829b254b0bbb7a9fa9cd91ebdd8"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/desktop-normal.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 127660,
+      "sha256": "4dfc19f97272e6bd214bd54dba09575d97b683659104eeea81777552b33641c7"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/desktop-paused.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 119400,
+      "sha256": "0c89114371c408a8d2b79cbe98781b366116ee9855bf35dac794545e8b190512"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/desktop-ring.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 143159,
+      "sha256": "4b2d053802e95df76b3d53c2c8d8e2ff4e368d4c09a6caf47b8a5233a3fa32f1"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/gap-preview.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 132406,
+      "sha256": "923c64316281bea15d83259fa64239ef2109359f40dc56d3060a9a2c63ba0dfb"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/jump-apex.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 127044,
+      "sha256": "0577d9de88942b0c5dff9328a22dadfbf0ca971d69cdbb8b4cc25a76011c7b18"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/landscape-running.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 352351,
+      "sha256": "98132424fe413f5d09d62b97a6c60bc3548299732cf3c73810d5d8f799c93890"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/lane-end.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 133706,
+      "sha256": "9be6b24363ae7e1685ed9b30932419877dc71e77db5ae45c29fd9218445e58fc"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/lane-mid.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 131018,
+      "sha256": "c255a7ca64b798bce8020b9e05e3b8c52409f22c8375b056a22ea47c2aa4082f"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/milestone.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 164803,
+      "sha256": "65a08177444a3fad95fc4ffb6292dbb217d376749cf15f680d253b601a9bed8b"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/mobile-close-chase.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 277882,
+      "sha256": "2c66ba5ee733cd6551fcfbb96c31b79eb606651428e6262d173d5243bd8b41a4"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/mobile-landscape.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 352244,
+      "sha256": "a7687ad99781a7b659c4c9ff4cddb6e771546c44715d6af44165104f7deeb790"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/mobile-milestone.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 312251,
+      "sha256": "af72b7ec5ef8d992fc94e97490a34360cc00cdce91049bcb380bb50fc6056957"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/mobile-normal.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 274407,
+      "sha256": "80a7919c1e116df189d6fe40b28691af9d324b5aeba72e0a6d3e7fead3100701"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/mobile-portrait.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 271938,
+      "sha256": "0b58934a2668e97e12779648e45bbe04b00a82194b897057cb8e053f2cefb3b1"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/pause-high-contrast.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 121737,
+      "sha256": "5a26503ec102611c1282e5554d2a064f346c55fb5a910577ec9513282c238e75"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/ready-desktop.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 398033,
+      "sha256": "79620455ff1453c417f323767ef05153156151cd068a491c5181a7e10393dee8"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/reduced-motion.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 127042,
+      "sha256": "aa23cc284cd4abd2239f21abc1bd5eefb627e121bbbdff1ac41563f7785ba1b7"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/ring-preview.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 279539,
+      "sha256": "9c3aa768708fc6eb5276a4fa413f4661ac99f889f84a421e2dca81173e390b3f"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/running-desktop.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 127535,
+      "sha256": "23dc47a054705c8027da3788fe6fe3fe8955200ac6189563e28bc34f14f0e1a9"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/slide-mid.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 129978,
+      "sha256": "f78e228c1be4920d95e96a3787044f2833bc73945a3916ffbab32d1980b53cf8"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/turn-lane-change.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 135692,
+      "sha256": "2cb2adde93be00d3c1f6427e3c6ef3ae8ec0b0f3bbba180cf25931953e2253a0"
+    },
+    {
+      "path": "docs/screenshots/temple/tr3/turn-mid.png",
+      "status": [
+        "ignored-screenshot"
+      ],
+      "bytes": 107734,
+      "sha256": "c6c42360425a32180899133bba3a07f1000d2710843a568ad1d8dbd5746dcc6b"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/ASSET_PIPELINE.md",
+      "status": [
+        "??"
+      ],
+      "bytes": 10239,
+      "sha256": "6904e07fe056659d3b0e9df7f8b27eaab8892e6b0c8dc1d47d6c05444580664a"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/THREAD_LOG.md",
+      "status": [
+        "??"
+      ],
+      "bytes": 36479,
+      "sha256": "345af0c38317f9bd6825f623d4f3710e4b9da424a15733e7ffe016502e764aec"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/SHA256SUMS.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 1019,
+      "sha256": "c19570d7147fba0bab5a7d0e2f20e7cdb7a1a08b5420dcdd2ba3844d73535585"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a2/a2-clay-desktop.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 486484,
+      "sha256": "8cded12db56a3fa39c4ccda002d006f96acaf13204f98272caa604760d03142a"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a2/a2-clay-portrait.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 485762,
+      "sha256": "e41c3363c18b93c25691acf6b8f1f6b8c28d04fbc72dde8edb983f93cfcac677"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a2/a2-clay-readability.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 5065,
+      "sha256": "50613601fe5b77a2f64c672645c3f8f5c348026b3036b15be197d105ab644763"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a2/a2-clay-scene-metadata.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 1710,
+      "sha256": "07f4df97aa14222a95911dbc3a56b067abf37f36f9f3fb244e4b0474eab833a2"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a2/a2-clay-silhouette-closeup.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 398845,
+      "sha256": "9748e6ff45f2db4117b23a74c43355579919c8773cefbc544f3e615b3174a273"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a3/a3-clay-closeup.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 286013,
+      "sha256": "4b060fd510abd8f2b66cfb6e166d95a78624526a1a8c6248031deed17222841b"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a3/a3-clay-desktop.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 505285,
+      "sha256": "e5a378c9c73dd4e1a6b9ef07ad6dabe887c27fee87f68f76d645d923e0888085"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a3/a3-clay-metadata.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 5389,
+      "sha256": "49929e04a418b3441bf888b299796f66a01618a4f40e13dde1172671fd7f8c40"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a3/a3-clay-portrait.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 493970,
+      "sha256": "f949c72efdef29dad7e54e263a5ca1b5cfb5c6696850f7d0f28fda71515b3208"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/a3/a3-clay-verifier.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 7207,
+      "sha256": "121f2c5d48d141c39aa9eb5675f68c0411488fec6b630637558c96262a50307d"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/desktop-hero.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 1431793,
+      "sha256": "a54fa6cd89478c83e548942f6bb3e086b54603ac88239f7e25a82a05097dc8f9"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/diagnostic-closeup.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 210827,
+      "sha256": "96cd27d1bd2239245e72b8e084c336208d68a87cc8716168f174978d3f60b448"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/diagnostic-desktop.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 256379,
+      "sha256": "007f53a5c6f1a7132fe92ce9b71f95ac6c4428fcfca15e0c79655aeb606f9f8f"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/diagnostic-pixel-evidence.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 4985,
+      "sha256": "6ea23043905a9ec8bfc686bdffeaeef9b3326f74536bb4ef5453bd63604faed5"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/diagnostic-portrait.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 273799,
+      "sha256": "d98716ab39e1f5c92d58092b18f205951bdd7c517b02cdd7bfa4bf93cac70d0c"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/diagnostic-scene-metadata.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 1354,
+      "sha256": "443f0977ef1ff5ef4b09ab01c52de93a4640345617509018fec11575dcb2c658"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/final-pixel-evidence.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 4999,
+      "sha256": "5aa75d65e0c0fca88419648d47b3df4a8a27095508c3fdad558711e9bb76e23c"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/gltf-transform-inspect-meshopt.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 14251,
+      "sha256": "d772f98792a0ed2667d446f398152bd20d20009e1a8da7753ec25ffb88cd421f"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/gltf-transform-inspect-unoptimized.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 206479,
+      "sha256": "f775b17c4677c4640681d74e783ea053ac065331185647fcde2fa992e849ef75"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/gltf-transform-optimize-meshopt.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 543,
+      "sha256": "a736ada3c396b31f55395a3283a5567e952c535fb15cc7c27dfcbb34425e4cda"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/gltf-transform-validate-meshopt.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 2664,
+      "sha256": "dcc19a965262273d8788943a64431ac41d8672ef321d91006f60544d2b381e03"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/gltf-transform-validate-unoptimized.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 62845,
+      "sha256": "290d330064a8d4383c0f1db3681f52786449c0a796acd6538137651b3d71030c"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/manifest.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 10682,
+      "sha256": "8b48b45110ff21c4575c77309c758d5c5b2ba057497f5e35c3a9bda0f15cf2d7"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/portrait-hero-draft.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 827638,
+      "sha256": "e24e4ec0d64b4c7f7dbbce36e9bb28fd67799c02849696c91f9e753ae25acf14"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/portrait-hero.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 1502788,
+      "sha256": "147ec1111e97b046933941e059c0375ce1faca98aaedd786b80333bbc70135e6"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/runner-pursuer-obstacle-closeup.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 1162177,
+      "sha256": "a6673560193b1bd35c8901dd8140bff1cfeae2bd163725c5d5bd124d55cb796f"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/scene-metadata.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 1349,
+      "sha256": "ef5c68dce59667a00828d30cb98a3a5e34a6cec20fcfc6bf1d23b557a5512dc9"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-basalt-base.ktx.validate.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-basalt-base.ktx2",
+      "status": [
+        "??"
+      ],
+      "bytes": 87856,
+      "sha256": "602a559d454bf7aa2b7cbd82695dfaa642c5ab24a1df5ece6d27001efb4b976b"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-basalt-base.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 58322,
+      "sha256": "e07aaf4c5dc517552341442ddc88ad20e91c652ad72806396ebe73530605f5e4"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-basalt-base.toktx.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-ao.ktx.validate.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-ao.ktx2",
+      "status": [
+        "??"
+      ],
+      "bytes": 87856,
+      "sha256": "8de8d3177cc4b48524a248fe8ad37914ad870060357e8482f208dac4e3ad97f0"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-ao.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 24796,
+      "sha256": "8bfd5d578d6143c4f0730b61204347148a1a20bb94adcc26aba9c1e0a5b8e3ff"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-ao.toktx.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-base.ktx.validate.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-base.ktx2",
+      "status": [
+        "??"
+      ],
+      "bytes": 87856,
+      "sha256": "fb6265a76a056d9b60e8d022b419614029628ef781c737399ed7d19b7bc109a4"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-base.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 70603,
+      "sha256": "2f1a1eb0fa8157f0dee37d2d1996cbc8db05489c004c901be67f4064e90af975"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-base.toktx.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-normal.ktx.validate.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-normal.ktx2",
+      "status": [
+        "??"
+      ],
+      "bytes": 87856,
+      "sha256": "7be04b1ffcc40a0a536a28f6c64bd0487236c5c331bd16ea7c04d8a405d1ac88"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-normal.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 59846,
+      "sha256": "e5f542d122ca257255b11e66fee607a0c352bebcffbca1052f2b19bd9ac2d1e6"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-normal.toktx.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-roughness.ktx.validate.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-roughness.ktx2",
+      "status": [
+        "??"
+      ],
+      "bytes": 87856,
+      "sha256": "d2164cd755366430adddcdffb47cedbca683d6e96a3cfaf5601411dc2120f92d"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-roughness.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 39331,
+      "sha256": "b78ab5024c34ed764bbf8708b7a110eb1e2984b26e027edd28ba9dd1233bb738"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/textures/proof-sandstone-roughness.toktx.txt",
+      "status": [
+        "??"
+      ],
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/tide-scar-hero.blend",
+      "status": [
+        "??"
+      ],
+      "bytes": 2449315,
+      "sha256": "f9022230b2f9a4f197d6c1b6cf9621b5289740407c1318ee9b2ee9654b6f65f9"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/tide-scar-hero.blend1",
+      "status": [
+        "??"
+      ],
+      "bytes": 2496123,
+      "sha256": "00a12a28497545e5e7b87f01f41996cee319ef7b907fff680e870c31dc76e46e"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/tide-scar-hero.meshopt.glb",
+      "status": [
+        "??"
+      ],
+      "bytes": 416812,
+      "sha256": "cbbf261f2c204c7a3acb176086dddc2baaff43a3413808d89e9c822adc9a9703"
+    },
+    {
+      "path": "docs/workstreams/temple-tr3/asset-proof/tide-scar-hero.unoptimized.glb",
+      "status": [
+        "??"
+      ],
+      "bytes": 2889112,
+      "sha256": "5a59fb36d116e63187941598ee3f921b0d4a058a64f4993fdec50b49ed5c82cb"
+    },
+    {
+      "path": "docs/workstreams/temple-visual-review/THREAD_LOG.md",
+      "status": [
+        "??"
+      ],
+      "bytes": 2895,
+      "sha256": "3a1d5cf06c5326d2bf5cef9660ed2080281c5198abe9983d9038f4e8b116ce4a"
+    },
+    {
+      "path": "scripts/capture-temple-evidence.mjs",
+      "status": [
+        " M"
+      ],
+      "bytes": 41364,
+      "sha256": "a9f4a1f917110e0724ea89892e27d1fc09a5be0d981d221992d492a5dc0a1848"
+    },
+    {
+      "path": "src/App.tsx",
+      "status": [
+        " M"
+      ],
+      "bytes": 11954,
+      "sha256": "7b8c7422d10328e0aa28659cc21ef1fd953c1e70f40f39430445f92b123b6a29"
+    },
+    {
+      "path": "src/assets/tide-scar-d4/manifest.json",
+      "status": [
+        "??"
+      ],
+      "bytes": 1936,
+      "sha256": "b41130f68c29f7748a639d7248cda422e909049bfaac5faf37232b83768cf92c"
+    },
+    {
+      "path": "src/assets/tide-scar-d4/tide-basalt-base-1024.webp",
+      "status": [
+        "??"
+      ],
+      "bytes": 81808,
+      "sha256": "2369e446c2356e638e05fe327b8fafa6ccab147ac3dfca572f4515177019a704"
+    },
+    {
+      "path": "src/assets/tide-scar-d4/tide-basalt-base-mobile-512.webp",
+      "status": [
+        "??"
+      ],
+      "bytes": 3696,
+      "sha256": "3c9fb25dcd0372001c723deb8b2a5cbf47cb92c9f4560f662494d5f541dab1c0"
+    },
+    {
+      "path": "src/assets/tide-scar-d4/tide-coral-mask-512.png",
+      "status": [
+        "??"
+      ],
+      "bytes": 7995,
+      "sha256": "12390b045165e609cb6990fc365ffedfd3b53012e780222943547c6d3c255b7f"
+    },
+    {
+      "path": "src/assets/tide-scar-d4/tide-distant-canyon-2048x1024.webp",
+      "status": [
+        "??"
+      ],
+      "bytes": 23312,
+      "sha256": "319108622d5e4eb03dd1a77baa6d689d3c8fbb36fc556e69667b353b0538fe0b"
+    },
+    {
+      "path": "src/assets/tide-scar-d4/tide-distant-canyon-mobile-1024x512.webp",
+      "status": [
+        "??"
+      ],
+      "bytes": 7726,
+      "sha256": "42d279146d55084f733736d7ff44ad45cadc040111f5111092453469c7ef3ae9"
+    },
+    {
+      "path": "src/assets/tide-scar-d4/tide-sandstone-base-1024.webp",
+      "status": [
+        "??"
+      ],
+      "bytes": 323058,
+      "sha256": "55d83ccede95aaf4a25599cf21485e0ccdb18952a53a86db977838bc6126115f"
+    },
+    {
+      "path": "src/assets/tide-scar-d4/tide-sandstone-base-mobile-512.webp",
+      "status": [
+        "??"
+      ],
+      "bytes": 43608,
+      "sha256": "2783edb30e2837aa2c91f562254658b00d5d638248c2781144737cf2b6fb1a01"
+    },
+    {
+      "path": "src/game/render/WorldRenderer.test.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 7401,
+      "sha256": "ae5412f1c628644c197296dc15b4bf8da035be51ee36ee4b5868c3747ab1fa58"
+    },
+    {
+      "path": "src/game/render/WorldRenderer.ts",
+      "status": [
+        " M"
+      ],
+      "bytes": 62819,
+      "sha256": "54d99d4175b05a6e4f2399fc87df599c4534eb8d76e4fe82ea219c0b8512bf83"
+    },
+    {
+      "path": "src/game/render/d4Assets.test.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 1997,
+      "sha256": "add111d5fcf803801a517356616fc3f0a57c1e759fb1c20c8b9ea9f64cd0bbdc"
+    },
+    {
+      "path": "src/game/render/d4Assets.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 5982,
+      "sha256": "95610c63eef19501cb0664e375c09d0f91b04ac953b363f283891efdde1b455e"
+    },
+    {
+      "path": "src/game/render/d4Profile.test.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 1311,
+      "sha256": "158f94433e6a3b60ce797527f0381b7472b52f6395b8d345e400e13b2db18ce7"
+    },
+    {
+      "path": "src/game/render/d4Profile.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 1949,
+      "sha256": "869ee4fb6059494932fbca55e9909644680160081385ca37e5cc952425c7c63f"
+    },
+    {
+      "path": "src/game/render/pursuerRig.test.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 1802,
+      "sha256": "0946b19201ee15422a4d583de744c17908485455b8cf4f187595f121fcd5f9ad"
+    },
+    {
+      "path": "src/game/render/pursuerRig.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 7015,
+      "sha256": "6770b80611ce11fc20a81f10ead4a7cdfcbc220b02b59ecfaba58cabded59260"
+    },
+    {
+      "path": "src/game/render/runnerRig.test.ts",
+      "status": [
+        " M"
+      ],
+      "bytes": 4113,
+      "sha256": "d112306e88fcb38540792e7b914c58ef90d22ff4d8b1b775b4f0438ce4659b58"
+    },
+    {
+      "path": "src/game/render/runnerRig.ts",
+      "status": [
+        " M"
+      ],
+      "bytes": 15964,
+      "sha256": "83f05ff07add62a15060401027fc64f9bf86403295d87db9ab3a236b252d448b"
+    },
+    {
+      "path": "src/game/render/theme.ts",
+      "status": [
+        " M"
+      ],
+      "bytes": 685,
+      "sha256": "65bc2fbb75e3d02c19d6a6c8848ee4e7024d223cfed3f80e8a677c51d954a104"
+    },
+    {
+      "path": "src/game/render/tideScarRoad.test.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 1988,
+      "sha256": "0108087e489bbae813dba1d0613eb81f12fd7af1d70f05f8b0c4c4b382335d70"
+    },
+    {
+      "path": "src/game/render/tideScarRoad.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 9075,
+      "sha256": "5ece6b08ddb3f81c1c3cfc1528ecbd2c2db65f9bae395ff290b09f9e06cfb903"
+    },
+    {
+      "path": "src/game/render/tideScarWorld.test.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 896,
+      "sha256": "a3371ba107db34167ec7f3bc418fe966bc620d334652d9200db31b6a15cda6c2"
+    },
+    {
+      "path": "src/game/render/tideScarWorld.ts",
+      "status": [
+        "??"
+      ],
+      "bytes": 6431,
+      "sha256": "8a0bd5d1fec4639601ec594dd0b5f415644fd01304973334836cfb16ac4049a7"
+    },
+    {
+      "path": "src/styles.css",
+      "status": [
+        " M"
+      ],
+      "bytes": 14993,
+      "sha256": "cb0ea4f6a9f35a5d8e38d34794e21d224ce2e5662f9139eafe598df10e1fb3d8"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/__pycache__/evaluate_asset_proof_a2.cpython-312.pyc",
+      "status": [
+        "??"
+      ],
+      "bytes": 6454,
+      "sha256": "cdf913fcfd7356719ca719605a7382d952516e07f61fdeb7095d5106537d7212"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/__pycache__/generate_tide_scar_hero_a2.cpython-312.pyc",
+      "status": [
+        "??"
+      ],
+      "bytes": 56232,
+      "sha256": "9e4aabd0afd80e67b9b3b9414c5fb6eceb0461da951591bb3d48ccc03bc0594a"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/__pycache__/run_asset_proof_a2.cpython-312.pyc",
+      "status": [
+        "??"
+      ],
+      "bytes": 10967,
+      "sha256": "93be77ed0f904cad87975be265b6cfaa084a17ff8d055ee6407ca8ad73a24ede"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/evaluate_asset_proof.py",
+      "status": [
+        "??"
+      ],
+      "bytes": 4993,
+      "sha256": "af526b131831407d86572f454adbc8cfe94ae0d77acf497286b3870745ba0389"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/evaluate_asset_proof_a2.py",
+      "status": [
+        "??"
+      ],
+      "bytes": 3951,
+      "sha256": "f8f889ce86e3f176f9ef4ecd20500ceee82fa3ec0a2b784bfaf0fef1e1eb9e51"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/evaluate_asset_proof_a3.py",
+      "status": [
+        "??"
+      ],
+      "bytes": 5361,
+      "sha256": "3c01c5893b947d2bfc2da2e3a9e2cca79a22f065e42ceb5660bf060e00f1120a"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/generate_tide_scar_hero.py",
+      "status": [
+        "??"
+      ],
+      "bytes": 35595,
+      "sha256": "ea469e687d17e7f383b2900382a0c0772e006786868ba1369b0412d92f3f10ee"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/generate_tide_scar_hero_a2.py",
+      "status": [
+        "??"
+      ],
+      "bytes": 35882,
+      "sha256": "482fb778f3cfbec1d6efe3782dba3cd98b26d9cc7c657a0c47d6279d06068e3e"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/generate_tide_scar_hero_a3.py",
+      "status": [
+        "??"
+      ],
+      "bytes": 28552,
+      "sha256": "22a40d2a7227a08c26d85d6496df85ce64ce9de6763caf898d84bfbd683967cc"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/run_asset_proof.py",
+      "status": [
+        "??"
+      ],
+      "bytes": 8206,
+      "sha256": "378fa2d2e170bb4cca72b6340312e2b9b03e16aeed17ccee88c036c76dabc952"
+    },
+    {
+      "path": "tools/temple-asset-pipeline/run_asset_proof_a2.py",
+      "status": [
+        "??"
+      ],
+      "bytes": 6701,
+      "sha256": "fe4dd57195f9ebc50109b80649a3cabf9b5a21653822cdb58f33ea2eabebb33b"
+    }
+  ]
+}
