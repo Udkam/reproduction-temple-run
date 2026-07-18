@@ -153,3 +153,17 @@ GATES static frozen-portrait projection only; old center X=.8817599105873106-1.0
 EVIDENCE immutable diagnostic-006 portrait view/projection matrices; exact C7-D3 actual-world loop controls; world inner edge X=2.957m > safety bound 2.92m
 BLOCKER C7-D3 lacks independent READY_FOR_DIAGNOSTIC_007_LOOP_CONTRACT and C7-D4 coordinator reauthorization; generator may not be staged or expanded
 NEXT commit this docs-only review request, obtain independent read-only review of the exact SHA, then either correct P0/P1 or record separate C7-D4 reauthorization
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 C7-D4-SOURCE-REAUTHORIZED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T17:25:05+08:00
+BASE d66e1a58e865e694d8b8cbace32b2bec732f6e77
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 C7-D3-LOOP-CONTRACT-REVIEW-REQUESTED
+HEAD pending C7-D4 docs-only authorization checkpoint
+CANDIDATE none
+WRITE_SCOPE C7-T1 exact generator; then C7-T2 exact runner/evaluator; no process launch before both commits and dry preflight
+DIRTY uncommitted C7-T1 generator WIP plus five declared never-stage backup/cache paths; staged zero before C7-D4
+GATES /root/c7_contract_review_2 independently reproduced old/new center and full-tube bounds, world inner edge 2.957m, exact 13-point active-doc equality, identity transforms, unchanged camera/output gates, and suspended lifecycle; P0 none; P1 none
+EVIDENCE exact reviewed C7-D3 SHA d66e1a58e865e694d8b8cbace32b2bec732f6e77; READY_FOR_DIAGNOSTIC_007_LOOP_CONTRACT
+BLOCKER C7-T1 and C7-T2 source checkpoints plus non-writing dry preflight do not yet exist; Blender remains blocked
+NEXT asset writer corrects only the existing C7-T1 generator WIP to the accepted world loop and independent source-review findings, runs static checks, appends asset THREAD_LOG, and commits exact generator path

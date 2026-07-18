@@ -1,6 +1,6 @@
 # TEMPLE-TR4 executable preflight and diagnostic schema
 
-This file is the immutable C1 baseline first made normative for diagnostic `001`. Later diagnostic authorizations inherit every unchanged closed field and state their exact schema/ID/root/value deltas. C5 and C6 are frozen `DIAGNOSTIC_BLOCKED`; `DIAGNOSTIC_006_AUTHORIZATION.md` is the consumed historical overlay that governed the immutable 27-file C6 result. `DIAGNOSTIC_007_AUTHORIZATION.md` is the active schema-version-7 overlay. Its earlier readiness at `614d280` is superseded only for the exact Tide Scar near-loop coordinates while C7-D3 receives fresh independent review; C7-T1/T2 checkpoint authority and `READY_FOR_BLENDER` remain inactive until separate C7-D4 reauthorization, committed source hashes, and a green non-writing dry preflight.
+This file is the immutable C1 baseline first made normative for diagnostic `001`. Later diagnostic authorizations inherit every unchanged closed field and state their exact schema/ID/root/value deltas. C5 and C6 are frozen `DIAGNOSTIC_BLOCKED`; `DIAGNOSTIC_006_AUTHORIZATION.md` is the consumed historical overlay that governed the immutable 27-file C6 result. `DIAGNOSTIC_007_AUTHORIZATION.md` is the active schema-version-7 overlay. Exact C7-D3 correction `d66e1a5` received independent `READY_FOR_DIAGNOSTIC_007_LOOP_CONTRACT`; C7-D4 restores C7-T1/T2 source-checkpoint authority. `READY_FOR_BLENDER` remains inactive until committed source hashes and a green non-writing dry preflight.
 
 ## Canonical JSON
 
