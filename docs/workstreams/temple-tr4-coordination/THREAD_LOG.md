@@ -279,3 +279,17 @@ GATES independent review P0 none; P1 unique token absent; P1 evidence schema des
 EVIDENCE exact reviewed SHA 733f4d1; corrected complete labelled token; two Draft 2020-12 JSON Schemas; exact stage closures; contract/input/schema/runner/generator/Blender hashes
 BLOCKER corrected contract lacks fresh READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT and separate source authorization; Blender/process/diagnostic-008 blocked
 NEXT commit corrected docs/schema-only review request and obtain a fresh independent read-only verdict before any source edit
+
+REPORT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-BLOCKED-REVIEW-002-CORRECTED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T21:15:00+08:00
+BASE bf4cda5586bc88af3d1a366211c9b67f98240b2d
+PARENT TEMPLE-TR4 MATERIAL-SOCKET-PROBE-001 CONTRACT-BLOCKED-REVIEW-001-CORRECTED
+HEAD pending second corrected schema review-request checkpoint
+CANDIDATE none
+WRITE_SCOPE probe contract/evidence-schema/status-schema/log plus CURRENT_TASK.md, acceptance, coordination progress/log
+DIRTY five declared never-stage backup/cache paths; staged zero before correction
+GATES independent review P0 none; P1 tuple file objects underconstrained; P1 value types and unique target nulls underconstrained; P1 OS launch failure unrepresentable; P2 none; verdict CONTRACT_BLOCKED
+EVIDENCE full tuple item refs and items:false; exact default-value JSON type branches; non-null unique target evidence; new launch stage with null return/render counts
+BLOCKER corrected schema lacks fresh READY_FOR_MATERIAL_SOCKET_PROBE_001_CONTRACT and separate source authorization; Blender/process/diagnostic-008 blocked
+NEXT commit corrected docs/schema-only review request and obtain another fresh independent read-only verdict before source

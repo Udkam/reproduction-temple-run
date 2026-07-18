@@ -106,7 +106,10 @@ Target dispositions are exact: count zero uses `ABSENT`; count greater than one 
 `NO_DEFAULT_VALUE`; only a unique socket with `default_value` may set
 `assignmentAttempted/assignmentSucceeded/matchesRequested` true. The two JSON Schemas
 close every corresponding null, boolean, and error field. Socket records use
-`defaultValueType: NONE` plus null only when `supportsDefaultValue` is false.
+`defaultValueType: NONE` plus null only when `supportsDefaultValue` is false; every other
+type label is bound to the matching scalar or homogeneous array JSON type. A unique target
+always records non-null enabled/hidden/linked booleans and, when `default_value` exists,
+non-null before/after values.
 
 Comparable values are null, booleans, strings, finite JSON numbers, or flat arrays of
 those scalar types. Negative zero normalizes to zero; tuples and Blender arrays normalize
@@ -121,6 +124,9 @@ missing `default_value` uses null values exactly as permitted by the schema.
 The terminal directory has zero subdirectories. After every prelaunch validation passes,
 the runner creates it once. The only permitted stage closures are:
 
+- `launch` + `PROBE_BLOCKED`: exactly `probe-input.json`, `blender.log`, and
+  `probe-status.json`; an OS/process-start exception is recorded in the log, Blender
+  return code and render count are null, and no child process was established;
 - `blender` + `PROBE_BLOCKED`: exactly `probe-input.json`, `blender.log`, and
   `probe-status.json`; the generator writes no schema on a nonzero exit;
 - `schema-validation` + `PROBE_BLOCKED`: exactly all four files below after Blender exits
@@ -141,7 +147,7 @@ are:
 schema, status schema, runner, generator, and Blender executable SHA-256 values; Blender
 return code; render count; stage/verdict/reason; and exact ordered sibling hashes/sizes.
 The sibling list excludes the terminal status itself to avoid a circular self-hash and is
-exactly `[probe-input.json, blender.log]` at `blender`, or
+exactly `[probe-input.json, blender.log]` at `launch` or `blender`, or
 `[probe-input.json, material-socket-schema.json, blender.log]` at the other two stages.
 The evidence schema repeats all seven provenance hashes except its own terminal status
 file. The runner rejects any extra file, directory, reparse point, output

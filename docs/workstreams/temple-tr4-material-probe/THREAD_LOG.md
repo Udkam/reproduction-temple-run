@@ -26,3 +26,16 @@
   stage-to-file closures; and contract/input/schema/runner/generator/Blender hashes.
 - Source, Blender, diagnostic-008, render/evaluator/export, runtime, browser, tests/build,
   staging, push, and visual acceptance remain blocked pending a fresh independent review.
+
+## 2026-07-18 contract review 002 blocked and closure correction
+
+- Independent review of exact commit `bf4cda5` found no P0/P2 and three remaining P1
+  gaps: tuple branches did not fully close sibling file objects, value-type labels and
+  successful target non-null fields were underconstrained, and an OS launch failure had
+  no schema-valid terminal stage. Verdict: `CONTRACT_BLOCKED`.
+- The corrected status schema uses full file-schema references plus `items:false` in every
+  tuple branch and adds exact `launch` failure semantics. The evidence schema binds every
+  value-type label to its JSON type and requires real booleans/non-null before/after for
+  unique writable targets.
+- Source, Blender, diagnostic-008, render/evaluator/export, runtime, browser, tests/build,
+  staging, push, and visual acceptance remain blocked pending another fresh review.
