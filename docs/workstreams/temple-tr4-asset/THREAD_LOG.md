@@ -409,6 +409,25 @@ or runtime action followed.
   bounded runner-only commit are required before one fresh non-writing dry preflight.
   Blender remains blocked.
 
+## 2026-07-18 C7-T2F canonical object key-set correction
+
+- Source checkpoint `de625c6` changes exactly
+  `tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py`. The runner now compares
+  dictionary keys as exact sorted sets instead of treating canonical JSON key order as
+  authored insertion order. Runner SHA-256 is
+  `7a0069e427d59a56fe7639a63cfa6640b99b68b84be65a52d03913e53bd83e25`;
+  Git blob SHA-1 is `26c5b1bcdd38e8aed480d275a6afd02e8a117d22`.
+- Recursive value and type equality, list order, canonical-byte equality, unknown-key
+  rejection, missing-key rejection, all construction/hash/schema gates, the two-process
+  ceiling, and no-retry behavior remain unchanged. An isolated AST-extracted positive
+  reordered-object comparison passed; injected unknown and missing keys and reordered
+  list values each fail closed. UTF-8 AST parsing and `git diff --check` passed.
+- Independent source review found no P0/P1/P2 and returned `SOURCE_READY`. No Blender,
+  evaluator, diagnostic directory, render, export, runtime, browser, project test,
+  build, push, or unrelated file action occurred. Exactly one fresh non-writing dry
+  preflight is now permitted by the existing C7-T2F authorization; Blender remains
+  blocked unless it returns `READY_FOR_BLENDER`.
+
 ## 2026-07-16 diagnostic-006 terminal result
 
 Verdict: **DIAGNOSTIC_BLOCKED** at stage `render-set`. After coordinator review of the
