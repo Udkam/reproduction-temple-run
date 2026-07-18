@@ -1,6 +1,5 @@
 import {
   ACESFilmicToneMapping,
-  AdditiveBlending,
   AmbientLight,
   BoxGeometry,
   BufferGeometry,
@@ -25,12 +24,14 @@ import {
   PlaneGeometry,
   Points,
   PointsMaterial,
+  PCFShadowMap,
   RingGeometry,
   Scene,
   SRGBColorSpace,
   TorusGeometry,
   Vector3,
   Vector2,
+  Vector4,
   WebGLRenderer,
 } from 'three';
 import {
@@ -47,7 +48,12 @@ import {
   type RunnerState,
   type TurnDirection,
 } from '../core';
-import { createRunnerRig, updateRunnerRig, type RunnerRig } from './runnerRig';
+import { PURSUER_RIG_BOUNDS, createPursuerRig, updatePursuerRig, type PursuerRig } from './pursuerRig';
+import { RUNNER_RIG_BOUNDS, createRunnerRig, updateRunnerRig, type RunnerRig } from './runnerRig';
+import { TideScarWorld } from './tideScarWorld';
+import { d4MinimumPursuerGapPx, d4ProfileForViewport, type D4Profile } from './d4Profile';
+import { loadD4Assets, selectD4Assets, type D4LoadedAssets } from './d4Assets';
+import { TideScarRoad, type TideScarRoadSnapshot, type TideScarWorldSegment } from './tideScarRoad';
 import { PALETTE, WORLD_METRICS } from './theme';
 import { turnLaneOffset } from './turnPresentation';
 
@@ -72,6 +78,15 @@ export interface HazardScreenBounds {
   bounds: ClippedScreenBounds;
 }
 
+export interface TideScarScreenSegment {
+  sectionId: string;
+  intervalIndex: number;
+  segmentIndex: number;
+  polygonCss: readonly { x: number; y: number }[];
+  pixelBounds: { left: number; top: number; right: number; bottom: number };
+  visibleAreaPx: number;
+}
+
 export interface RenderSnapshot {
   canvas: { width: number; height: number; resolution: number };
   options: RenderOptions;
@@ -79,10 +94,13 @@ export interface RenderSnapshot {
   presentedDistance: number;
   presentedLanePosition: number;
   runnerWorld: { x: number; y: number; z: number; yaw: number };
-  runnerScreen: { x: number; y: number; visible: boolean };
+  runnerScreen: { x: number; y: number; visible: boolean; bounds?: ClippedScreenBounds | null };
   pursuerScreen: { x: number; y: number; visible: boolean; bounds: ClippedScreenBounds | null };
+  /** Positive vertical separation between courier and pursuer in non-capture frames. */
+  pursuerGapPx?: number | null;
   /** Clipped CSS-pixel geometry for every visible unresolved hazard. */
   hazardScreens: HazardScreenBounds[];
+  tideScarSegments?: readonly TideScarScreenSegment[];
   camera: { x: number; y: number; z: number; fov: number; yaw: number };
   lanePosition: number;
   posture: 'run' | 'jump' | 'slide';
@@ -92,6 +110,23 @@ export interface RenderSnapshot {
   triangles: number;
   turnProgress: number | null;
   contextLossCount: number;
+  d4?: {
+    profile: 'desktop' | 'portrait' | 'landscape';
+    fogDensity: number;
+    assetTier: 'desktop' | 'mobile' | 'fallback' | 'loading';
+    requestedAssets: readonly string[];
+    textureBytes: number;
+    tideScarVertices: number;
+    tideScarCoverage: number;
+    pursuerPlacementError: string | null;
+    composition: {
+      pitchDegrees: number;
+      horizonY: number;
+      vanishingPoint: { x: number; y: number };
+      bottomRoadWidth: number;
+      runnerCenterY: number;
+    };
+  };
 }
 
 interface TurnMotion {
@@ -113,6 +148,8 @@ const MAX_SECTIONS = 8;
 const MAX_RAILS = MAX_SECTIONS * 2;
 const MAX_PILLARS = MAX_SECTIONS * 6;
 const MAX_ROCKS = MAX_SECTIONS * 8;
+const MAX_CORAL = MAX_SECTIONS * 4;
+const MAX_CLIFF_APRONS = MAX_SECTIONS * 2;
 const MAX_EVENTS = 96;
 const MAX_SHARDS = 160;
 const TURN_VISUAL_RADIUS = 1.45;
@@ -158,6 +195,356 @@ function seededUnit(index: number, salt: number): number {
   return (value >>> 0) / 0xffffffff;
 }
 
+export function createDeckCapGeometry(profile: number): BufferGeometry {
+  const inset = 0.04 + profile * 0.012;
+  const skew = (profile % 2 === 0 ? 1 : -1) * (0.018 + profile * 0.009);
+  const top = [
+    -0.5 + inset, 0, -0.5,
+    0.5 - inset * 0.45, 0.018, -0.5,
+    0.5 - inset, 0.012, 0.5,
+    -0.5 + inset * 0.65, 0.006, 0.5,
+  ];
+  const bottom = [
+    -0.5 + inset * 0.7 + skew, -0.72, -0.5 + inset * 0.8,
+    0.5 - inset * 0.8 + skew, -0.64, -0.5 + inset,
+    0.5 - inset * 0.65 + skew, -0.72, 0.5 - inset * 0.7,
+    -0.5 + inset * 0.9 + skew, -0.65, 0.5 - inset,
+  ];
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new Float32BufferAttribute([...top, ...bottom], 3));
+  geometry.setIndex([
+    0, 1, 2, 0, 2, 3,
+    7, 6, 5, 7, 5, 4,
+    0, 4, 5, 0, 5, 1,
+    1, 5, 6, 1, 6, 2,
+    2, 6, 7, 2, 7, 3,
+    3, 7, 4, 3, 4, 0,
+  ]);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function worldMappedMaterial(
+  parameters: ConstructorParameters<typeof MeshStandardMaterial>[0],
+  texelMeters: number,
+): MeshStandardMaterial {
+  const material = new MeshStandardMaterial(parameters);
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = `varying vec3 tideWorldPosition;\n${shader.vertexShader}`.replace(
+      '#include <worldpos_vertex>',
+      '#include <worldpos_vertex>\n  tideWorldPosition = worldPosition.xyz;',
+    );
+    shader.fragmentShader = `varying vec3 tideWorldPosition;\n${shader.fragmentShader}`.replace(
+      '#include <map_fragment>',
+      `#ifdef USE_MAP
+        vec2 tideWorldUv = fract(tideWorldPosition.xz / ${texelMeters.toFixed(3)});
+        vec4 sampledDiffuseColor = texture2D( map, tideWorldUv );
+        diffuseColor *= sampledDiffuseColor;
+      #endif`,
+    );
+  };
+  material.customProgramCacheKey = () => `tide-world-map-${texelMeters}`;
+  return material;
+}
+
+export interface RigDimensions {
+  width: number;
+  height: number;
+  depth: number;
+}
+
+/**
+ * Rigs are positioned from their feet/ground root. Keep screen evidence above
+ * that root instead of projecting a symmetric box through the road surface.
+ */
+export function groundAnchoredBounds(root: Vector3, dimensions: RigDimensions, scale = 1): {
+  center: Vector3;
+  halfExtent: Vector3;
+} {
+  const width = dimensions.width * scale;
+  const height = dimensions.height * scale;
+  const depth = dimensions.depth * scale;
+  return {
+    center: root.clone().add(new Vector3(0, height / 2, 0)),
+    halfExtent: new Vector3(width / 2, height / 2, depth / 2),
+  };
+}
+
+export function pursuerScreenGapPx(
+  runnerBounds: ClippedScreenBounds | null,
+  pursuerBounds: ClippedScreenBounds | null,
+  captured: boolean,
+): number | null {
+  if (captured || !runnerBounds || !pursuerBounds) return null;
+  return pursuerBounds.top - runnerBounds.bottom;
+}
+
+export function projectOrientedBounds(
+  camera: PerspectiveCamera,
+  center: Vector3,
+  halfExtent: Vector3,
+  width: number,
+  height: number,
+  yaw: number,
+): ClippedScreenBounds | null {
+  const points: Vector3[] = [];
+  const cosine = Math.cos(yaw);
+  const sine = Math.sin(yaw);
+  for (const x of [-halfExtent.x, halfExtent.x]) {
+    for (const y of [-halfExtent.y, halfExtent.y]) {
+      for (const z of [-halfExtent.z, halfExtent.z]) {
+        points.push(new Vector3(
+          center.x + x * cosine + z * sine,
+          center.y + y,
+          center.z - x * sine + z * cosine,
+        ));
+      }
+    }
+  }
+  const projected = points.map((point) => point.project(camera));
+  if (!projected.some((point) => point.z >= -1 && point.z <= 1)) return null;
+  const left = Math.max(0, Math.min(...projected.map((point) => (point.x * 0.5 + 0.5) * width)));
+  const right = Math.min(width, Math.max(...projected.map((point) => (point.x * 0.5 + 0.5) * width)));
+  const top = Math.max(0, Math.min(...projected.map((point) => (-point.y * 0.5 + 0.5) * height)));
+  const bottom = Math.min(height, Math.max(...projected.map((point) => (-point.y * 0.5 + 0.5) * height)));
+  const clippedWidth = Math.max(0, right - left);
+  const clippedHeight = Math.max(0, bottom - top);
+  const area = clippedWidth * clippedHeight;
+  return area > 0 ? { left, top, right, bottom, width: clippedWidth, height: clippedHeight, area } : null;
+}
+
+function polygonArea(points: readonly { x: number; y: number }[]): number {
+  if (points.length < 3) return 0;
+  let area = 0;
+  for (let index = 0; index < points.length; index += 1) {
+    const current = points[index]!;
+    const next = points[(index + 1) % points.length]!;
+    area += current.x * next.y - next.x * current.y;
+  }
+  return Math.abs(area) / 2;
+}
+
+function clipHomogeneousPolygon(
+  polygon: readonly Vector4[],
+  distance: (point: Vector4) => number,
+): Vector4[] {
+  if (polygon.length === 0) return [];
+  const output: Vector4[] = [];
+  let previous = polygon.at(-1)!;
+  let previousDistance = distance(previous);
+  for (const current of polygon) {
+    const currentDistance = distance(current);
+    const previousInside = previousDistance >= 0;
+    const currentInside = currentDistance >= 0;
+    if (previousInside !== currentInside) {
+      const ratio = previousDistance / (previousDistance - currentDistance);
+      output.push(previous.clone().lerp(current, ratio));
+    }
+    if (currentInside) output.push(current.clone());
+    previous = current;
+    previousDistance = currentDistance;
+  }
+  return output;
+}
+
+/** Projects one real Tide Scar quad through full clip-space/frustum clipping. */
+export function projectTideScarSegment(
+  camera: PerspectiveCamera,
+  segment: TideScarWorldSegment,
+  width: number,
+  height: number,
+  pixelRatio: number,
+): TideScarScreenSegment | null {
+  let polygon = segment.points.map((point) => new Vector4(point.x, point.y, point.z, 1)
+    .applyMatrix4(camera.matrixWorldInverse)
+    .applyMatrix4(camera.projectionMatrix));
+  const planes = [
+    (point: Vector4) => point.x + point.w,
+    (point: Vector4) => point.w - point.x,
+    (point: Vector4) => point.y + point.w,
+    (point: Vector4) => point.w - point.y,
+    (point: Vector4) => point.z + point.w,
+    (point: Vector4) => point.w - point.z,
+  ];
+  for (const plane of planes) polygon = clipHomogeneousPolygon(polygon, plane);
+  if (polygon.length < 3) return null;
+  const polygonCss = polygon.map((point) => ({
+    x: MathUtils.clamp((point.x / point.w * 0.5 + 0.5) * width, 0, width),
+    y: MathUtils.clamp((-point.y / point.w * 0.5 + 0.5) * height, 0, height),
+  }));
+  const visibleAreaPx = polygonArea(polygonCss);
+  if (visibleAreaPx <= 0) return null;
+  return {
+    sectionId: segment.sectionId,
+    intervalIndex: segment.intervalIndex,
+    segmentIndex: segment.segmentIndex,
+    polygonCss,
+    pixelBounds: {
+      left: Math.floor(Math.min(...polygonCss.map((point) => point.x)) * pixelRatio),
+      top: Math.floor(Math.min(...polygonCss.map((point) => point.y)) * pixelRatio),
+      right: Math.ceil(Math.max(...polygonCss.map((point) => point.x)) * pixelRatio),
+      bottom: Math.ceil(Math.max(...polygonCss.map((point) => point.y)) * pixelRatio),
+    },
+    visibleAreaPx,
+  };
+}
+
+export interface D4CompositionMeasurement {
+  pitchDegrees: number;
+  horizonY: number;
+  vanishingPoint: { x: number; y: number };
+  bottomRoadWidth: number;
+}
+
+function panoramaHorizonHeight(profile: D4Profile): number {
+  return profile.name === 'portrait' ? -67 : profile.name === 'landscape' ? -36 : -49;
+}
+
+export function applyD4LensShift(camera: PerspectiveCamera, profile: D4Profile): void {
+  camera.projectionMatrix.elements[9] = profile.lensShiftY;
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+}
+
+function screenPoint(camera: PerspectiveCamera, point: Vector3, width: number, height: number): { x: number; y: number } {
+  const projected = point.clone().project(camera);
+  return { x: (projected.x * 0.5 + 0.5) * width, y: (-projected.y * 0.5 + 0.5) * height };
+}
+
+function intersectScreenBottom(points: readonly { x: number; y: number }[], height: number): number | null {
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1]!;
+    const current = points[index]!;
+    const previousOffset = previous.y - height;
+    const currentOffset = current.y - height;
+    if (previousOffset === 0) return previous.x;
+    if (previousOffset * currentOffset > 0) continue;
+    const fraction = previousOffset / (previousOffset - currentOffset);
+    return MathUtils.lerp(previous.x, current.x, fraction);
+  }
+  return null;
+}
+
+/** Renderer-only camera evidence for the frozen D4 profile bands. */
+export function measureD4Composition(
+  camera: PerspectiveCamera,
+  runnerPosition: Vector3,
+  yaw: number,
+  width: number,
+  height: number,
+  profile: D4Profile,
+): D4CompositionMeasurement {
+  const direction = camera.getWorldDirection(new Vector3());
+  const pitchDegrees = Math.atan2(-direction.y, Math.hypot(direction.x, direction.z)) * 180 / Math.PI;
+  const forward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+  const right = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+  const vanishingPoint = screenPoint(camera, runnerPosition.clone().addScaledVector(forward, 145).add(new Vector3(0, panoramaHorizonHeight(profile), 0)), width, height);
+  const leftRoad: { x: number; y: number }[] = [];
+  const rightRoad: { x: number; y: number }[] = [];
+  for (let distance = -2; distance <= 96; distance += 2) {
+    const center = runnerPosition.clone().addScaledVector(forward, distance);
+    leftRoad.push(screenPoint(camera, center.clone().addScaledVector(right, -WORLD_METRICS.roadWidth / 2), width, height));
+    rightRoad.push(screenPoint(camera, center.clone().addScaledVector(right, WORLD_METRICS.roadWidth / 2), width, height));
+  }
+  const left = intersectScreenBottom(leftRoad, height);
+  const rightEdge = intersectScreenBottom(rightRoad, height);
+  let closestRoadWidth = 0;
+  let closestRoadDistance = Number.POSITIVE_INFINITY;
+  for (let index = 0; index < leftRoad.length; index += 1) {
+    const roadY = (leftRoad[index]!.y + rightRoad[index]!.y) / 2;
+    const distance = Math.abs(roadY - height);
+    if (distance < closestRoadDistance) {
+      closestRoadDistance = distance;
+      closestRoadWidth = Math.abs(rightRoad[index]!.x - leftRoad[index]!.x);
+    }
+  }
+  return {
+    pitchDegrees,
+    horizonY: MathUtils.clamp(vanishingPoint.y, 0, height),
+    vanishingPoint: { x: MathUtils.clamp(vanishingPoint.x, 0, width), y: MathUtils.clamp(vanishingPoint.y, 0, height) },
+    bottomRoadWidth: left === null || rightEdge === null ? closestRoadWidth : Math.abs(rightEdge - left),
+  };
+}
+
+export interface PursuerProjectionCandidate {
+  worldGap: number;
+  scale: number;
+  bounds: ClippedScreenBounds;
+  screenGapPx: number;
+}
+
+/**
+ * Presentation-only search over grounded positions. It intentionally derives
+ * the final placement from the same rig extent and camera projection that QA
+ * reports, so a missing candidate is observable rather than a hidden fallback.
+ */
+export function selectPursuerProjection(
+  camera: PerspectiveCamera,
+  viewport: { width: number; height: number },
+  profile: D4Profile,
+  runnerPosition: Vector3,
+  yaw: number,
+  chaseGap: number,
+  scale: number,
+): PursuerProjectionCandidate | null {
+  const runner = groundAnchoredBounds(runnerPosition, RUNNER_RIG_BOUNDS);
+  const runnerBounds = projectOrientedBounds(camera, runner.center, runner.halfExtent, viewport.width, viewport.height, yaw);
+  if (!runnerBounds) return null;
+  const normalized = MathUtils.clamp((chaseGap - 0.65) / 7.35, 0, 1);
+  const targetTop = viewport.height * MathUtils.lerp(profile.pursuerCloseTopBand, profile.pursuerNormalTopBand, normalized);
+  const minimumGap = d4MinimumPursuerGapPx(viewport.height);
+  const forward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+  let selected: PursuerProjectionCandidate | null = null;
+  let bestScore = Number.POSITIVE_INFINITY;
+  const bottomInset = Math.max(4, Math.round(viewport.height * 0.012));
+  const profileScales = profile.mobileQuality
+    ? [Math.min(scale, 0.8), 0.7, 0.62, 0.55]
+    : [scale, 0.82, 0.7, 0.62];
+  for (const candidateScale of [...new Set(profileScales)]) {
+    for (let index = 0; index <= 80; index += 1) {
+      const worldGap = 0.45 + index * 0.15;
+      const root = runnerPosition.clone().addScaledVector(forward, -worldGap).add(new Vector3(0, 0.03, 0));
+      const rig = groundAnchoredBounds(root, PURSUER_RIG_BOUNDS, candidateScale);
+      const bounds = projectOrientedBounds(camera, rig.center, rig.halfExtent, viewport.width, viewport.height, yaw);
+      const screenGapPx = pursuerScreenGapPx(runnerBounds, bounds, false);
+      if (!bounds || screenGapPx === null || screenGapPx < minimumGap || bounds.bottom > viewport.height - bottomInset) continue;
+      const score = Math.abs(bounds.top - targetTop) + (scale - candidateScale) * viewport.height * 0.12;
+      if (score < bestScore) {
+        bestScore = score;
+        selected = { worldGap, scale: candidateScale, bounds, screenGapPx };
+      }
+    }
+  }
+  return selected;
+}
+
+export interface PursuerPresentation {
+  visibleGap: number;
+  scale: number;
+  danger: number;
+}
+
+/**
+ * Camera-only mapping for the grounded pursuer. Wide follow views have just a
+ * narrow lower-road strip after the runner, whereas portrait holds more road.
+ * Keep the root distance monotonic with canonical chaseGap in either view.
+ */
+export function pursuerPresentation(chaseGap: number, aspect: number, captured: boolean): PursuerPresentation {
+  const normalizedGap = MathUtils.clamp((chaseGap - 0.65) / 7.35, 0, 1);
+  const danger = MathUtils.clamp((4.5 - chaseGap) / 3.85, 0, 1);
+  if (captured) return { visibleGap: 0.76, scale: 0.88, danger };
+
+  const portrait = 1 - MathUtils.smoothstep(aspect, 0.5, 0.78);
+  const nearGap = MathUtils.lerp(3.58, 4.18, portrait);
+  const farGap = MathUtils.lerp(3.66, 5.1, portrait);
+  return {
+    visibleGap: MathUtils.lerp(nearGap, farGap, normalizedGap),
+    // A stable silhouette keeps the grounded, scale-aware screen bounds real
+    // in the shallow lower-road band without changing canonical chase distance.
+    scale: MathUtils.lerp(0.9, 0.92, danger),
+    danger,
+  };
+}
+
 export class WorldRenderer {
   private renderer: WebGLRenderer | null = null;
   private readonly scene = new Scene();
@@ -173,34 +560,38 @@ export class WorldRenderer {
   private readonly cameraLook = new Vector3();
   private readonly ocean = new Mesh(
     new PlaneGeometry(900, 900),
-    new MeshBasicMaterial({ color: PALETTE.soil }),
+    new MeshBasicMaterial({ color: PALETTE.tideDeep }),
   );
   private readonly horizon = new Mesh(
     new PlaneGeometry(360, 110),
     new MeshBasicMaterial({ color: PALETTE.mist, transparent: true, opacity: 0.34, side: DoubleSide, depthWrite: false }),
   );
-  private readonly floorMaterial = new MeshStandardMaterial({ color: PALETTE.basalt, roughness: 0.92, metalness: 0.02 });
-  private readonly railMaterial = new MeshStandardMaterial({ color: PALETTE.basaltEdge, roughness: 0.9, metalness: 0.02 });
-  private readonly seamMaterial = new MeshStandardMaterial({ color: PALETTE.signal, emissive: PALETTE.signal, emissiveIntensity: 0.32, roughness: 0.48 });
+  private readonly floorMaterial = worldMappedMaterial({ color: PALETTE.sandstone, roughness: 0.94, metalness: 0.01 }, 2.7);
+  private readonly railMaterial = worldMappedMaterial({ color: PALETTE.basaltEdge, roughness: 0.9, metalness: 0.02 }, 1.8);
+  private readonly seamMaterial = new MeshStandardMaterial({ color: PALETTE.tideScar, roughness: 0.92, metalness: 0 });
   private readonly guideMaterial = new MeshStandardMaterial({ color: PALETTE.brass, roughness: 0.76, metalness: 0.12 });
-  private readonly porcelainMaterial = new MeshStandardMaterial({ color: PALETTE.porcelain, roughness: 0.86, metalness: 0.02 });
-  private readonly rockMaterial = new MeshStandardMaterial({ color: PALETTE.foliage, roughness: 0.96, metalness: 0 });
-  private readonly beamMaterial = new MeshStandardMaterial({ color: 0x6d4938, roughness: 0.9, metalness: 0.01 });
-  private readonly gateMaterial = new MeshStandardMaterial({ color: 0x826f48, roughness: 0.78, metalness: 0.18 });
-  private readonly columnMaterial = new MeshStandardMaterial({ color: 0x8f8874, roughness: 0.94, metalness: 0.01 });
-  private readonly dangerMaterial = new MeshStandardMaterial({ color: PALETTE.hazard, emissive: 0x3a1009, emissiveIntensity: 0.18, roughness: 0.8 });
-  private readonly gapMaterial = new MeshStandardMaterial({ color: 0x18130f, roughness: 0.98 });
-  private readonly shardMaterial = new MeshStandardMaterial({ color: PALETTE.signal, emissive: PALETTE.signal, emissiveIntensity: 1.25, roughness: 0.28, metalness: 0.08 });
-  private readonly shieldMaterial = new MeshBasicMaterial({ color: PALETTE.signal, transparent: true, opacity: 0.72, wireframe: true });
+  private readonly porcelainMaterial = new MeshStandardMaterial({ color: PALETTE.sandstoneShade, roughness: 0.94, metalness: 0 });
+  private readonly rockMaterial = worldMappedMaterial({ color: PALETTE.basalt, roughness: 0.98, metalness: 0 }, 2.2);
+  private readonly coralMaterial = new MeshStandardMaterial({ color: PALETTE.hazard, roughness: 0.88, metalness: 0 });
+  private readonly beamMaterial = new MeshStandardMaterial({ color: PALETTE.sandstoneShade, roughness: 0.92, metalness: 0 });
+  private readonly gateMaterial = new MeshStandardMaterial({ color: PALETTE.sandstoneShade, roughness: 0.86, metalness: 0.04 });
+  private readonly columnMaterial = new MeshStandardMaterial({ color: PALETTE.sandstone, roughness: 0.96, metalness: 0 });
+  private readonly dangerMaterial = new MeshStandardMaterial({ color: PALETTE.hazard, emissive: 0x2d0906, emissiveIntensity: 0.08, roughness: 0.86 });
+  private readonly gapMaterial = new MeshStandardMaterial({ color: PALETTE.tideDeep, roughness: 0.98 });
+  private readonly shardMaterial = new MeshStandardMaterial({ color: PALETTE.tideScar, emissive: PALETTE.tideScar, emissiveIntensity: 0.48, roughness: 0.4, metalness: 0.02 });
+  private readonly shieldMaterial = new MeshBasicMaterial({ color: PALETTE.tideScar, transparent: true, opacity: 0.52, wireframe: true });
   private readonly floors = this.instances(new BoxGeometry(1, 1, 1), this.floorMaterial, MAX_SECTIONS);
+  private readonly deckCaps = [0, 1, 2, 3].map((profile) => this.instances(createDeckCapGeometry(profile), this.floorMaterial, MAX_SECTIONS * 2));
+  private readonly cliffAprons = this.instances(new BoxGeometry(1, 1, 1), this.rockMaterial, MAX_CLIFF_APRONS);
   private readonly rails = this.instances(new BoxGeometry(1, 1, 1), this.railMaterial, MAX_RAILS);
   private readonly seams = this.instances(new BoxGeometry(1, 1, 1), this.seamMaterial, MAX_SECTIONS * 3);
   private readonly laneGuides = this.instances(new BoxGeometry(1, 1, 1), this.guideMaterial, MAX_SECTIONS * 2);
   private readonly platforms = this.instances(new BoxGeometry(1, 1, 1), this.floorMaterial, MAX_SECTIONS + 1);
   private readonly pillars = this.instances(new CylinderGeometry(1, 1.18, 1, 7), this.porcelainMaterial, MAX_PILLARS);
   private readonly rocks = this.instances(new DodecahedronGeometry(1, 0), this.rockMaterial, MAX_ROCKS);
+  private readonly coral = this.instances(new DodecahedronGeometry(1, 0), this.coralMaterial, MAX_CORAL);
   private readonly beams = this.instances(new BoxGeometry(1, 1, 1), this.beamMaterial, MAX_EVENTS);
-  private readonly beamCuts = this.instances(new BoxGeometry(1, 1, 1), this.dangerMaterial, MAX_EVENTS * 2);
+  private readonly beamCuts = this.instances(new BoxGeometry(1, 1, 1), this.dangerMaterial, MAX_EVENTS * 4);
   private readonly rings = this.instances(new TorusGeometry(1, 0.14, 7, 18), this.gateMaterial, MAX_EVENTS);
   private readonly gatePosts = this.instances(new CylinderGeometry(0.12, 0.18, 1, 6), this.gateMaterial, MAX_EVENTS * 2);
   private readonly columns = this.instances(new DodecahedronGeometry(0.76, 0), this.columnMaterial, MAX_EVENTS);
@@ -208,10 +599,21 @@ export class WorldRenderer {
   private readonly columnRubble = this.instances(new DodecahedronGeometry(0.34, 0), this.columnMaterial, MAX_EVENTS * 3);
   private readonly gaps = this.instances(new BoxGeometry(1, 1, 1), this.gapMaterial, MAX_EVENTS);
   private readonly gapLips = this.instances(new BoxGeometry(1, 1, 1), this.dangerMaterial, MAX_EVENTS * 2);
+  /** Invisible-to-color shared proxy: the one key-light shadow pass for near hazards. */
+  private readonly hazardShadow = this.instances(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ colorWrite: false }), MAX_EVENTS);
   private readonly shards = this.instances(new IcosahedronGeometry(0.26, 0), this.shardMaterial, MAX_SHARDS);
   private readonly shields = this.instances(new IcosahedronGeometry(0.72, 1), this.shieldMaterial, 16);
-  private readonly wraith = this.createWraith();
+  private readonly pursuer: PursuerRig = createPursuerRig();
+  private readonly canyon = new TideScarWorld();
+  private readonly tideScarRoad = new TideScarRoad();
   private readonly mist = this.createMist();
+  private host: HTMLElement | null = null;
+  private d4Assets: D4LoadedAssets | null = null;
+  private d4AssetsLoading = false;
+  private pendingD4AssetDimensions: { width: number; height: number } | null = null;
+  private activeD4Profile: D4Profile = d4ProfileForViewport(1600, 900);
+  private tideScarSnapshot: TideScarRoadSnapshot = { sections: [], vertexCount: 0, coverage: 0, segments: [] };
+  private pursuerPlacementError: string | null = null;
   private visibleSections: CourseSection[] = [];
   private contextLossCount = 0;
   private snapshot: RenderSnapshot = {
@@ -223,7 +625,9 @@ export class WorldRenderer {
     runnerWorld: { x: 0, y: 0, z: 0, yaw: 0 },
     runnerScreen: { x: 0, y: 0, visible: false },
     pursuerScreen: { x: 0, y: 0, visible: false, bounds: null },
+    pursuerGapPx: null,
     hazardScreens: [],
+    tideScarSegments: [],
     camera: { x: 0, y: 0, z: 0, fov: 47, yaw: 0 },
     lanePosition: 0,
     posture: 'run',
@@ -233,18 +637,32 @@ export class WorldRenderer {
     triangles: 0,
     turnProgress: null,
     contextLossCount: 0,
+    d4: {
+      profile: 'desktop',
+      fogDensity: 0.0185,
+      assetTier: 'loading',
+      requestedAssets: [],
+      textureBytes: 0,
+      tideScarVertices: 0,
+      tideScarCoverage: 0,
+      pursuerPlacementError: null,
+      composition: { pitchDegrees: 0, horizonY: 0, vanishingPoint: { x: 0, y: 0 }, bottomRoadWidth: 0, runnerCenterY: 0 },
+    },
   };
 
   constructor() {
     this.scene.background = new Color(PALETTE.sky);
-    this.scene.fog = new FogExp2(PALETTE.mist, 0.0115);
-    this.camera.position.set(0, 4.8, 7.4);
-    this.scene.add(new HemisphereLight(0xe3eee9, 0x31382f, 1.82));
-    this.scene.add(new AmbientLight(0xa9bdb3, 0.58));
-    const key = new DirectionalLight(0xffe1ad, 2.35);
-    key.position.set(-8, 15, 6);
+    this.scene.fog = new FogExp2(PALETTE.mist, 0.0185);
+    this.camera.position.set(0, 5.35, 8.1);
+    this.scene.add(new HemisphereLight(0xd8e0df, PALETTE.tideDeep, 1.2));
+    this.scene.add(new AmbientLight(0x708691, 0.22));
+    const key = new DirectionalLight(0xffe0ad, 2.65);
+    key.position.set(-10, 16, 7);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.normalBias = 0.02;
     this.scene.add(key);
-    const rim = new DirectionalLight(PALETTE.signal, 0.62);
+    const rim = new DirectionalLight(0x49768e, 0.32);
     rim.position.set(7, 6, -12);
     this.scene.add(rim);
     this.ocean.rotation.x = -Math.PI / 2;
@@ -253,12 +671,15 @@ export class WorldRenderer {
     this.scene.add(this.ocean, this.horizon);
     this.scene.add(
       this.floors,
+      ...this.deckCaps,
+      this.cliffAprons,
       this.rails,
       this.seams,
       this.laneGuides,
       this.platforms,
       this.pillars,
       this.rocks,
+      this.coral,
       this.beams,
       this.beamCuts,
       this.rings,
@@ -268,19 +689,32 @@ export class WorldRenderer {
       this.columnRubble,
       this.gaps,
       this.gapLips,
+      this.hazardShadow,
       this.shards,
       this.shields,
-      this.wraith,
+      this.pursuer.root,
+      this.canyon.root,
+      this.tideScarRoad.mesh,
       this.mist,
     );
+    for (const mesh of [this.floors, ...this.deckCaps, this.cliffAprons, this.rails, this.platforms, this.rocks]) {
+      mesh.receiveShadow = true;
+    }
+    for (const mesh of [this.beams, this.beamCuts, this.rings, this.gatePosts, this.columns, this.columnCaps, this.columnRubble, this.gaps, this.gapLips]) {
+      mesh.receiveShadow = true;
+    }
+    this.hazardShadow.castShadow = true;
+    this.pursuer.shadowCaster.castShadow = true;
   }
 
   async init(host: HTMLElement): Promise<void> {
     const renderer = new WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.outputColorSpace = SRGBColorSpace;
     renderer.toneMapping = ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth <= 900 ? 1.75 : 2));
+    renderer.toneMappingExposure = 0.94;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = PCFShadowMap;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(host.clientWidth, host.clientHeight, false);
     renderer.domElement.dataset.testid = 'runner-canvas';
     renderer.domElement.setAttribute('aria-label', 'TIDE RELAY third-person endless runner world');
@@ -289,7 +723,9 @@ export class WorldRenderer {
     renderer.domElement.addEventListener('webglcontextlost', this.onContextLost);
     host.appendChild(renderer.domElement);
     this.renderer = renderer;
+    this.host = host;
     this.runner = createRunnerRig();
+    this.runner.shadowCaster.castShadow = true;
     this.scene.add(this.runner.root);
     this.resizeObserver = new ResizeObserver(() => this.resize(host));
     this.resizeObserver.observe(host);
@@ -302,9 +738,8 @@ export class WorldRenderer {
 
   setOptions(options: Partial<RenderOptions>): void {
     this.options = { ...this.options, ...options };
-    this.scene.fog = new FogExp2(this.options.highContrast ? 0x78958c : PALETTE.mist, this.options.highContrast ? 0.009 : 0.0115);
-    this.dangerMaterial.emissiveIntensity = this.options.highContrast ? 0.5 : 0.18;
-    this.seamMaterial.emissiveIntensity = this.options.highContrast ? 0.72 : 0.32;
+    this.scene.fog = new FogExp2(this.options.highContrast ? 0x71828a : PALETTE.mist, this.options.highContrast ? 0.012 : this.activeD4Profile.fogDensity);
+    this.dangerMaterial.emissiveIntensity = this.options.highContrast ? 0.3 : 0.08;
     if (this.options.reducedMotion) {
       this.impact = 0;
       this.pickupPulse = 0;
@@ -361,6 +796,7 @@ export class WorldRenderer {
     rig.root.position.copy(position);
     rig.root.rotation.y = yaw;
     const laneDelta = state.runner.targetLane - state.runner.lanePosition;
+    rig.core.scale.setScalar(1 + this.pickupPulse * 0.55);
     updateRunnerRig(rig, {
       elapsed: this.elapsed,
       speed: state.speed,
@@ -371,11 +807,11 @@ export class WorldRenderer {
       reducedMotion: this.options.reducedMotion,
       dead: state.status === 'game-over',
     });
-    rig.core.scale.setScalar(1 + this.pickupPulse * 0.55);
 
     this.updateCourse(state);
-    this.updateWraith(state, position, yaw);
     this.updateCamera(state, position, yaw, deltaMs);
+    this.canyon.update(position, yaw, this.activeD4Profile.name);
+    this.updatePursuer(state, position, yaw);
     this.ocean.position.x = position.x;
     this.ocean.position.z = position.z;
     const horizonForward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
@@ -428,6 +864,12 @@ export class WorldRenderer {
   destroy(): void {
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
+    this.host = null;
+    this.pendingD4AssetDimensions = null;
+    this.clearD4MaterialMaps();
+    this.d4Assets?.dispose();
+    this.d4Assets = null;
+    this.canyon.setPanorama(null);
     const renderer = this.renderer;
     this.renderer = null;
     if (renderer) {
@@ -462,11 +904,77 @@ export class WorldRenderer {
     if (!renderer) return;
     const width = Math.max(1, host.clientWidth);
     const height = Math.max(1, host.clientHeight);
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, width <= 900 ? 1.75 : 2);
+    this.activeD4Profile = d4ProfileForViewport(width, height);
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, this.activeD4Profile.mobileQuality ? 1.5 : 2);
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(width, height, false);
     this.camera.aspect = width / height;
+    this.camera.fov = this.activeD4Profile.fov;
     this.camera.updateProjectionMatrix();
+    this.requestD4Assets(width, height);
+  }
+
+  private requestD4Assets(width: number, height: number): void {
+    const coarsePointer = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
+    const deviceMemory = (typeof navigator !== 'undefined' ? (navigator as Navigator & { deviceMemory?: number }).deviceMemory : undefined);
+    const capabilities = { cssWidth: width, cssHeight: height, coarsePointer, deviceMemory };
+    const selection = selectD4Assets(capabilities);
+    if (this.d4AssetsLoading) {
+      this.pendingD4AssetDimensions = { width, height };
+      return;
+    }
+    if (this.d4Assets?.tier === selection.tier) return;
+    this.clearD4MaterialMaps();
+    this.d4Assets?.dispose();
+    this.d4Assets = null;
+    this.canyon.setPanorama(null);
+    this.d4AssetsLoading = true;
+    void loadD4Assets(capabilities).then((assets) => {
+      if (!this.renderer) {
+        assets.dispose();
+        return;
+      }
+      this.d4Assets = assets;
+      if (assets.textures) {
+        const anisotropy = Math.min(4, this.renderer?.capabilities.getMaxAnisotropy() ?? 1);
+        assets.textures.sandstone.anisotropy = anisotropy;
+        assets.textures.basalt.anisotropy = anisotropy;
+        assets.textures.canyon.anisotropy = anisotropy;
+        this.floorMaterial.map = assets.textures.sandstone;
+        this.railMaterial.map = assets.textures.basalt;
+        this.rockMaterial.map = assets.textures.basalt;
+        this.coralMaterial.alphaMap = assets.textures.coral;
+        this.coralMaterial.transparent = true;
+        this.canyon.setPanorama(assets.textures.canyon);
+        this.horizon.visible = false;
+      } else {
+        this.clearD4MaterialMaps();
+        this.horizon.visible = true;
+      }
+      this.floorMaterial.needsUpdate = true;
+      this.railMaterial.needsUpdate = true;
+      this.rockMaterial.needsUpdate = true;
+      this.coralMaterial.needsUpdate = true;
+    }).finally(() => {
+      this.d4AssetsLoading = false;
+      const pending = this.pendingD4AssetDimensions;
+      this.pendingD4AssetDimensions = null;
+      if (pending) this.requestD4Assets(pending.width, pending.height);
+    });
+  }
+
+  private clearD4MaterialMaps(): void {
+    this.floorMaterial.map = null;
+    this.railMaterial.map = null;
+    this.rockMaterial.map = null;
+    this.coralMaterial.alphaMap = null;
+    this.coralMaterial.transparent = false;
+    this.floorMaterial.needsUpdate = true;
+    this.railMaterial.needsUpdate = true;
+    this.rockMaterial.needsUpdate = true;
+    this.coralMaterial.needsUpdate = true;
+    this.canyon.setPanorama(null);
+    this.horizon.visible = true;
   }
 
   private consumeEvents(state: RunnerState, events: readonly RunnerEvent[]): void {
@@ -584,12 +1092,15 @@ export class WorldRenderer {
       .filter((section) => section.index >= state.sectionIndex - 1 && section.index <= state.sectionIndex + 5)
       .slice(0, MAX_SECTIONS);
     let floorCount = 0;
+    const deckCapCounts = [0, 0, 0, 0];
+    let cliffApronCount = 0;
     let railCount = 0;
     let seamCount = 0;
     let laneGuideCount = 0;
     let platformCount = 0;
     let pillarCount = 0;
     let rockCount = 0;
+    let coralCount = 0;
     let beamCount = 0;
     let beamCutCount = 0;
     let ringCount = 0;
@@ -599,47 +1110,21 @@ export class WorldRenderer {
     let columnRubbleCount = 0;
     let gapCount = 0;
     let gapLipCount = 0;
+    let hazardShadowCount = 0;
     let shardCount = 0;
     let shieldCount = 0;
-
-    const firstVisible = this.visibleSections[0];
-    if (firstVisible) {
-      this.setInstance(
-        this.platforms,
-        platformCount++,
-        firstVisible.origin.x,
-        -WORLD_METRICS.roadHeight / 2,
-        firstVisible.origin.z,
-        0,
-        WORLD_METRICS.roadWidth,
-        WORLD_METRICS.roadHeight,
-        WORLD_METRICS.roadWidth,
-      );
-    }
 
     for (const section of this.visibleSections) {
       const yaw = headingYaw(section.heading);
       const center = sampleCoursePosition(section, section.length / 2);
-      const straightLength = Math.max(1, section.length - WORLD_METRICS.roadWidth);
-      this.setInstance(this.floors, floorCount++, center.x, -WORLD_METRICS.roadHeight / 2, center.z, yaw, WORLD_METRICS.roadWidth, WORLD_METRICS.roadHeight, straightLength);
+      const straightLength = Math.max(1, section.length + 0.08);
+      const capProfile = Math.min(3, Math.floor(seededUnit(section.index, 71) * 4));
+      const cap = this.deckCaps[capProfile];
+      if (cap) this.setInstance(cap, deckCapCounts[capProfile]++, center.x, 0, center.z, yaw, WORLD_METRICS.roadWidth, 1, straightLength);
       const right = rightVector(section.heading);
       for (const side of [-1, 1] as const) {
-        const offset = side * (WORLD_METRICS.roadWidth / 2 - WORLD_METRICS.railInset);
-        this.setInstance(this.rails, railCount++, center.x + right.x * offset, 0.13, center.z + right.z * offset, yaw, 0.25, 0.28, straightLength + 0.12);
-      }
-      this.setInstance(this.seams, seamCount++, center.x, 0.025, center.z, yaw, 0.1, 0.035, straightLength);
-      for (const guideLane of [-0.5, 0.5]) {
-        const guide = sampleCoursePosition(section, section.length / 2, guideLane);
-        this.setInstance(this.laneGuides, laneGuideCount++, guide.x, 0.012, guide.z, yaw, 0.028, 0.02, straightLength);
-      }
-      const end = sampleCoursePosition(section, section.length);
-      this.setInstance(this.platforms, platformCount++, end.x, -WORLD_METRICS.roadHeight / 2, end.z, 0, WORLD_METRICS.roadWidth, WORLD_METRICS.roadHeight, WORLD_METRICS.roadWidth);
-      const next = state.course.sections.find((candidate) => candidate.index === section.index + 1);
-      if (next) {
-        const incomingSeam = sampleCoursePosition(section, section.length - WORLD_METRICS.roadWidth / 4);
-        const outgoingSeam = sampleCoursePosition(next, WORLD_METRICS.roadWidth / 4);
-        this.setInstance(this.seams, seamCount++, incomingSeam.x, 0.026, incomingSeam.z, yaw, 0.1, 0.036, WORLD_METRICS.roadWidth / 2);
-        this.setInstance(this.seams, seamCount++, outgoingSeam.x, 0.026, outgoingSeam.z, headingYaw(next.heading), 0.1, 0.036, WORLD_METRICS.roadWidth / 2);
+        const apronOffset = side * (WORLD_METRICS.roadWidth / 2 + 0.5);
+        this.setInstance(this.cliffAprons, cliffApronCount++, center.x + right.x * apronOffset, -3.5, center.z + right.z * apronOffset, yaw, 0.92, 6.8, straightLength + 0.1);
       }
 
       for (let marker = 0; marker < 3; marker += 1) {
@@ -647,10 +1132,10 @@ export class WorldRenderer {
         const sample = sampleCoursePosition(section, Math.min(section.length - 6, along));
         for (const side of [-1, 1] as const) {
           const variance = seededUnit(section.index, marker * 2 + (side > 0 ? 1 : 0));
-          const edge = 5.8 + variance * 4.2;
-          this.setInstance(this.pillars, pillarCount++, sample.x + right.x * edge * side, 1.35 + variance * 0.65, sample.z + right.z * edge * side, yaw, 0.36 + variance * 0.22, 2.8 + variance * 2.2, 0.36 + variance * 0.22);
-          const rockOffset = edge + 1.3 + variance * 2;
-          this.setInstance(this.rocks, rockCount++, sample.x + right.x * rockOffset * side, -0.25, sample.z + right.z * rockOffset * side, variance * Math.PI, 0.75 + variance, 0.55 + variance * 0.8, 0.8 + variance * 1.2);
+          if ((marker + section.index + (side > 0 ? 1 : 0)) % 4 === 0) {
+            const coralInset = WORLD_METRICS.roadWidth / 2 + 0.42 + variance * 0.28;
+            this.setInstance(this.coral, coralCount++, sample.x + right.x * coralInset * side, 0.16, sample.z + right.z * coralInset * side, variance * Math.PI, 0.18 + variance * 0.16, 0.44 + variance * 0.34, 0.18 + variance * 0.18);
+          }
         }
       }
 
@@ -659,10 +1144,11 @@ export class WorldRenderer {
         const sample = sampleCoursePosition(section, event.at, event.lane === 'all' ? 0 : event.lane);
         if (event.kind === 'beam') {
           const width = event.lane === 'all' ? WORLD_METRICS.roadWidth - 0.5 : 1.65;
-          this.setInstance(this.beams, beamCount++, sample.x, 0.34, sample.z, yaw, width, 0.48, 0.5);
+          this.setInstance(this.beams, beamCount++, sample.x, 0.36, sample.z, yaw, width, 0.56, 0.58);
           const capOffset = Math.max(0.34, width / 2 - 0.14);
-          this.setInstance(this.beamCuts, beamCutCount++, sample.x + right.x * capOffset, 0.35, sample.z + right.z * capOffset, yaw, 0.22, 0.52, 0.54);
-          this.setInstance(this.beamCuts, beamCutCount++, sample.x - right.x * capOffset, 0.35, sample.z - right.z * capOffset, yaw, 0.22, 0.52, 0.54);
+          this.setInstance(this.beamCuts, beamCutCount++, sample.x + right.x * capOffset, 0.28, sample.z + right.z * capOffset, yaw, 0.25, 0.62, 0.62);
+          this.setInstance(this.beamCuts, beamCutCount++, sample.x - right.x * capOffset, 0.28, sample.z - right.z * capOffset, yaw, 0.25, 0.62, 0.62);
+          this.setInstance(this.hazardShadow, hazardShadowCount++, sample.x, 0.31, sample.z, yaw, width, 0.54, 0.56);
         } else if (event.kind === 'ring') {
           const widthScale = event.lane === 'all' ? WORLD_METRICS.roadWidth / 2.15 : 1;
           const ringY = event.lane === 'all' ? 1.12 : 0.96;
@@ -670,31 +1156,17 @@ export class WorldRenderer {
           const postOffset = event.lane === 'all' ? WORLD_METRICS.roadWidth / 2 - 0.48 : 0.92;
           this.setInstance(this.gatePosts, gatePostCount++, sample.x + right.x * postOffset, 0.64, sample.z + right.z * postOffset, yaw, 1, 1.28, 1);
           this.setInstance(this.gatePosts, gatePostCount++, sample.x - right.x * postOffset, 0.64, sample.z - right.z * postOffset, yaw, 1, 1.28, 1);
+          this.setInstance(this.hazardShadow, hazardShadowCount++, sample.x, ringY, sample.z, yaw, widthScale * 2, event.lane === 'all' ? 1.9 : 1.5, 0.32);
         } else if (event.kind === 'column') {
           this.setInstance(this.columns, columnCount++, sample.x, 0.92, sample.z, yaw + 0.12, 0.94, 1.36, 0.9);
-          this.setInstance(this.columnCaps, columnCapCount++, sample.x + right.x * 0.12, 1.83, sample.z + right.z * 0.12, yaw + event.at * 0.07, 0.58, 0.38, 0.58);
-          for (const [rubbleIndex, rubbleOffset] of [-0.52, 0.08, 0.55].entries()) {
-            const forward = headingVector(section.heading);
-            const along = (rubbleIndex - 1) * 0.23;
-            this.setInstance(
-              this.columnRubble,
-              columnRubbleCount++,
-              sample.x + right.x * rubbleOffset + forward.x * along,
-              0.2,
-              sample.z + right.z * rubbleOffset + forward.z * along,
-              yaw + rubbleIndex * 0.7,
-              0.85 + rubbleIndex * 0.08,
-              0.62,
-              0.8,
-            );
-          }
+          this.setInstance(this.hazardShadow, hazardShadowCount++, sample.x, 0.92, sample.z, yaw, 0.94, 1.36, 0.9);
         } else if (event.kind === 'gap') {
           const width = event.lane === 'all' ? WORLD_METRICS.roadWidth - 0.5 : WORLD_METRICS.laneWidth * 0.9;
           const gapCenter = sampleCoursePosition(section, event.at + event.length / 2, event.lane === 'all' ? 0 : event.lane);
           this.setInstance(this.gaps, gapCount++, gapCenter.x, 0.03, gapCenter.z, yaw, width, 0.075, Math.max(1.6, event.length));
           const farSample = sampleCoursePosition(section, event.at + event.length, event.lane === 'all' ? 0 : event.lane);
-          this.setInstance(this.gapLips, gapLipCount++, sample.x, 0.08, sample.z, yaw, width, 0.12, 0.18);
-          this.setInstance(this.gapLips, gapLipCount++, farSample.x, 0.08, farSample.z, yaw, width, 0.12, 0.18);
+          this.setInstance(this.beamCuts, beamCutCount++, sample.x, 0.08, sample.z, yaw, width, 0.12, 0.18);
+          this.setInstance(this.beamCuts, beamCutCount++, farSample.x, 0.08, farSample.z, yaw, width, 0.12, 0.18);
         } else if (event.kind === 'shard') {
           const bob = this.options.reducedMotion ? 0 : Math.sin(this.elapsed * 3.2 + event.at) * 0.13;
           const rotation = this.options.reducedMotion ? event.at * 0.17 : this.elapsed * 1.6 + event.at;
@@ -706,12 +1178,15 @@ export class WorldRenderer {
       }
     }
     this.finishInstances(this.floors, floorCount);
+    this.deckCaps.forEach((cap, index) => this.finishInstances(cap, deckCapCounts[index] ?? 0));
+    this.finishInstances(this.cliffAprons, cliffApronCount);
     this.finishInstances(this.rails, railCount);
     this.finishInstances(this.seams, seamCount);
     this.finishInstances(this.laneGuides, laneGuideCount);
     this.finishInstances(this.platforms, platformCount);
     this.finishInstances(this.pillars, pillarCount);
     this.finishInstances(this.rocks, rockCount);
+    this.finishInstances(this.coral, coralCount);
     this.finishInstances(this.beams, beamCount);
     this.finishInstances(this.beamCuts, beamCutCount);
     this.finishInstances(this.rings, ringCount);
@@ -721,8 +1196,13 @@ export class WorldRenderer {
     this.finishInstances(this.columnRubble, columnRubbleCount);
     this.finishInstances(this.gaps, gapCount);
     this.finishInstances(this.gapLips, gapLipCount);
+    this.finishInstances(this.hazardShadow, hazardShadowCount);
     this.finishInstances(this.shards, shardCount);
     this.finishInstances(this.shields, shieldCount);
+    const unresolved = new Set(this.visibleSections.flatMap((section) => section.events
+      .filter((event) => !resolved.has(event.id))
+      .map((event) => event.id)));
+    this.tideScarSnapshot = this.tideScarRoad.update(this.visibleSections, unresolved);
   }
 
   private setInstance(mesh: InstancedMesh, index: number, x: number, y: number, z: number, yaw: number, sx: number, sy: number, sz: number): void {
@@ -742,10 +1222,10 @@ export class WorldRenderer {
   private updateCamera(state: RunnerState, position: Vector3, yaw: number, deltaMs: number): void {
     const forward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
     const right = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-    const portraitFactor = this.camera.aspect < 0.7 ? 1.42 : 1;
-    const targetPosition = position.clone().addScaledVector(forward, -8.35 * portraitFactor);
-    targetPosition.y = 5 + (portraitFactor - 1) * 1.4 + position.y * 0.18 - (state.runner.slideTicksRemaining > 0 ? 0.1 : 0);
-    targetPosition.addScaledVector(right, -state.runner.lanePosition * 0.08);
+    const profile = this.activeD4Profile;
+    const targetPosition = position.clone().addScaledVector(forward, -profile.cameraBack);
+    targetPosition.y = profile.cameraHeight + position.y * 0.18 - (state.runner.slideTicksRemaining > 0 ? 0.12 : 0);
+    targetPosition.addScaledVector(right, -state.runner.lanePosition * profile.cameraLaneBias);
     if (this.impact > 0 && !this.options.reducedMotion) {
       targetPosition.addScaledVector(right, Math.sin(this.elapsed * 95) * this.impact * 0.12);
       targetPosition.y += Math.cos(this.elapsed * 82) * this.impact * 0.07;
@@ -756,50 +1236,15 @@ export class WorldRenderer {
       this.camera.position.distanceToSquared(targetPosition) > 12 * 12
     ) this.camera.position.copy(targetPosition);
     else this.camera.position.lerp(targetPosition, damping);
-    const lookAhead = (10 + state.speed * 0.34) * (this.camera.aspect < 0.7 ? 0.72 : 1);
-    this.cameraLook.copy(position).addScaledVector(forward, lookAhead).add(new Vector3(0, 1.15 + position.y * 0.12, 0));
+    this.cameraLook.copy(position).addScaledVector(forward, profile.lookAhead).add(new Vector3(0, profile.lookHeight + position.y * 0.1, 0));
     this.camera.lookAt(this.cameraLook);
-    const targetFov = this.options.reducedMotion ? 47 : 47 + ((state.speed - 9) / 10) * 6;
-    this.camera.fov = MathUtils.lerp(this.camera.fov, MathUtils.clamp(targetFov, 47, 53), damping * 0.7);
+    this.camera.fov = profile.fov;
+    const fog = this.scene.fog;
+    if (fog instanceof FogExp2) fog.density = this.options.highContrast ? 0.012 : profile.fogDensity;
     this.camera.updateProjectionMatrix();
-  }
-
-  private createWraith(): Object3D {
-    const group = new Object3D();
-    group.name = 'black-tide-pursuers';
-    const material = new MeshStandardMaterial({
-      color: PALETTE.blackTide,
-      emissive: 0x182219,
-      emissiveIntensity: 0.22,
-      transparent: true,
-      opacity: 0.92,
-      roughness: 0.96,
-    });
-    const eyeMaterial = new MeshBasicMaterial({ color: PALETTE.hazard });
-    for (const [index, offset] of [-0.72, 0.72].entries()) {
-      const figure = new Object3D();
-      figure.position.set(offset, index === 0 ? 0 : -0.08, Math.abs(offset) * 0.24);
-      figure.rotation.z = offset * -0.06;
-      const torso = new Mesh(new DodecahedronGeometry(index === 0 ? 0.68 : 0.62, 0), material);
-      torso.position.y = 0.92;
-      torso.scale.set(0.72, 1.35, 0.62);
-      const head = new Mesh(new IcosahedronGeometry(index === 0 ? 0.35 : 0.32, 1), material);
-      head.position.y = 1.72;
-      const leftClaw = new Mesh(new CylinderGeometry(0.08, 0.13, 1.25, 5), material);
-      const rightClaw = leftClaw.clone();
-      leftClaw.position.set(-0.52, 0.72, -0.08);
-      rightClaw.position.set(0.52, 0.72, -0.08);
-      leftClaw.rotation.z = -0.38;
-      rightClaw.rotation.z = 0.38;
-      figure.add(torso, head, leftClaw, rightClaw);
-      for (const eyeX of [-0.11, 0.11]) {
-        const eye = new Mesh(new IcosahedronGeometry(0.052, 0), eyeMaterial);
-        eye.position.set(eyeX, 1.76, -0.29);
-        figure.add(eye);
-      }
-      group.add(figure);
-    }
-    return group;
+    // Preserve the frozen FOV/look target while shifting the asymmetric lens
+    // into the documented runner/road bands; presentation only.
+    applyD4LensShift(this.camera, profile);
   }
 
   private createMist(): Points {
@@ -812,27 +1257,40 @@ export class WorldRenderer {
     }
     const geometry = new BufferGeometry();
     geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
-    const material = new PointsMaterial({ color: PALETTE.signal, size: 1.4, sizeAttenuation: false, transparent: true, opacity: 0.22, depthWrite: false, blending: AdditiveBlending });
+    const material = new PointsMaterial({ color: PALETTE.tideLight, size: 1.15, sizeAttenuation: false, transparent: true, opacity: 0.13, depthWrite: false });
     return new Points(geometry, material);
   }
 
-  private updateWraith(state: RunnerState, position: Vector3, yaw: number): void {
+  private updatePursuer(state: RunnerState, position: Vector3, yaw: number): void {
     const forward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
-    const normalizedGap = MathUtils.clamp((state.chaseGap - 0.65) / 7.35, 0, 1);
-    const visibleGap = 1.25 + normalizedGap * 4.45;
-    const danger = MathUtils.clamp((4.5 - state.chaseGap) / 3.85, 0, 1);
-    this.wraith.position.copy(position).addScaledVector(forward, -visibleGap);
-    this.wraith.position.y = 0.08 + (this.options.reducedMotion ? 0 : Math.sin(this.elapsed * (3.4 + danger * 2.2)) * 0.1);
-    this.wraith.rotation.y = yaw;
-    this.wraith.scale.setScalar(0.6 + danger * 0.2);
-    for (const [index, figure] of this.wraith.children.entries()) {
-      const side = index === 0 ? -1 : 1;
-      const stride = this.options.reducedMotion ? 0 : Math.sin(this.elapsed * (7.8 + danger * 2.6) + index * Math.PI);
-      figure.position.x = side * 0.72 + stride * 0.035;
-      figure.position.y = (index === 0 ? 0 : -0.08) + Math.abs(stride) * 0.075;
-      figure.rotation.z = side * -0.043 + stride * 0.025;
-    }
-    this.wraith.visible = state.status !== 'ready';
+    const captured = state.status === 'game-over' && state.failureReason?.kind === 'pursuer-caught';
+    const presentation = pursuerPresentation(state.chaseGap, this.camera.aspect, captured);
+    const size = this.renderer?.getSize(new Vector2()) ?? new Vector2(1, 1);
+    const placement = captured ? null : selectPursuerProjection(
+      this.camera,
+      { width: size.x, height: size.y },
+      this.activeD4Profile,
+      position,
+      yaw,
+      state.chaseGap,
+      presentation.scale,
+    );
+    this.pursuerPlacementError = !captured && state.status !== 'ready' && !placement
+      ? `No grounded pursuer projection for ${this.activeD4Profile.name} at chaseGap=${state.chaseGap.toFixed(3)}`
+      : null;
+    const visibleGap = captured ? 0.42 : placement?.worldGap ?? 0;
+    this.pursuer.root.position.copy(position).addScaledVector(forward, -visibleGap);
+    this.pursuer.root.position.y = 0.03;
+    this.pursuer.root.rotation.y = yaw;
+    this.pursuer.root.scale.setScalar(placement?.scale ?? presentation.scale);
+    updatePursuerRig(this.pursuer, {
+      elapsed: this.elapsed,
+      danger: presentation.danger,
+      reducedMotion: this.options.reducedMotion,
+      stumble: state.runner.speedPenaltyTicks > 0,
+      captured,
+    });
+    this.pursuer.root.visible = state.status !== 'ready' && (captured || placement !== null);
     this.mist.position.copy(position).addScaledVector(forward, -Math.min(6.4, visibleGap + 0.7));
     this.mist.visible = !this.options.reducedMotion && state.chaseGap > 2.4;
   }
@@ -848,17 +1306,43 @@ export class WorldRenderer {
     const renderer = this.renderer;
     if (!renderer) return;
     const screen = position.clone().add(new Vector3(0, 1, 0)).project(this.camera);
-    const pursuer = this.wraith.position.clone().add(new Vector3(0, 1.05, 0)).project(this.camera);
+    const pursuer = this.pursuer.root.position.clone().add(new Vector3(0, 0.9, 0)).project(this.camera);
     const size = renderer.getSize(new Vector2());
     const width = size.x;
     const height = size.y;
-    const pursuerBounds = this.clippedBounds(this.wraith.position, new Vector3(1.25, 1.25, 0.85), width, height, this.wraith.rotation.y);
+    const runnerRigBounds = groundAnchoredBounds(position, RUNNER_RIG_BOUNDS);
+    const pursuerRigBounds = groundAnchoredBounds(
+      this.pursuer.root.position,
+      PURSUER_RIG_BOUNDS,
+      this.pursuer.root.scale.x,
+    );
+    const runnerBounds = this.clippedBounds(runnerRigBounds.center, runnerRigBounds.halfExtent, width, height, yaw);
+    const pursuerBounds = this.clippedBounds(
+      pursuerRigBounds.center,
+      pursuerRigBounds.halfExtent,
+      width,
+      height,
+      this.pursuer.root.rotation.y,
+    );
+    const captured = state.status === 'game-over' && state.failureReason?.kind === 'pursuer-caught';
+    const pursuerGapPx = pursuerScreenGapPx(runnerBounds, pursuerBounds, captured);
+    const fallbackSelection = selectD4Assets({
+      cssWidth: width,
+      cssHeight: height,
+      coarsePointer: typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches,
+      deviceMemory: typeof navigator !== 'undefined' ? (navigator as Navigator & { deviceMemory?: number }).deviceMemory : undefined,
+    });
+    const assets = this.d4Assets;
     const resolved = new Set([...state.resolvedEventIds, ...state.consumedEventIds]);
     const hazardScreens = this.visibleSections.flatMap((section) => section.events.flatMap((event) => {
       if (resolved.has(event.id) || !this.isSnapshotHazard(event)) return [];
       const projected = this.hazardScreenBounds(section, event, width, height);
       return projected ? [projected] : [];
     }));
+    const tideScarSegments = this.tideScarSnapshot.segments
+      .map((segment) => projectTideScarSegment(this.camera, segment, width, height, renderer.getPixelRatio()))
+      .filter((segment): segment is TideScarScreenSegment => segment !== null);
+    const composition = measureD4Composition(this.camera, position, yaw, width, height, this.activeD4Profile);
     this.snapshot = {
       canvas: { width, height, resolution: renderer.getPixelRatio() },
       options: { ...this.options },
@@ -866,14 +1350,21 @@ export class WorldRenderer {
       presentedDistance,
       presentedLanePosition,
       runnerWorld: { x: position.x, y: position.y, z: position.z, yaw },
-      runnerScreen: { x: (screen.x * 0.5 + 0.5) * width, y: (-screen.y * 0.5 + 0.5) * height, visible: screen.z >= -1 && screen.z <= 1 },
+      runnerScreen: {
+        x: (screen.x * 0.5 + 0.5) * width,
+        y: (-screen.y * 0.5 + 0.5) * height,
+        visible: screen.z >= -1 && screen.z <= 1,
+        bounds: runnerBounds,
+      },
       pursuerScreen: {
         x: (pursuer.x * 0.5 + 0.5) * width,
         y: (-pursuer.y * 0.5 + 0.5) * height,
-        visible: this.wraith.visible && pursuerBounds !== null,
-        bounds: this.wraith.visible ? pursuerBounds : null,
+        visible: this.pursuer.root.visible && pursuerBounds !== null,
+        bounds: this.pursuer.root.visible ? pursuerBounds : null,
       },
+      pursuerGapPx,
       hazardScreens,
+      tideScarSegments,
       camera: { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z, fov: this.camera.fov, yaw },
       lanePosition: state.runner.lanePosition,
       posture: postureOf(state),
@@ -883,6 +1374,20 @@ export class WorldRenderer {
       triangles: renderer.info.render.triangles,
       turnProgress: this.turnMotion ? this.turnMotion.override ?? this.turnMotion.progress : null,
       contextLossCount: this.contextLossCount,
+      d4: {
+        profile: this.activeD4Profile.name,
+        fogDensity: this.options.highContrast ? 0.012 : this.activeD4Profile.fogDensity,
+        assetTier: assets ? (assets.fallback ? 'fallback' : assets.tier) : 'loading',
+        requestedAssets: assets?.requestedFiles ?? fallbackSelection.requestedFiles,
+        textureBytes: assets?.textureBytes ?? fallbackSelection.textureBytes,
+        tideScarVertices: this.tideScarSnapshot.vertexCount,
+        tideScarCoverage: this.tideScarSnapshot.coverage,
+        pursuerPlacementError: this.pursuerPlacementError,
+        composition: {
+          ...composition,
+          runnerCenterY: runnerBounds ? (runnerBounds.top + runnerBounds.bottom) / (2 * height) : -1,
+        },
+      },
     };
   }
 
@@ -930,30 +1435,7 @@ export class WorldRenderer {
     height: number,
     yaw: number,
   ): ClippedScreenBounds | null {
-    const points: Vector3[] = [];
-    const cosine = Math.cos(yaw);
-    const sine = Math.sin(yaw);
-    for (const x of [-halfExtent.x, halfExtent.x]) {
-      for (const y of [-halfExtent.y, halfExtent.y]) {
-        for (const z of [-halfExtent.z, halfExtent.z]) {
-          points.push(new Vector3(
-            center.x + x * cosine + z * sine,
-            center.y + y,
-            center.z - x * sine + z * cosine,
-          ));
-        }
-      }
-    }
-    const projected = points.map((point) => point.project(this.camera));
-    if (!projected.some((point) => point.z >= -1 && point.z <= 1)) return null;
-    const left = Math.max(0, Math.min(...projected.map((point) => (point.x * 0.5 + 0.5) * width)));
-    const right = Math.min(width, Math.max(...projected.map((point) => (point.x * 0.5 + 0.5) * width)));
-    const top = Math.max(0, Math.min(...projected.map((point) => (-point.y * 0.5 + 0.5) * height)));
-    const bottom = Math.min(height, Math.max(...projected.map((point) => (-point.y * 0.5 + 0.5) * height)));
-    const clippedWidth = Math.max(0, right - left);
-    const clippedHeight = Math.max(0, bottom - top);
-    const area = clippedWidth * clippedHeight;
-    return area > 0 ? { left, top, right, bottom, width: clippedWidth, height: clippedHeight, area } : null;
+    return projectOrientedBounds(this.camera, center, halfExtent, width, height, yaw);
   }
 
   private readonly onContextLost = (event: Event): void => {
