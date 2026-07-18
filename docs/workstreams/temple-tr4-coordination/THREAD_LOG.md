@@ -167,3 +167,17 @@ GATES /root/c7_contract_review_2 independently reproduced old/new center and ful
 EVIDENCE exact reviewed C7-D3 SHA d66e1a58e865e694d8b8cbace32b2bec732f6e77; READY_FOR_DIAGNOSTIC_007_LOOP_CONTRACT
 BLOCKER C7-T1 and C7-T2 source checkpoints plus non-writing dry preflight do not yet exist; Blender remains blocked
 NEXT asset writer corrects only the existing C7-T1 generator WIP to the accepted world loop and independent source-review findings, runs static checks, appends asset THREAD_LOG, and commits exact generator path
+
+REPORT TEMPLE-TR4-DIAGNOSTIC-007 DRY-PREFLIGHT-PRECHECK-BLOCKED-C7-T2F-AUTHORIZED
+THREAD 019f6475-a6fb-7cc1-b3eb-2052c6ef22a9
+TIME 2026-07-18T18:25:58+08:00
+BASE 343d511daa0d6e5df2a424858685739fa4ef200a
+PARENT TEMPLE-TR4-DIAGNOSTIC-007 C7-D4-SOURCE-REAUTHORIZED
+HEAD pending C7-T2F authorization docs checkpoint
+CANDIDATE none
+WRITE_SCOPE tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py exact dictionary key-set comparison only; coordination docs/logs
+DIRTY five declared never-stage backup/cache paths; staged zero before authorization
+GATES C7-T1 a9acb0a and C7-T2 51fdbab independently SOURCE_READY; first dry preflight exit 1 PRECHECK_BLOCKED; exact reason unknown/missing/reordered keys at $.construction.atmosphere; diagnostic-007 absent; Blender/evaluator not launched
+EVIDENCE committed three-script hashes; canonical preflight sorts object keys; active schema rejects unknown/missing keys without binding insertion order
+BLOCKER runner deep_compare uses list(expected.keys()) equality against canonical sorted actual keys; fresh dry preflight and Blender remain blocked
+NEXT commit this docs-only bounded correction authority, record the asset dry failure, then correct only runner deep_compare to sorted exact key-set equality and obtain independent source review before one fresh dry preflight

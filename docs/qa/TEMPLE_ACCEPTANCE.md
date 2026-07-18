@@ -54,7 +54,7 @@
 
 ## Current result
 
-Result: **TEMPLE-TR4 in progress; C7 near-loop contract corrected and exact source checkpoints reauthorized, diagnostic not yet executed.** Independent review of C7-D3 `d66e1a5` returned `READY_FOR_DIAGNOSTIC_007_LOOP_CONTRACT` with no P0/P1. C7-D4 restores only C7-T1/T2 source authority for the actual-world `X=3.00-3.78m` loop and unchanged substantive reconstruction; the diagnostic remains blocked on both commits and a green non-writing dry preflight. TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 and C1-C6 are historical, unintegrated or blocked visual attempts and do not supply TR4 acceptance evidence.
+Result: **TEMPLE-TR4 in progress; C7 dry preflight blocked before Blender, exact C7-T2F validator correction authorized.** C7-T1 `a9acb0a` and C7-T2 `51fdbab` passed independent source review, but the first non-writing dry preflight returned `PRECHECK_BLOCKED` on order-sensitive keys at `$.construction.atmosphere`; `diagnostic-007` remained absent. C7-T2F may correct only the runner dictionary comparison to use exact key sets without changing values or lowering unknown/missing-key rejection. A fresh dry preflight is required before Blender. TR2 remains the accepted simulation/runtime baseline described below. TR3/A3-A6 and C1-C6 are historical, unintegrated or blocked visual attempts and do not supply TR4 acceptance evidence.
 
 ## TEMPLE-TR4 visual and lifecycle gates
 
