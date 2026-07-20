@@ -7,7 +7,6 @@ import {
   CylinderGeometry,
   DirectionalLight,
   DodecahedronGeometry,
-  DoubleSide,
   DynamicDrawUsage,
   FogExp2,
   Float32BufferAttribute,
@@ -21,12 +20,12 @@ import {
   MeshStandardMaterial,
   Object3D,
   PerspectiveCamera,
-  PlaneGeometry,
   Points,
   PointsMaterial,
   PCFShadowMap,
   RingGeometry,
   Scene,
+  ShapeUtils,
   SRGBColorSpace,
   TorusGeometry,
   Vector3,
@@ -149,10 +148,17 @@ const MAX_RAILS = MAX_SECTIONS * 2;
 const MAX_PILLARS = MAX_SECTIONS * 6;
 const MAX_ROCKS = MAX_SECTIONS * 8;
 const MAX_CORAL = MAX_SECTIONS * 4;
-const MAX_CLIFF_APRONS = MAX_SECTIONS * 2;
+const MAX_ROAD_MODULES_PER_SIGNATURE = MAX_SECTIONS * 8;
 const MAX_EVENTS = 96;
 const MAX_SHARDS = 160;
 const TURN_VISUAL_RADIUS = 1.45;
+const TR4_FOG_COLOR = 0x9aa7a8, TR4_FOG_DENSITY = 0.0035;
+export const TR4_RUNTIME_CAMERA = {
+  portrait: { height: 6.2, back: 15.2, targetAhead: 16.8, targetY: 0.55, fov: 40, lensShiftY: -0.055 },
+  desktop: { height: 6.06, back: 13.6, targetAhead: 13.3, targetY: 0.6, fov: 43, lensShiftY: -0.025 },
+  landscape: { height: 6.15, back: 12.8, targetAhead: 12.56, targetY: 0.55, fov: 46, lensShiftY: -0.02 },
+} as const;
+function canyonFogDensity(profile: D4Profile, highContrast: boolean): number { void profile; return highContrast ? .003 : TR4_FOG_DENSITY; }
 
 function easeInOut(progress: number): number {
   const value = MathUtils.clamp(progress, 0, 1);
@@ -195,32 +201,98 @@ function seededUnit(index: number, salt: number): number {
   return (value >>> 0) / 0xffffffff;
 }
 
+export function presentationRoadStart(sectionIndex: number): number { return sectionIndex === 0 ? -18 : 0; }
+
 export function createDeckCapGeometry(profile: number): BufferGeometry {
-  const inset = 0.04 + profile * 0.012;
-  const skew = (profile % 2 === 0 ? 1 : -1) * (0.018 + profile * 0.009);
-  const top = [
-    -0.5 + inset, 0, -0.5,
-    0.5 - inset * 0.45, 0.018, -0.5,
-    0.5 - inset, 0.012, 0.5,
-    -0.5 + inset * 0.65, 0.006, 0.5,
-  ];
-  const bottom = [
-    -0.5 + inset * 0.7 + skew, -0.72, -0.5 + inset * 0.8,
-    0.5 - inset * 0.8 + skew, -0.64, -0.5 + inset,
-    0.5 - inset * 0.65 + skew, -0.72, 0.5 - inset * 0.7,
-    -0.5 + inset * 0.9 + skew, -0.65, 0.5 - inset,
-  ];
+  const signature = ((profile % 6) + 6) % 6;
+  const edgeEvents = [
+    { name: 'collapsed-shoulder', points: [[0, 0], [.06, -.28], [.14, -.38], [.06, -1.2], [.19, -1]] },
+    { name: 'stepped-ledge', points: [[0, 0], [.05, -.22], [.16, -.22], [.16, -.56], [.3, -.56], [.22, -1]] },
+    { name: 'deep-recess', points: [[0, 0], [.05, -.24], [.24, -.44], [.1, -.8], [.38, -1.12], [.16, -1.75], [.24, -1]] },
+    { name: 'outer-buttress', points: [[0, 0], [.06, -.22], [.14, -.43], [.32, -.55], [.45, -.9], [.32, -1.25], [.52, -1.65], [.36, -1]] },
+    { name: 'undercut', points: [[0, 0], [.04, -.23], [.2, -.3], [.08, -.55], [-.006, -.82], [.18, -1.08], [.38, -1.45], [.26, -1.9], [.34, -1]] },
+    { name: 'outer-rubble', points: [[0, 0], [.08, -.2], [.18, -.42], [.33, -.62], [.26, -.85], [.55, -1.05], [.43, -1.35], [.72, -1.7], [.5, -2.05], [.62, -1]] },
+  ] as const;
+  const sideEvents = [edgeEvents[signature]!, edgeEvents[(signature + 3) % 6]!] as const;
+  const stationCount = 5 + signature % 3;
+  const positions: number[] = [];
+  const colors: number[] = [];
+  const indices: number[] = [];
+  const stations = Array.from({ length: stationCount }, (_, station) => {
+    const z = -0.5 + station / (stationCount - 1);
+    const terminal = station === 0 || station === stationCount - 1, left = terminal ? -.462 : -.475 + seededUnit(signature * 19 + station, 701) * .028;
+    const right = terminal ? .462 : .475 - seededUnit(signature * 23 + station, 703) * .028, crown = terminal ? 0 : (seededUnit(signature * 29 + station, 709) - .5) * .045;
+    return { z, left, right, crown, xs: [left, -0.17 + crown * 0.3, 0.17 - crown * 0.2, right] };
+  });
+  const topRows = stations.map(() => [-1, -1, -1, -1]);
+  const addTop = (station: number, column: number) => {
+    const point = stations[station]!;
+    topRows[station]![column] = positions.length / 3;
+    positions.push(point.xs[column]!, point.crown + (column === 1 || column === 2 ? .025 : -.012), point.z);
+    colors.push(1, 1, 1);
+  };
+  for (const [station, column] of [[0, 0], [0, 3], [stationCount - 1, 0], [stationCount - 1, 3]] as const) addTop(station, column);
+  for (let station = 0; station < stationCount; station += 1) {
+    for (let column = 0; column < 4; column += 1) if (topRows[station]![column] === -1) addTop(station, column);
+  }
+  const sideRows: [number[][], number[][]] = [[], []];
+  for (const [station, point] of stations.entries()) {
+    for (const [sideIndex, edge] of [point.left, point.right].entries()) {
+      const sign = sideIndex === 0 ? -1 : 1;
+      const sideEvent = sideEvents[sideIndex as 0 | 1], structuralDepth = 3.2 + signature * .46 + seededUnit(station, 719 + signature) * .38;
+      const sideRow: number[] = [];
+      for (const [depthIndex, [outward, depth]] of sideEvent.points.entries()) {
+        sideRow.push(positions.length / 3);
+        positions.push(edge + sign * outward, depth === 0 ? point.crown - .012 : depth === -1 ? -structuralDepth : depth, point.z);
+        const shade = 0.82 - depthIndex * 0.075;
+        colors.push(shade, shade * 0.94, shade * 0.86);
+      }
+      sideRows[sideIndex as 0 | 1].push(sideRow);
+    }
+  }
+  for (let station = 0; station < stationCount - 1; station += 1) {
+    for (let column = 0; column < 3; column += 1) {
+      const a = topRows[station]![column]!;
+      const b = topRows[station]![column + 1]!;
+      const c = topRows[station + 1]![column]!;
+      const d = topRows[station + 1]![column + 1]!;
+      indices.push(a, c, d, a, d, b);
+    }
+    for (const [sideIndex, rows] of sideRows.entries()) {
+      for (let depth = 0; depth < sideEvents[sideIndex as 0 | 1].points.length - 1; depth += 1) {
+        const a = rows[station]![depth]!;
+        const b = rows[station]![depth + 1]!;
+        const c = rows[station + 1]![depth]!;
+        const d = rows[station + 1]![depth + 1]!;
+        if (sideIndex === 0) indices.push(a, b, d, a, d, c);
+        else indices.push(a, d, b, a, c, d);
+      }
+    }
+    const leftBottom = sideEvents[0].points.length - 1, rightBottom = sideEvents[1].points.length - 1;
+    const leftBase = sideRows[0][station]![leftBottom]!, rightBase = sideRows[1][station]![rightBottom]!;
+    const nextLeftBase = sideRows[0][station + 1]![leftBottom]!, nextRightBase = sideRows[1][station + 1]![rightBottom]!;
+    indices.push(leftBase, nextRightBase, nextLeftBase, leftBase, rightBase, nextRightBase);
+  }
+  let capTriangleCount = 0;
+  for (const [station, targetNormalZ] of [[0, -1], [stationCount - 1, 1]] as const) {
+    const perimeter = [...topRows[station]!, ...sideRows[1][station]!.slice(1), ...sideRows[0][station]!.slice(1).reverse()];
+    const faces = ShapeUtils.triangulateShape(perimeter.map((vertex) => new Vector2(positions[vertex * 3]!, positions[vertex * 3 + 1]!)), []);
+    for (const face of faces) {
+      const triangle = face.map((index) => perimeter[index]!) as [number, number, number],
+        [a, b, c] = triangle.map((vertex) => new Vector2(positions[vertex * 3]!, positions[vertex * 3 + 1]!));
+      const crossZ = (b!.x - a!.x) * (c!.y - a!.y) - (b!.y - a!.y) * (c!.x - a!.x);
+      indices.push(...(crossZ * targetNormalZ < 0 ? [triangle[0], triangle[2], triangle[1]] : triangle));
+      capTriangleCount += 1;
+    }
+  }
   const geometry = new BufferGeometry();
-  geometry.setAttribute('position', new Float32BufferAttribute([...top, ...bottom], 3));
-  geometry.setIndex([
-    0, 1, 2, 0, 2, 3,
-    7, 6, 5, 7, 5, 4,
-    0, 4, 5, 0, 5, 1,
-    1, 5, 6, 1, 6, 2,
-    2, 6, 7, 2, 7, 3,
-    3, 7, 4, 3, 4, 0,
-  ]);
+  geometry.name = `tide-scar-causeway-module-${signature}`;
+  geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+  geometry.setIndex(indices);
   geometry.computeVertexNormals();
+  geometry.userData = { signature, edgeEvent: sideEvents[0].name, oppositeEdgeEvent: sideEvents[1].name, profilePointCounts: sideEvents.map((event) => event.points.length), capTriangleCount,
+    sideWinding: 'outward-x', moduleLength: [6, 11], protectedHalfWidth: .44, structure: 'fractured-top-authored-edge-event-side-mass' };
   return geometry;
 }
 
@@ -396,15 +468,15 @@ export interface D4CompositionMeasurement {
   bottomRoadWidth: number;
 }
 
-function panoramaHorizonHeight(profile: D4Profile): number {
-  return profile.name === 'portrait' ? -67 : profile.name === 'landscape' ? -36 : -49;
-}
-
 export function applyD4LensShift(camera: PerspectiveCamera, profile: D4Profile): void {
   camera.projectionMatrix.elements[9] = profile.lensShiftY;
   camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
 }
 
+export function applyTR4RuntimeLensShift(camera: PerspectiveCamera, profile: D4Profile): void {
+  camera.projectionMatrix.elements[9] = TR4_RUNTIME_CAMERA[profile.name].lensShiftY;
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+}
 function screenPoint(camera: PerspectiveCamera, point: Vector3, width: number, height: number): { x: number; y: number } {
   const projected = point.clone().project(camera);
   return { x: (projected.x * 0.5 + 0.5) * width, y: (-projected.y * 0.5 + 0.5) * height };
@@ -437,7 +509,7 @@ export function measureD4Composition(
   const pitchDegrees = Math.atan2(-direction.y, Math.hypot(direction.x, direction.z)) * 180 / Math.PI;
   const forward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
   const right = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-  const vanishingPoint = screenPoint(camera, runnerPosition.clone().addScaledVector(forward, 145).add(new Vector3(0, panoramaHorizonHeight(profile), 0)), width, height);
+  const vanishingPoint = screenPoint(camera, runnerPosition.clone().addScaledVector(forward, 400), width, height);
   const leftRoad: { x: number; y: number }[] = [];
   const rightRoad: { x: number; y: number }[] = [];
   for (let distance = -2; distance <= 96; distance += 2) {
@@ -545,6 +617,10 @@ export function pursuerPresentation(chaseGap: number, aspect: number, captured: 
   };
 }
 
+export function shouldShowPursuer(status: RunnerState['status'], elapsedTicks: number, distance: number): boolean {
+  return status === 'ready' || status === 'game-over' || status === 'running' && elapsedTicks < 54 && distance < 6;
+}
+
 export class WorldRenderer {
   private renderer: WebGLRenderer | null = null;
   private readonly scene = new Scene();
@@ -558,15 +634,7 @@ export class WorldRenderer {
   private options: RenderOptions = { highContrast: false, reducedMotion: false };
   private readonly dummy = new Object3D();
   private readonly cameraLook = new Vector3();
-  private readonly ocean = new Mesh(
-    new PlaneGeometry(900, 900),
-    new MeshBasicMaterial({ color: PALETTE.tideDeep }),
-  );
-  private readonly horizon = new Mesh(
-    new PlaneGeometry(360, 110),
-    new MeshBasicMaterial({ color: PALETTE.mist, transparent: true, opacity: 0.34, side: DoubleSide, depthWrite: false }),
-  );
-  private readonly floorMaterial = worldMappedMaterial({ color: PALETTE.sandstone, roughness: 0.94, metalness: 0.01 }, 2.7);
+  private readonly floorMaterial = worldMappedMaterial({ color: PALETTE.sandstone, roughness: 0.9, metalness: 0.01, vertexColors: true }, 2.7);
   private readonly railMaterial = worldMappedMaterial({ color: PALETTE.basaltEdge, roughness: 0.9, metalness: 0.02 }, 1.8);
   private readonly seamMaterial = new MeshStandardMaterial({ color: PALETTE.tideScar, roughness: 0.92, metalness: 0 });
   private readonly guideMaterial = new MeshStandardMaterial({ color: PALETTE.brass, roughness: 0.76, metalness: 0.12 });
@@ -577,12 +645,10 @@ export class WorldRenderer {
   private readonly gateMaterial = new MeshStandardMaterial({ color: PALETTE.sandstoneShade, roughness: 0.86, metalness: 0.04 });
   private readonly columnMaterial = new MeshStandardMaterial({ color: PALETTE.sandstone, roughness: 0.96, metalness: 0 });
   private readonly dangerMaterial = new MeshStandardMaterial({ color: PALETTE.hazard, emissive: 0x2d0906, emissiveIntensity: 0.08, roughness: 0.86 });
-  private readonly gapMaterial = new MeshStandardMaterial({ color: PALETTE.tideDeep, roughness: 0.98 });
   private readonly shardMaterial = new MeshStandardMaterial({ color: PALETTE.tideScar, emissive: PALETTE.tideScar, emissiveIntensity: 0.48, roughness: 0.4, metalness: 0.02 });
   private readonly shieldMaterial = new MeshBasicMaterial({ color: PALETTE.tideScar, transparent: true, opacity: 0.52, wireframe: true });
   private readonly floors = this.instances(new BoxGeometry(1, 1, 1), this.floorMaterial, MAX_SECTIONS);
-  private readonly deckCaps = [0, 1, 2, 3].map((profile) => this.instances(createDeckCapGeometry(profile), this.floorMaterial, MAX_SECTIONS * 2));
-  private readonly cliffAprons = this.instances(new BoxGeometry(1, 1, 1), this.rockMaterial, MAX_CLIFF_APRONS);
+  private readonly deckCaps = [0, 1, 2, 3, 4, 5].map((profile) => this.instances(createDeckCapGeometry(profile), this.floorMaterial, MAX_ROAD_MODULES_PER_SIGNATURE));
   private readonly rails = this.instances(new BoxGeometry(1, 1, 1), this.railMaterial, MAX_RAILS);
   private readonly seams = this.instances(new BoxGeometry(1, 1, 1), this.seamMaterial, MAX_SECTIONS * 3);
   private readonly laneGuides = this.instances(new BoxGeometry(1, 1, 1), this.guideMaterial, MAX_SECTIONS * 2);
@@ -597,7 +663,6 @@ export class WorldRenderer {
   private readonly columns = this.instances(new DodecahedronGeometry(0.76, 0), this.columnMaterial, MAX_EVENTS);
   private readonly columnCaps = this.instances(new DodecahedronGeometry(0.64, 0), this.dangerMaterial, MAX_EVENTS);
   private readonly columnRubble = this.instances(new DodecahedronGeometry(0.34, 0), this.columnMaterial, MAX_EVENTS * 3);
-  private readonly gaps = this.instances(new BoxGeometry(1, 1, 1), this.gapMaterial, MAX_EVENTS);
   private readonly gapLips = this.instances(new BoxGeometry(1, 1, 1), this.dangerMaterial, MAX_EVENTS * 2);
   /** Invisible-to-color shared proxy: the one key-light shadow pass for near hazards. */
   private readonly hazardShadow = this.instances(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ colorWrite: false }), MAX_EVENTS);
@@ -639,7 +704,7 @@ export class WorldRenderer {
     contextLossCount: 0,
     d4: {
       profile: 'desktop',
-      fogDensity: 0.0185,
+      fogDensity: TR4_FOG_DENSITY,
       assetTier: 'loading',
       requestedAssets: [],
       textureBytes: 0,
@@ -651,28 +716,23 @@ export class WorldRenderer {
   };
 
   constructor() {
-    this.scene.background = new Color(PALETTE.sky);
-    this.scene.fog = new FogExp2(PALETTE.mist, 0.0185);
+    this.scene.background = new Color(TR4_FOG_COLOR);
+    this.scene.fog = new FogExp2(TR4_FOG_COLOR, TR4_FOG_DENSITY);
     this.camera.position.set(0, 5.35, 8.1);
-    this.scene.add(new HemisphereLight(0xd8e0df, PALETTE.tideDeep, 1.2));
-    this.scene.add(new AmbientLight(0x708691, 0.22));
-    const key = new DirectionalLight(0xffe0ad, 2.65);
+    this.scene.add(new HemisphereLight(0xd8e0df, PALETTE.tideDeep, 1.5));
+    this.scene.add(new AmbientLight(0x708691, .38));
+    const key = new DirectionalLight(0xffd7a0, 4.2);
     key.position.set(-10, 16, 7);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
     key.shadow.normalBias = 0.02;
     this.scene.add(key);
-    const rim = new DirectionalLight(0x49768e, 0.32);
-    rim.position.set(7, 6, -12);
+    const rim = new DirectionalLight(0x638fa4, 1.1);
+    rim.position.set(8, 8, 10);
     this.scene.add(rim);
-    this.ocean.rotation.x = -Math.PI / 2;
-    this.ocean.position.y = -4.4;
-    this.horizon.position.set(0, 22, -100);
-    this.scene.add(this.ocean, this.horizon);
     this.scene.add(
       this.floors,
       ...this.deckCaps,
-      this.cliffAprons,
       this.rails,
       this.seams,
       this.laneGuides,
@@ -687,7 +747,6 @@ export class WorldRenderer {
       this.columns,
       this.columnCaps,
       this.columnRubble,
-      this.gaps,
       this.gapLips,
       this.hazardShadow,
       this.shards,
@@ -697,10 +756,10 @@ export class WorldRenderer {
       this.tideScarRoad.mesh,
       this.mist,
     );
-    for (const mesh of [this.floors, ...this.deckCaps, this.cliffAprons, this.rails, this.platforms, this.rocks]) {
+    for (const mesh of [this.floors, ...this.deckCaps, this.rails, this.platforms, this.rocks]) {
       mesh.receiveShadow = true;
     }
-    for (const mesh of [this.beams, this.beamCuts, this.rings, this.gatePosts, this.columns, this.columnCaps, this.columnRubble, this.gaps, this.gapLips]) {
+    for (const mesh of [this.beams, this.beamCuts, this.rings, this.gatePosts, this.columns, this.columnCaps, this.columnRubble, this.gapLips]) {
       mesh.receiveShadow = true;
     }
     this.hazardShadow.castShadow = true;
@@ -738,7 +797,8 @@ export class WorldRenderer {
 
   setOptions(options: Partial<RenderOptions>): void {
     this.options = { ...this.options, ...options };
-    this.scene.fog = new FogExp2(this.options.highContrast ? 0x71828a : PALETTE.mist, this.options.highContrast ? 0.012 : this.activeD4Profile.fogDensity);
+    this.scene.fog = new FogExp2(this.options.highContrast ? 0x71828a : TR4_FOG_COLOR,
+      canyonFogDensity(this.activeD4Profile, this.options.highContrast));
     this.dangerMaterial.emissiveIntensity = this.options.highContrast ? 0.3 : 0.08;
     if (this.options.reducedMotion) {
       this.impact = 0;
@@ -812,15 +872,6 @@ export class WorldRenderer {
     this.updateCamera(state, position, yaw, deltaMs);
     this.canyon.update(position, yaw, this.activeD4Profile.name);
     this.updatePursuer(state, position, yaw);
-    this.ocean.position.x = position.x;
-    this.ocean.position.z = position.z;
-    const horizonForward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
-    this.horizon.position.set(
-      position.x + horizonForward.x * 115,
-      22,
-      position.z + horizonForward.z * 115,
-    );
-    this.horizon.rotation.y = yaw;
     renderer.render(this.scene, this.camera);
     this.updateSnapshot(
       state,
@@ -869,7 +920,8 @@ export class WorldRenderer {
     this.clearD4MaterialMaps();
     this.d4Assets?.dispose();
     this.d4Assets = null;
-    this.canyon.setPanorama(null);
+    this.canyon.dispose();
+    this.scene.remove(this.canyon.root);
     const renderer = this.renderer;
     this.renderer = null;
     if (renderer) {
@@ -927,7 +979,6 @@ export class WorldRenderer {
     this.clearD4MaterialMaps();
     this.d4Assets?.dispose();
     this.d4Assets = null;
-    this.canyon.setPanorama(null);
     this.d4AssetsLoading = true;
     void loadD4Assets(capabilities).then((assets) => {
       if (!this.renderer) {
@@ -939,17 +990,14 @@ export class WorldRenderer {
         const anisotropy = Math.min(4, this.renderer?.capabilities.getMaxAnisotropy() ?? 1);
         assets.textures.sandstone.anisotropy = anisotropy;
         assets.textures.basalt.anisotropy = anisotropy;
-        assets.textures.canyon.anisotropy = anisotropy;
         this.floorMaterial.map = assets.textures.sandstone;
         this.railMaterial.map = assets.textures.basalt;
         this.rockMaterial.map = assets.textures.basalt;
+        this.canyon.setSurfaceMap(assets.textures.basalt);
         this.coralMaterial.alphaMap = assets.textures.coral;
         this.coralMaterial.transparent = true;
-        this.canyon.setPanorama(assets.textures.canyon);
-        this.horizon.visible = false;
       } else {
         this.clearD4MaterialMaps();
-        this.horizon.visible = true;
       }
       this.floorMaterial.needsUpdate = true;
       this.railMaterial.needsUpdate = true;
@@ -967,14 +1015,13 @@ export class WorldRenderer {
     this.floorMaterial.map = null;
     this.railMaterial.map = null;
     this.rockMaterial.map = null;
+    this.canyon.setSurfaceMap(null);
     this.coralMaterial.alphaMap = null;
     this.coralMaterial.transparent = false;
     this.floorMaterial.needsUpdate = true;
     this.railMaterial.needsUpdate = true;
     this.rockMaterial.needsUpdate = true;
     this.coralMaterial.needsUpdate = true;
-    this.canyon.setPanorama(null);
-    this.horizon.visible = true;
   }
 
   private consumeEvents(state: RunnerState, events: readonly RunnerEvent[]): void {
@@ -1092,8 +1139,7 @@ export class WorldRenderer {
       .filter((section) => section.index >= state.sectionIndex - 1 && section.index <= state.sectionIndex + 5)
       .slice(0, MAX_SECTIONS);
     let floorCount = 0;
-    const deckCapCounts = [0, 0, 0, 0];
-    let cliffApronCount = 0;
+    const deckCapCounts = [0, 0, 0, 0, 0, 0];
     let railCount = 0;
     let seamCount = 0;
     let laneGuideCount = 0;
@@ -1108,7 +1154,6 @@ export class WorldRenderer {
     let columnCount = 0;
     let columnCapCount = 0;
     let columnRubbleCount = 0;
-    let gapCount = 0;
     let gapLipCount = 0;
     let hazardShadowCount = 0;
     let shardCount = 0;
@@ -1116,15 +1161,35 @@ export class WorldRenderer {
 
     for (const section of this.visibleSections) {
       const yaw = headingYaw(section.heading);
-      const center = sampleCoursePosition(section, section.length / 2);
-      const straightLength = Math.max(1, section.length + 0.08);
-      const capProfile = Math.min(3, Math.floor(seededUnit(section.index, 71) * 4));
-      const cap = this.deckCaps[capProfile];
-      if (cap) this.setInstance(cap, deckCapCounts[capProfile]++, center.x, 0, center.z, yaw, WORLD_METRICS.roadWidth, 1, straightLength);
       const right = rightVector(section.heading);
-      for (const side of [-1, 1] as const) {
-        const apronOffset = side * (WORLD_METRICS.roadWidth / 2 + 0.5);
-        this.setInstance(this.cliffAprons, cliffApronCount++, center.x + right.x * apronOffset, -3.5, center.z + right.z * apronOffset, yaw, 0.92, 6.8, straightLength + 0.1);
+      const gapIntervals = section.events
+        .filter((event): event is CourseEvent & { kind: 'gap' } => event.kind === 'gap')
+        .map((event) => [event.at, Math.min(section.length, event.at + event.length)] as const)
+        .sort((a, b) => a[0] - b[0]);
+      const roadIntervals: [number, number][] = [];
+      let intervalStart = presentationRoadStart(section.index);
+      for (const [gapStart, gapEnd] of gapIntervals) {
+        if (gapStart > intervalStart) roadIntervals.push([intervalStart, gapStart]);
+        intervalStart = Math.max(intervalStart, gapEnd);
+      }
+      if (intervalStart < section.length) roadIntervals.push([intervalStart, section.length]);
+      let moduleIndex = 0;
+      for (const [start, end] of roadIntervals) {
+        let cursor = start;
+        while (end - cursor > 0.2) {
+          const remaining = end - cursor;
+          let moduleLength = Math.min(11, 6 + seededUnit(section.index * 31 + moduleIndex, 733) * 5);
+          if (remaining <= 11) moduleLength = remaining;
+          else if (remaining - moduleLength < 6) moduleLength = remaining - 6;
+          const signature = Math.floor(seededUnit(section.index * 37 + moduleIndex, 739) * this.deckCaps.length) % this.deckCaps.length;
+          const cap = this.deckCaps[signature];
+          if (cap) {
+            const center = sampleCoursePosition(section, cursor + moduleLength / 2);
+            this.setInstance(cap, deckCapCounts[signature]++, center.x, 0, center.z, yaw, WORLD_METRICS.roadWidth, 1, moduleLength + 0.06);
+          }
+          cursor += moduleLength;
+          moduleIndex += 1;
+        }
       }
 
       for (let marker = 0; marker < 3; marker += 1) {
@@ -1162,11 +1227,9 @@ export class WorldRenderer {
           this.setInstance(this.hazardShadow, hazardShadowCount++, sample.x, 0.92, sample.z, yaw, 0.94, 1.36, 0.9);
         } else if (event.kind === 'gap') {
           const width = event.lane === 'all' ? WORLD_METRICS.roadWidth - 0.5 : WORLD_METRICS.laneWidth * 0.9;
-          const gapCenter = sampleCoursePosition(section, event.at + event.length / 2, event.lane === 'all' ? 0 : event.lane);
-          this.setInstance(this.gaps, gapCount++, gapCenter.x, 0.03, gapCenter.z, yaw, width, 0.075, Math.max(1.6, event.length));
           const farSample = sampleCoursePosition(section, event.at + event.length, event.lane === 'all' ? 0 : event.lane);
-          this.setInstance(this.beamCuts, beamCutCount++, sample.x, 0.08, sample.z, yaw, width, 0.12, 0.18);
-          this.setInstance(this.beamCuts, beamCutCount++, farSample.x, 0.08, farSample.z, yaw, width, 0.12, 0.18);
+          this.setInstance(this.gapLips, gapLipCount++, sample.x, 0.08, sample.z, yaw, width, 0.18, 0.22);
+          this.setInstance(this.gapLips, gapLipCount++, farSample.x, 0.08, farSample.z, yaw, width, 0.18, 0.22);
         } else if (event.kind === 'shard') {
           const bob = this.options.reducedMotion ? 0 : Math.sin(this.elapsed * 3.2 + event.at) * 0.13;
           const rotation = this.options.reducedMotion ? event.at * 0.17 : this.elapsed * 1.6 + event.at;
@@ -1179,7 +1242,6 @@ export class WorldRenderer {
     }
     this.finishInstances(this.floors, floorCount);
     this.deckCaps.forEach((cap, index) => this.finishInstances(cap, deckCapCounts[index] ?? 0));
-    this.finishInstances(this.cliffAprons, cliffApronCount);
     this.finishInstances(this.rails, railCount);
     this.finishInstances(this.seams, seamCount);
     this.finishInstances(this.laneGuides, laneGuideCount);
@@ -1194,7 +1256,6 @@ export class WorldRenderer {
     this.finishInstances(this.columns, columnCount);
     this.finishInstances(this.columnCaps, columnCapCount);
     this.finishInstances(this.columnRubble, columnRubbleCount);
-    this.finishInstances(this.gaps, gapCount);
     this.finishInstances(this.gapLips, gapLipCount);
     this.finishInstances(this.hazardShadow, hazardShadowCount);
     this.finishInstances(this.shards, shardCount);
@@ -1223,8 +1284,9 @@ export class WorldRenderer {
     const forward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
     const right = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
     const profile = this.activeD4Profile;
-    const targetPosition = position.clone().addScaledVector(forward, -profile.cameraBack);
-    targetPosition.y = profile.cameraHeight + position.y * 0.18 - (state.runner.slideTicksRemaining > 0 ? 0.12 : 0);
+    const cameraRecord = TR4_RUNTIME_CAMERA[profile.name];
+    const targetPosition = position.clone().addScaledVector(forward, -cameraRecord.back);
+    targetPosition.y = cameraRecord.height + position.y * 0.18 - (state.runner.slideTicksRemaining > 0 ? 0.12 : 0);
     targetPosition.addScaledVector(right, -state.runner.lanePosition * profile.cameraLaneBias);
     if (this.impact > 0 && !this.options.reducedMotion) {
       targetPosition.addScaledVector(right, Math.sin(this.elapsed * 95) * this.impact * 0.12);
@@ -1236,15 +1298,15 @@ export class WorldRenderer {
       this.camera.position.distanceToSquared(targetPosition) > 12 * 12
     ) this.camera.position.copy(targetPosition);
     else this.camera.position.lerp(targetPosition, damping);
-    this.cameraLook.copy(position).addScaledVector(forward, profile.lookAhead).add(new Vector3(0, profile.lookHeight + position.y * 0.1, 0));
+    this.cameraLook.copy(position).addScaledVector(forward, cameraRecord.targetAhead).add(new Vector3(0, cameraRecord.targetY + position.y * 0.1, 0));
     this.camera.lookAt(this.cameraLook);
-    this.camera.fov = profile.fov;
+    this.camera.fov = cameraRecord.fov;
     const fog = this.scene.fog;
-    if (fog instanceof FogExp2) fog.density = this.options.highContrast ? 0.012 : profile.fogDensity;
+    if (fog instanceof FogExp2) fog.density = canyonFogDensity(profile, this.options.highContrast);
     this.camera.updateProjectionMatrix();
     // Preserve the frozen FOV/look target while shifting the asymmetric lens
     // into the documented runner/road bands; presentation only.
-    applyD4LensShift(this.camera, profile);
+    applyTR4RuntimeLensShift(this.camera, profile);
   }
 
   private createMist(): Points {
@@ -1262,6 +1324,13 @@ export class WorldRenderer {
   }
 
   private updatePursuer(state: RunnerState, position: Vector3, yaw: number): void {
+    const visible = shouldShowPursuer(state.status, state.elapsedTicks, state.distance);
+    if (!visible) {
+      this.pursuer.root.visible = false;
+      this.mist.visible = false;
+      this.pursuerPlacementError = null;
+      return;
+    }
     const forward = new Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
     const captured = state.status === 'game-over' && state.failureReason?.kind === 'pursuer-caught';
     const presentation = pursuerPresentation(state.chaseGap, this.camera.aspect, captured);
@@ -1275,10 +1344,10 @@ export class WorldRenderer {
       state.chaseGap,
       presentation.scale,
     );
-    this.pursuerPlacementError = !captured && state.status !== 'ready' && !placement
+    this.pursuerPlacementError = !captured && !placement
       ? `No grounded pursuer projection for ${this.activeD4Profile.name} at chaseGap=${state.chaseGap.toFixed(3)}`
       : null;
-    const visibleGap = captured ? 0.42 : placement?.worldGap ?? 0;
+    const visibleGap = captured ? .42 : placement?.worldGap ?? presentation.visibleGap;
     this.pursuer.root.position.copy(position).addScaledVector(forward, -visibleGap);
     this.pursuer.root.position.y = 0.03;
     this.pursuer.root.rotation.y = yaw;
@@ -1290,9 +1359,9 @@ export class WorldRenderer {
       stumble: state.runner.speedPenaltyTicks > 0,
       captured,
     });
-    this.pursuer.root.visible = state.status !== 'ready' && (captured || placement !== null);
+    this.pursuer.root.visible = true;
     this.mist.position.copy(position).addScaledVector(forward, -Math.min(6.4, visibleGap + 0.7));
-    this.mist.visible = !this.options.reducedMotion && state.chaseGap > 2.4;
+    this.mist.visible = state.status === 'running' && !this.options.reducedMotion && state.chaseGap > 2.4;
   }
 
   private updateSnapshot(
@@ -1306,24 +1375,20 @@ export class WorldRenderer {
     const renderer = this.renderer;
     if (!renderer) return;
     const screen = position.clone().add(new Vector3(0, 1, 0)).project(this.camera);
-    const pursuer = this.pursuer.root.position.clone().add(new Vector3(0, 0.9, 0)).project(this.camera);
+    const pursuer = this.pursuer.root.visible
+      ? this.pursuer.root.position.clone().add(new Vector3(0, .9, 0)).project(this.camera)
+      : null;
     const size = renderer.getSize(new Vector2());
     const width = size.x;
     const height = size.y;
     const runnerRigBounds = groundAnchoredBounds(position, RUNNER_RIG_BOUNDS);
-    const pursuerRigBounds = groundAnchoredBounds(
-      this.pursuer.root.position,
-      PURSUER_RIG_BOUNDS,
-      this.pursuer.root.scale.x,
-    );
+    const pursuerRigBounds = this.pursuer.root.visible
+      ? groundAnchoredBounds(this.pursuer.root.position, PURSUER_RIG_BOUNDS, this.pursuer.root.scale.x)
+      : null;
     const runnerBounds = this.clippedBounds(runnerRigBounds.center, runnerRigBounds.halfExtent, width, height, yaw);
-    const pursuerBounds = this.clippedBounds(
-      pursuerRigBounds.center,
-      pursuerRigBounds.halfExtent,
-      width,
-      height,
-      this.pursuer.root.rotation.y,
-    );
+    const pursuerBounds = pursuerRigBounds
+      ? this.clippedBounds(pursuerRigBounds.center, pursuerRigBounds.halfExtent, width, height, this.pursuer.root.rotation.y)
+      : null;
     const captured = state.status === 'game-over' && state.failureReason?.kind === 'pursuer-caught';
     const pursuerGapPx = pursuerScreenGapPx(runnerBounds, pursuerBounds, captured);
     const fallbackSelection = selectD4Assets({
@@ -1357,10 +1422,10 @@ export class WorldRenderer {
         bounds: runnerBounds,
       },
       pursuerScreen: {
-        x: (pursuer.x * 0.5 + 0.5) * width,
-        y: (-pursuer.y * 0.5 + 0.5) * height,
-        visible: this.pursuer.root.visible && pursuerBounds !== null,
-        bounds: this.pursuer.root.visible ? pursuerBounds : null,
+        x: pursuer ? (pursuer.x * .5 + .5) * width : -1,
+        y: pursuer ? (-pursuer.y * .5 + .5) * height : -1,
+        visible: pursuerBounds !== null,
+        bounds: pursuerBounds,
       },
       pursuerGapPx,
       hazardScreens,
@@ -1369,14 +1434,14 @@ export class WorldRenderer {
       lanePosition: state.runner.lanePosition,
       posture: postureOf(state),
       visibleSectionIds: this.visibleSections.map((section) => section.id),
-      visibleObstacleCount: this.beams.count + this.rings.count + this.columns.count + this.gaps.count,
+      visibleObstacleCount: this.beams.count + this.rings.count + this.columns.count + Math.ceil(this.gapLips.count / 2),
       drawCalls: renderer.info.render.calls,
       triangles: renderer.info.render.triangles,
       turnProgress: this.turnMotion ? this.turnMotion.override ?? this.turnMotion.progress : null,
       contextLossCount: this.contextLossCount,
       d4: {
         profile: this.activeD4Profile.name,
-        fogDensity: this.options.highContrast ? 0.012 : this.activeD4Profile.fogDensity,
+        fogDensity: canyonFogDensity(this.activeD4Profile, this.options.highContrast),
         assetTier: assets ? (assets.fallback ? 'fallback' : assets.tier) : 'loading',
         requestedAssets: assets?.requestedFiles ?? fallbackSelection.requestedFiles,
         textureBytes: assets?.textureBytes ?? fallbackSelection.textureBytes,
