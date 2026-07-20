@@ -154,7 +154,7 @@ const MAX_SHARDS = 160;
 const TURN_VISUAL_RADIUS = 1.45;
 const TR4_FOG_COLOR = 0x9aa7a8, TR4_FOG_DENSITY = 0.0035;
 export const TR4_RUNTIME_CAMERA = {
-  portrait: { height: 6.2, back: 15.2, targetAhead: 16.8, targetY: 0.55, fov: 40, lensShiftY: -0.055 },
+  portrait: { height: 8.4, back: 22, targetAhead: 21, targetY: 0.7, fov: 46, lensShiftY: -0.04 },
   desktop: { height: 6.06, back: 13.6, targetAhead: 13.3, targetY: 0.6, fov: 43, lensShiftY: -0.025 },
   landscape: { height: 6.15, back: 12.8, targetAhead: 12.56, targetY: 0.55, fov: 46, lensShiftY: -0.02 },
 } as const;

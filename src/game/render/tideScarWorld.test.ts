@@ -4,9 +4,9 @@ import { TideScarWorld } from './tideScarWorld';
 import { applyTR4RuntimeLensShift, createDeckCapGeometry, presentationRoadStart, shouldShowPursuer, TR4_RUNTIME_CAMERA } from './WorldRenderer';
 import { d4ProfileForViewport } from './d4Profile';
 
-const LAYERS = [['tide-scar-near-fractured-inner-lips', 'near', 3, 13, 10],
-  ['tide-scar-mid-interrupted-buttress-recesses', 'mid', 4, 14, 12],
-  ['tide-scar-far-low-ridge-mesa-chains', 'far', 4, 11, 12]] as const;
+const LAYERS = [['tide-scar-near-fractured-inner-lips', 'near', 3, 13, 10, 6],
+  ['tide-scar-mid-interrupted-buttress-recesses', 'mid', 4, 14, 12, 8],
+  ['tide-scar-far-low-ridge-mesa-chains', 'far', 4, 11, 12, 8]] as const;
 describe('Tide Scar geometric canyon presentation', () => {
   it('builds thick, distinct near/mid/far topology without panorama, plane, or instanced-card geometry', () => {
     const world = new TideScarWorld();
@@ -17,7 +17,7 @@ describe('Tide Scar geometric canyon presentation', () => {
     const averageAbyssNormalY = Array.from({ length: abyssNormals.count }, (_, index) => abyssNormals.getY(index))
       .reduce((sum, value) => sum + value, 0) / abyssNormals.count;
     expect(averageAbyssNormalY).toBeGreaterThan(.7);
-    for (const [name, layer, runCount, profilePointCount, signatureCount] of LAYERS) {
+    for (const [name, layer, runCount, profilePointCount, signatureCount, detailFragmentCount] of LAYERS) {
       const object = world.root.getObjectByName(name);
       expect(object).toBeInstanceOf(Mesh);
       const mesh = object as Mesh;
@@ -27,13 +27,30 @@ describe('Tide Scar geometric canyon presentation', () => {
       expect(bounds.max.y - bounds.min.y).toBeGreaterThan(10);
       expect(bounds.max.z - bounds.min.z).toBeGreaterThan(40);
       const expectedSideTriangles = signatureCount * profilePointCount * 2, expectedCapTriangles = runCount * (profilePointCount - 2) * 2;
-      expect(mesh.geometry.userData).toMatchObject({ canyonLayer: layer, runCount, profilePointCount, signatureCount,
+      const detailTriangleCount = detailFragmentCount * 8;
+      expect(mesh.geometry.userData).toMatchObject({ canyonLayer: layer, runCount, profilePointCount, signatureCount, detailFragmentCount, detailTriangleCount,
         closedProfile: true, capCount: runCount * 2, sideTriangleCount: expectedSideTriangles,
         capTriangleCount: expectedCapTriangles,
-        construction: 'closed-segmented-longitudinal-shelf-recess-buttress-foot-talus' });
+        construction: 'closed-segmented-longitudinal-shelf-recess-buttress-foot-talus-strata-detail' });
       expect(mesh.geometry.userData.endpointAreaRatio).toBeLessThan(.2);
-      expect(mesh.geometry.getIndex()!.count / 3).toBe(expectedSideTriangles + expectedCapTriangles);
+      expect(mesh.geometry.getIndex()!.count / 3).toBe(expectedSideTriangles + expectedCapTriangles + detailTriangleCount);
+      expect(mesh.geometry.getIndex()!.count - mesh.geometry.userData.detailIndexStart).toBe(detailTriangleCount * 3);
       expect(mesh.geometry.getAttribute('uv').count).toBe(mesh.geometry.getAttribute('position').count);
+      const position = mesh.geometry.getAttribute('position'), fragments = mesh.geometry.userData.detailFragments as { kind: string; anchor: readonly number[]; side: number; runSeed: number; hostDepth: number; vertexStart: number; vertexCount: number }[];
+      for (const fragment of fragments) {
+        expect(['talus', 'strata']).toContain(fragment.kind); expect(fragment.vertexCount).toBe(24);
+        const points = Array.from({ length: fragment.vertexCount }, (_, offset) => new Vector3().fromBufferAttribute(position, fragment.vertexStart + offset));
+        const unique = [...new Map(points.map((point) => [point.toArray().join(','), point])).values()], center = unique.reduce((sum, point) => sum.add(point), new Vector3()).multiplyScalar(1 / unique.length);
+        expect(unique).toHaveLength(6);
+        for (const axis of ['x', 'y', 'z'] as const) expect(Math.max(...unique.map((point) => point[axis])) - Math.min(...unique.map((point) => point[axis]))).toBeGreaterThan(.04);
+        const contact = unique.map((point) => (point.x - fragment.anchor[0]!) * fragment.side); expect(Math.min(...contact)).toBeLessThan(0); expect(Math.min(...contact)).toBeGreaterThanOrEqual(-fragment.hostDepth * .13); expect(contact.filter((offset) => offset > 0).length).toBeGreaterThan(unique.length / 2);
+        for (let offset = 0; offset < points.length; offset += 3) {
+          const [a, b, c] = points.slice(offset, offset + 3), normal = b!.clone().sub(a!).cross(c!.clone().sub(a!)), centroid = a!.clone().add(b!).add(c!).multiplyScalar(1 / 3);
+          expect(normal.length()).toBeGreaterThan(1e-4); expect(normal.dot(centroid.sub(center))).toBeGreaterThan(0);
+        }
+      }
+      const runDetails = new Map<number, string[]>(); for (const fragment of fragments) runDetails.set(fragment.runSeed, [...runDetails.get(fragment.runSeed) ?? [], fragment.kind]); expect(runDetails.size).toBe(runCount);
+      for (const details of runDetails.values()) expect(details.sort()).toEqual(['strata', 'talus']);
       topologySizes.push(mesh.geometry.getAttribute('position').count);
     }
     expect(new Set(topologySizes).size).toBe(3);
@@ -97,6 +114,16 @@ describe('Tide Scar geometric canyon presentation', () => {
       expect({ fov: camera.fov, lens: camera.projectionMatrix.elements[9], position: camera.position.toArray() })
         .toEqual({ fov: record.fov, lens: record.lensShiftY, position: [0, record.height, record.back] });
     }
+    expect(TR4_RUNTIME_CAMERA.portrait).toEqual({ height: 8.4, back: 22, targetAhead: 21, targetY: .7, fov: 46, lensShiftY: -.04 });
+    const projectionScale = (record: { height: number; back: number; targetAhead: number; targetY: number; fov: number }) => {
+      const camera = new PerspectiveCamera(record.fov, 390 / 844, .08, 520); camera.position.set(0, record.height, record.back); camera.lookAt(0, record.targetY, -record.targetAhead); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
+      const project = (point: Vector3) => point.project(camera), left = project(new Vector3(-3, 0, 0)), right = project(new Vector3(3, 0, 0)), feet = project(new Vector3(0, 0, 0)), head = project(new Vector3(0, 2, 0));
+      return { road: Math.abs(right.x - left.x) * 195, runner: Math.abs(head.y - feet.y) * 422 };
+    };
+    const old = { height: 6.2, back: 15.2, targetAhead: 16.8, targetY: .55, fov: 40 }, next = projectionScale(TR4_RUNTIME_CAMERA.portrait), previous = projectionScale(old);
+    expect(next.road / previous.road).toBeGreaterThan(.55); expect(next.road / previous.road).toBeLessThan(.7);
+    expect(next.runner / previous.runner).toBeGreaterThan(.55); expect(next.runner / previous.runner).toBeLessThan(.7);
+    expect(Math.atan2(8.4 - .7, 22 + 21)).toBeCloseTo(Math.atan2(6.2 - .55, 15.2 + 16.8), 2);
   });
   it('replays identical geometry and holds a quantized world cell across all three profiles', () => {
     const first = new TideScarWorld();

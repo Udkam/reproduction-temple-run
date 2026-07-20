@@ -6,6 +6,10 @@ type CanyonLayerName = 'near' | 'mid' | 'far';
 type Side = -1 | 1;
 interface ShelfRun { side: Side; z: readonly number[]; inner: number; width: number; top: number; foot: number; seed: number }
 interface ShelfLayer { name: CanyonLayerName; objectName: string; color: number; runs: readonly ShelfRun[]; profile: readonly [number, number][] }
+type Point3 = readonly [number, number, number];
+interface DetailSpec { kind: 'talus' | 'strata'; anchor: Point3; side: Side; runSeed: number; hostDepth: number; points: readonly Point3[]; faces: readonly (readonly [number, number, number])[]; tone: number }
+const TALUS_FACES = [[0, 2, 4], [0, 4, 3], [0, 3, 5], [0, 5, 2], [1, 4, 2], [1, 3, 4], [1, 5, 3], [1, 2, 5]] as const;
+const STRATA_FACES = [[0, 2, 1], [3, 4, 5], [0, 1, 4], [0, 4, 3], [1, 2, 5], [1, 5, 4], [2, 0, 3], [2, 3, 5]] as const;
 const SHELF_LAYERS: readonly ShelfLayer[] = [
   { name: 'near', objectName: 'tide-scar-near-fractured-inner-lips', color: 0x9cabb0,
     profile: [[0, 1], [.34, 1.02], [.3, .76], [.58, .72], [.75, .8], [1, .4], [.82, 0], [.12, 0], [.12, .22], [.28, .22], [.22, .42], [.06, .42], [.06, .7]],
@@ -16,14 +20,14 @@ const SHELF_LAYERS: readonly ShelfLayer[] = [
   { name: 'mid', objectName: 'tide-scar-mid-interrupted-buttress-recesses', color: 0x657985,
     profile: [[0, 1], [.2, 1], [.22, .68], [.48, .66], [.6, .84], [.9, .82], [1, .35], [.74, 0], [.08, 0], [.08, .24], [.22, .24], [.16, .48], [.04, .48], [.04, .74]],
     runs: [
-      { side: -1, z: [-24, -33, -42, -51], inner: 18, width: 10, top: 5.4, foot: -17, seed: 41 }, { side: 1, z: [-44, -53, -62, -71], inner: 22, width: 12, top: 6, foot: -18, seed: 47 },
-      { side: -1, z: [-66, -76, -86, -96], inner: 26, width: 13, top: 6.5, foot: -19, seed: 53 }, { side: 1, z: [-91, -101, -111, -121], inner: 30, width: 14, top: 5.6, foot: -18, seed: 59 },
+      { side: -1, z: [-24, -33, -42, -51], inner: 14, width: 8, top: 5.4, foot: -17, seed: 41 }, { side: 1, z: [-44, -53, -62, -71], inner: 18, width: 10, top: 6, foot: -18, seed: 47 },
+      { side: -1, z: [-66, -76, -86, -96], inner: 22, width: 12, top: 6.5, foot: -19, seed: 53 }, { side: 1, z: [-91, -101, -111, -121], inner: 26, width: 14, top: 5.6, foot: -18, seed: 59 },
     ] },
   { name: 'far', objectName: 'tide-scar-far-low-ridge-mesa-chains', color: 0x87979d,
     profile: [[0, 1], [.32, 1], [.45, .72], [.72, .7], [1, .38], [.86, 0], [.1, 0], [.1, .28], [.24, .28], [.08, .55], [.04, .76]],
     runs: [
-      { side: -1, z: [-78, -90, -102, -114], inner: 28, width: 18, top: 3.8, foot: -12, seed: 89 }, { side: 1, z: [-96, -108, -120, -132], inner: 34, width: 20, top: 4.8, foot: -14, seed: 97 },
-      { side: -1, z: [-126, -139, -152, -165], inner: 40, width: 22, top: 6, foot: -17, seed: 101 }, { side: 1, z: [-150, -164, -178, -192], inner: 46, width: 23, top: 5.2, foot: -16, seed: 103 },
+      { side: -1, z: [-78, -90, -102, -114], inner: 12, width: 12, top: 3.8, foot: -12, seed: 89 }, { side: 1, z: [-96, -108, -120, -132], inner: 16, width: 15, top: 4.8, foot: -14, seed: 97 },
+      { side: -1, z: [-126, -139, -152, -165], inner: 22, width: 18, top: 6, foot: -17, seed: 101 }, { side: 1, z: [-150, -164, -178, -192], inner: 28, width: 20, top: 5.2, foot: -16, seed: 103 },
     ] },
 ] as const;
 
@@ -36,6 +40,7 @@ function seededUnit(index: number, salt: number): number {
 }
 function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   const positions: number[] = [], colors: number[] = [], uvs: number[] = [], indices: number[] = [];
+  const detailSpecs: DetailSpec[] = [], detailFragments: { kind: DetailSpec['kind']; anchor: Point3; side: Side; runSeed: number; hostDepth: number; vertexStart: number; vertexCount: number }[] = [];
   const tint = new Color(layer.color);
   const capFaces = ShapeUtils.triangulateShape(layer.profile.map(([x, y]) => new Vector2(x, y)), []);
   const signatureCount = layer.runs.reduce((count, run) => count + run.z.length - 1, 0);
@@ -44,6 +49,20 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
     const index = positions.length / 3, shade = (.82 + Math.max(0, point[1] + 33) / 48 * .18) * tone;
     positions.push(...point); colors.push(tint.r * shade, tint.g * shade, tint.b * shade); uvs.push(...uv); return index;
   };
+  const appendDetail = (spec: DetailSpec) => {
+    const center = spec.points.reduce((sum, point) => sum.add(new Vector3(...point)), new Vector3()).multiplyScalar(1 / spec.points.length), vertexStart = positions.length / 3;
+    for (const face of spec.faces) {
+      const points = face.map((index) => new Vector3(...spec.points[index]!)) as [Vector3, Vector3, Vector3];
+      const normal = points[1].clone().sub(points[0]).cross(points[2].clone().sub(points[0])), centroid = points[0].clone().add(points[1]).add(points[2]).multiplyScalar(1 / 3);
+      if (normal.dot(centroid.sub(center)) < 0) [points[1], points[2]] = [points[2], points[1]];
+      normal.copy(points[1]).sub(points[0]).cross(points[2].clone().sub(points[0])).normalize();
+      const abs = [Math.abs(normal.x), Math.abs(normal.y), Math.abs(normal.z)], tone = spec.tone * (normal.y > .45 ? 1.12 : normal.y < -.25 ? .78 : 1);
+      indices.push(...points.map((point) => addVertex([point.x, point.y, point.z], abs[1]! >= Math.max(abs[0]!, abs[2]!) ? [point.x * .08, -point.z * .055] : abs[0]! >= abs[2]! ? [-point.z * .055, point.y * .08] : [point.x * .08, point.y * .08], tone)));
+    }
+    detailFragments.push({ kind: spec.kind, anchor: spec.anchor, side: spec.side, runSeed: spec.runSeed, hostDepth: spec.hostDepth, vertexStart, vertexCount: positions.length / 3 - vertexStart });
+  };
+  const footStep = layer.profile.reduce((best, point, index) => point[1] < layer.profile[best]![1] || point[1] === layer.profile[best]![1] && point[0] < layer.profile[best]![0] ? index : best, 0);
+  const detailScale = layer.name === 'near' ? [1, 1, 3.4] : layer.name === 'mid' ? [1.35, 1.05, 5.2] : [2, .75, 8];
   for (const run of layer.runs) {
     const stations = run.z.map((z, station) => {
       const terminal = station === 0 || station === run.z.length - 1, innerUnit = seededUnit(run.seed + station * 17, 211), widthUnit = seededUnit(run.seed + station * 19, 223);
@@ -53,6 +72,15 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
     });
     const areas = stations.map((station) => Math.abs(ShapeUtils.area(station.map(([x, y]) => new Vector2(x, y)))));
     endpointAreaRatio = Math.max(endpointAreaRatio, Math.max(areas[0]!, areas.at(-1)!) / Math.max(...areas.slice(1, -1)));
+    const detailStation = 1 + Math.min(stations.length - 3, Math.floor(seededUnit(run.seed, 317) * (stations.length - 2)));
+    const foot = stations[detailStation]![footStep]!, upper = stations[detailStation]!.at(-1)!, unit = seededUnit(run.seed + detailStation * 41, 307);
+    const radius = detailScale[0]! * (.9 + unit * .28), height = detailScale[1]! * (.95 + seededUnit(run.seed, 311) * .3), zRadius = radius * (.85 + seededUnit(run.seed, 313) * .32);
+    const talusAnchor: Point3 = [foot[0], foot[1], foot[2] + (unit - .5) * 1.2], embed = .45 + seededUnit(run.seed, 319) * .1, cx = talusAnchor[0] + run.side * radius * embed, cy = talusAnchor[1] + height * .36;
+    detailSpecs.push({ kind: 'talus', anchor: talusAnchor, side: run.side, runSeed: run.seed, hostDepth: radius, tone: .91, faces: TALUS_FACES, points: [[cx - run.side * radius * (embed + .07), cy, talusAnchor[2]], [cx + run.side * radius * .9, cy, talusAnchor[2]], [cx, cy + height * .72, talusAnchor[2]], [cx, talusAnchor[1] - .04, talusAnchor[2]], [cx, cy, talusAnchor[2] - zRadius], [cx, cy, talusAnchor[2] + zRadius]] });
+    const ledgeAnchor: Point3 = [upper[0], upper[1], upper[2] + (unit - .5) * 1.4], depth = detailScale[0]! * (.95 + unit * .25), ledgeHeight = detailScale[1]! * (.62 + unit * .18), halfZ = detailScale[2]! * (.82 + unit * .22) / 2;
+    const section = [[ledgeAnchor[0] + run.side * depth * 1.05, ledgeAnchor[1] - ledgeHeight * .25], [ledgeAnchor[0] - run.side * depth * .08, ledgeAnchor[1] - ledgeHeight * .18], [ledgeAnchor[0] + run.side * depth * .5, ledgeAnchor[1] + ledgeHeight * .55]] as const;
+    const frontShift = (seededUnit(run.seed, 331) - .5) * depth * .06, backShift = (seededUnit(run.seed, 337) - .5) * depth * .06;
+    detailSpecs.push({ kind: 'strata', anchor: ledgeAnchor, side: run.side, runSeed: run.seed, hostDepth: depth, tone: .93, faces: STRATA_FACES, points: [...section.map(([x, y]) => [x + run.side * frontShift, y, ledgeAnchor[2] - halfZ] as Point3), ...section.map(([x, y]) => [x + run.side * backShift, y, ledgeAnchor[2] + halfZ] as Point3)] });
     for (let station = 0; station < stations.length - 1; station += 1) {
       for (let step = 0; step < layer.profile.length; step += 1) {
         const next = (step + 1) % layer.profile.length;
@@ -74,6 +102,8 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
       }
     }
   }
+  const detailIndexStart = indices.length;
+  for (const spec of detailSpecs) appendDetail(spec);
   const geometry = new BufferGeometry();
   geometry.name = `${layer.objectName}-geometry`;
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
@@ -85,7 +115,9 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   geometry.userData = { canyonLayer: layer.name, runCount: layer.runs.length, profilePointCount: layer.profile.length,
     signatureCount, endpointAreaRatio, closedProfile: true, capCount: layer.runs.length * 2,
     sideTriangleCount: signatureCount * layer.profile.length * 2,
-    capTriangleCount: layer.runs.length * capFaces.length * 2, construction: 'closed-segmented-longitudinal-shelf-recess-buttress-foot-talus' };
+    capTriangleCount: layer.runs.length * capFaces.length * 2, detailFragmentCount: detailFragments.length,
+    detailTriangleCount: detailSpecs.reduce((count, spec) => count + spec.faces.length, 0), detailIndexStart, detailFragments,
+    construction: 'closed-segmented-longitudinal-shelf-recess-buttress-foot-talus-strata-detail' };
   return geometry;
 }
 function createAbyssGeometry(): BufferGeometry {
