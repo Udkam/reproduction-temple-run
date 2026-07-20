@@ -2,9 +2,16 @@ node_modules/
 dist/
 coverage/
 .playwright-mcp/
+playwright-report/
+test-results/
+blob-report/
+*.trace.zip
+browser-profile/
+browser-profiles/
+.browser-profile/
 .vite/
 __pycache__/
-*.blend1
+*.blend[0-9]*
 docs/screenshots/temple/*-dev*.png
 
 *.log
