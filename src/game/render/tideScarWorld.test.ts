@@ -4,9 +4,9 @@ import { TideScarWorld } from './tideScarWorld';
 import { applyTR4RuntimeLensShift, createDeckCapGeometry, presentationRoadStart, shouldShowPursuer, TR4_RUNTIME_CAMERA } from './WorldRenderer';
 import { d4ProfileForViewport } from './d4Profile';
 
-const LAYERS = [['tide-scar-near-fractured-inner-lips', 'near', 3, 13, 10, 6],
-  ['tide-scar-mid-interrupted-buttress-recesses', 'mid', 4, 14, 12, 8],
-  ['tide-scar-far-low-ridge-mesa-chains', 'far', 4, 11, 12, 8]] as const;
+const LAYERS = [['tide-scar-near-fractured-inner-lips', 'near', 3, 13, 10, 6, 0],
+  ['tide-scar-mid-interrupted-buttress-recesses', 'mid', 4, 14, 12, 8, 0],
+  ['tide-scar-far-low-ridge-mesa-chains', 'far', 4, 11, 12, 8, 12]] as const;
 describe('Tide Scar geometric canyon presentation', () => {
   it('builds thick, distinct near/mid/far topology without panorama, plane, or instanced-card geometry', () => {
     const world = new TideScarWorld();
@@ -17,7 +17,7 @@ describe('Tide Scar geometric canyon presentation', () => {
     const averageAbyssNormalY = Array.from({ length: abyssNormals.count }, (_, index) => abyssNormals.getY(index))
       .reduce((sum, value) => sum + value, 0) / abyssNormals.count;
     expect(averageAbyssNormalY).toBeGreaterThan(.7);
-    for (const [name, layer, runCount, profilePointCount, signatureCount, detailFragmentCount] of LAYERS) {
+    for (const [name, layer, runCount, profilePointCount, signatureCount, detailFragmentCount, horizonIslandCount] of LAYERS) {
       const object = world.root.getObjectByName(name);
       expect(object).toBeInstanceOf(Mesh);
       const mesh = object as Mesh;
@@ -27,14 +27,14 @@ describe('Tide Scar geometric canyon presentation', () => {
       expect(bounds.max.y - bounds.min.y).toBeGreaterThan(10);
       expect(bounds.max.z - bounds.min.z).toBeGreaterThan(40);
       const expectedSideTriangles = signatureCount * profilePointCount * 2, expectedCapTriangles = runCount * (profilePointCount - 2) * 2;
-      const detailTriangleCount = detailFragmentCount * 8;
-      expect(mesh.geometry.userData).toMatchObject({ canyonLayer: layer, runCount, profilePointCount, signatureCount, detailFragmentCount, detailTriangleCount,
+      const detailTriangleCount = detailFragmentCount * 8, horizonTriangleCount = horizonIslandCount * 28;
+      expect(mesh.geometry.userData).toMatchObject({ canyonLayer: layer, runCount, profilePointCount, signatureCount, detailFragmentCount, detailTriangleCount, horizonIslandCount, horizonTriangleCount,
         closedProfile: true, capCount: runCount * 2, sideTriangleCount: expectedSideTriangles,
         capTriangleCount: expectedCapTriangles,
         construction: 'closed-segmented-longitudinal-shelf-recess-buttress-foot-talus-strata-detail' });
       expect(mesh.geometry.userData.endpointAreaRatio).toBeLessThan(.2);
-      expect(mesh.geometry.getIndex()!.count / 3).toBe(expectedSideTriangles + expectedCapTriangles + detailTriangleCount);
-      expect(mesh.geometry.getIndex()!.count - mesh.geometry.userData.detailIndexStart).toBe(detailTriangleCount * 3);
+      expect(mesh.geometry.getIndex()!.count / 3).toBe(expectedSideTriangles + expectedCapTriangles + detailTriangleCount + horizonTriangleCount);
+      expect(mesh.geometry.userData.horizonIndexStart - mesh.geometry.userData.detailIndexStart).toBe(detailTriangleCount * 3);
       expect(mesh.geometry.getAttribute('uv').count).toBe(mesh.geometry.getAttribute('position').count);
       const position = mesh.geometry.getAttribute('position'), fragments = mesh.geometry.userData.detailFragments as { kind: string; anchor: readonly number[]; side: number; runSeed: number; hostDepth: number; vertexStart: number; vertexCount: number }[];
       for (const fragment of fragments) {
@@ -54,9 +54,35 @@ describe('Tide Scar geometric canyon presentation', () => {
       topologySizes.push(mesh.geometry.getAttribute('position').count);
     }
     expect(new Set(topologySizes).size).toBe(3);
-    const farBounds = (world.root.getObjectByName(LAYERS[2][0]) as Mesh).geometry.boundingBox!;
-    expect(farBounds.max.z).toBeLessThan(-55);
+    const farMesh = world.root.getObjectByName(LAYERS[2][0]) as Mesh, farBounds = farMesh.geometry.boundingBox!;
+    expect(farBounds.max.z).toBeLessThan(-25);
     expect(farBounds.min.z).toBeGreaterThan(-230);
+    const position = farMesh.geometry.getAttribute('position'), index = farMesh.geometry.getIndex()!, horizonStart = farMesh.geometry.userData.horizonIndexStart as number;
+    const welded = new Map<string, Vector3>(), adjacency = new Map<string, Set<string>>();
+    type ActualTriangle = { keys: [string, string, string]; points: [Vector3, Vector3, Vector3] };
+    const triangles: ActualTriangle[] = [], keyOf = (point: Vector3) => point.toArray().map((value) => Math.round(value * 1e5)).join(':');
+    for (let offset = horizonStart; offset < index.count; offset += 3) {
+      const points = [0, 1, 2].map((step) => new Vector3().fromBufferAttribute(position, index.getX(offset + step))) as [Vector3, Vector3, Vector3], keys = points.map(keyOf) as [string, string, string]; triangles.push({ keys, points });
+      for (let step = 0; step < 3; step += 1) { const a = keys[step]!, b = keys[(step + 1) % 3]!; welded.set(a, points[step]!); welded.set(b, points[(step + 1) % 3]!); if (!adjacency.has(a)) adjacency.set(a, new Set()); if (!adjacency.has(b)) adjacency.set(b, new Set()); adjacency.get(a)!.add(b); adjacency.get(b)!.add(a); }
+    }
+    const remaining = new Set(adjacency.keys()), components: Set<string>[] = [];
+    while (remaining.size > 0) { const component = new Set<string>(), queue = [remaining.values().next().value as string]; while (queue.length > 0) { const key = queue.pop()!; if (!remaining.delete(key)) continue; component.add(key); queue.push(...adjacency.get(key)!); } components.push(component); }
+    expect(components).toHaveLength(12);
+    const actual = components.map((component) => {
+      const points = [...component].map((key) => welded.get(key)!), center = points.reduce((sum, point) => sum.add(point), new Vector3()).multiplyScalar(1 / points.length), componentTriangles = triangles.filter((triangle) => triangle.keys.every((key) => component.has(key))), edgeUse = new Map<string, number>();
+      const bounds = { min: new Vector3(...(['x', 'y', 'z'] as const).map((axis) => Math.min(...points.map((point) => point[axis]))) as [number, number, number]), max: new Vector3(...(['x', 'y', 'z'] as const).map((axis) => Math.max(...points.map((point) => point[axis]))) as [number, number, number]) };
+      expect(points).toHaveLength(16); expect(componentTriangles).toHaveLength(28);
+      for (const triangle of componentTriangles) { const [a, b, c] = triangle.points, normal = b.clone().sub(a).cross(c.clone().sub(a)), centroid = a.clone().add(b).add(c).multiplyScalar(1 / 3); expect(normal.length()).toBeGreaterThan(1e-4); expect(normal.dot(centroid.sub(center))).toBeGreaterThan(0); for (const [u, v] of [[0, 1], [1, 2], [2, 0]] as const) { const edge = [triangle.keys[u], triangle.keys[v]].sort().join('|'); edgeUse.set(edge, (edgeUse.get(edge) ?? 0) + 1); } }
+      expect([...edgeUse.values()].every((count) => count === 2)).toBe(true);
+      const width = bounds.max.x - bounds.min.x, depth = bounds.max.z - bounds.min.z, top = points.filter((point) => point.y > 0); expect(top).toHaveLength(8); expect(Math.max(...top.map((point) => point.y)) - Math.min(...top.map((point) => point.y))).toBeGreaterThan(2); expect(bounds.max.y - bounds.min.y).toBeGreaterThan(7); expect(width / depth).toBeGreaterThan(.3); expect(width / depth).toBeLessThan(1.6);
+      return { points, center, bounds };
+    }).sort((a, b) => b.center.z - a.center.z);
+    expect(farMesh.geometry.userData.horizonIslandCount).toBe(actual.length); expect(farMesh.geometry.userData.horizonTriangleCount).toBe(triangles.length);
+    expect(Math.min(...actual.map((island) => island.bounds.min.x))).toBeLessThan(-60); expect(Math.max(...actual.map((island) => island.bounds.max.x))).toBeGreaterThan(60);
+    const depthGroups = [actual.slice(0, 4), actual.slice(4, 8), actual.slice(8, 12)]; expect(depthGroups.every((group) => group.length === 4)).toBe(true); expect(Math.min(...depthGroups[0]!.map((island) => island.center.z))).toBeGreaterThan(Math.max(...depthGroups[1]!.map((island) => island.center.z))); expect(Math.min(...depthGroups[1]!.map((island) => island.center.z))).toBeGreaterThan(Math.max(...depthGroups[2]!.map((island) => island.center.z)));
+    for (const group of depthGroups) { const intervals = group.map((island) => [island.bounds.min.x, island.bounds.max.x] as const).sort((a, b) => a[0] - b[0]), gaps = intervals.slice(1).map((interval, offset) => interval[0] - intervals[offset]![1]); expect(gaps.filter((gap) => gap > 0).length).toBeGreaterThanOrEqual(2); }
+    const portraitRecord = TR4_RUNTIME_CAMERA.portrait, portraitCamera = new PerspectiveCamera(portraitRecord.fov, 390 / 844, .08, 520); portraitCamera.position.set(0, portraitRecord.height, portraitRecord.back); portraitCamera.lookAt(0, portraitRecord.targetY, -portraitRecord.targetAhead); portraitCamera.updateProjectionMatrix(); applyTR4RuntimeLensShift(portraitCamera, d4ProfileForViewport(390, 844)); portraitCamera.updateMatrixWorld();
+    for (const group of depthGroups) { const areas = group.map((island) => { const projected = island.points.map((point) => point.clone().project(portraitCamera)).filter((point) => point.z >= -1 && point.z <= 1); if (projected.length === 0) return 0; const left = Math.max(-.6, Math.min(...projected.map((point) => point.x))), right = Math.min(.6, Math.max(...projected.map((point) => point.x))), bottom = Math.max(-1, Math.min(...projected.map((point) => point.y))), top = Math.min(1, Math.max(...projected.map((point) => point.y))); return Math.max(0, right - left) * Math.max(0, top - bottom); }); expect(Math.max(...areas)).toBeGreaterThan(.002); }
     world.root.traverse((object) => {
       if (!(object instanceof Mesh)) return;
       expect(object.geometry.type).not.toBe('PlaneGeometry');

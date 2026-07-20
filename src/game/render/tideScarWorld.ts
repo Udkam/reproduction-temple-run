@@ -8,8 +8,18 @@ interface ShelfRun { side: Side; z: readonly number[]; inner: number; width: num
 interface ShelfLayer { name: CanyonLayerName; objectName: string; color: number; runs: readonly ShelfRun[]; profile: readonly [number, number][] }
 type Point3 = readonly [number, number, number];
 interface DetailSpec { kind: 'talus' | 'strata'; anchor: Point3; side: Side; runSeed: number; hostDepth: number; points: readonly Point3[]; faces: readonly (readonly [number, number, number])[]; tone: number }
+type HorizonBand = 'near' | 'mid' | 'far';
+interface HorizonIsland { x: number; z: number; radiusX: number; radiusZ: number; top: number; skirt: number; seed: number; band: HorizonBand }
 const TALUS_FACES = [[0, 2, 4], [0, 4, 3], [0, 3, 5], [0, 5, 2], [1, 4, 2], [1, 3, 4], [1, 5, 3], [1, 2, 5]] as const;
 const STRATA_FACES = [[0, 2, 1], [3, 4, 5], [0, 1, 4], [0, 4, 3], [1, 2, 5], [1, 5, 4], [2, 0, 3], [2, 3, 5]] as const;
+const HORIZON_ISLANDS: readonly HorizonIsland[] = [
+  { x: -52, z: -54, radiusX: 13, radiusZ: 18, top: 5.1, skirt: -5.4, seed: 401, band: 'near' }, { x: -15, z: -62, radiusX: 8, radiusZ: 16, top: 4.3, skirt: -5.1, seed: 409, band: 'near' },
+  { x: 15, z: -55, radiusX: 8, radiusZ: 17, top: 5, skirt: -5.6, seed: 419, band: 'near' }, { x: 52, z: -61, radiusX: 13, radiusZ: 20, top: 4.6, skirt: -5.8, seed: 421, band: 'near' },
+  { x: -42, z: -84, radiusX: 12, radiusZ: 18, top: 5.8, skirt: -6.2, seed: 431, band: 'mid' }, { x: -16, z: -91, radiusX: 7, radiusZ: 15, top: 4.8, skirt: -5.9, seed: 433, band: 'mid' },
+  { x: 16, z: -86, radiusX: 7, radiusZ: 16, top: 5.4, skirt: -6.1, seed: 439, band: 'mid' }, { x: 42, z: -94, radiusX: 12, radiusZ: 18, top: 5.1, skirt: -6.5, seed: 443, band: 'mid' },
+  { x: -34, z: -122, radiusX: 11, radiusZ: 17, top: 6.2, skirt: -7.1, seed: 449, band: 'far' }, { x: -12, z: -130, radiusX: 5, radiusZ: 14, top: 4.9, skirt: -6.6, seed: 457, band: 'far' },
+  { x: 12, z: -124, radiusX: 5, radiusZ: 15, top: 5.5, skirt: -6.8, seed: 461, band: 'far' }, { x: 34, z: -132, radiusX: 11, radiusZ: 17, top: 5.7, skirt: -7.3, seed: 463, band: 'far' },
+] as const;
 const SHELF_LAYERS: readonly ShelfLayer[] = [
   { name: 'near', objectName: 'tide-scar-near-fractured-inner-lips', color: 0x9cabb0,
     profile: [[0, 1], [.34, 1.02], [.3, .76], [.58, .72], [.75, .8], [1, .4], [.82, 0], [.12, 0], [.12, .22], [.28, .22], [.22, .42], [.06, .42], [.06, .7]],
@@ -41,6 +51,7 @@ function seededUnit(index: number, salt: number): number {
 function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   const positions: number[] = [], colors: number[] = [], uvs: number[] = [], indices: number[] = [];
   const detailSpecs: DetailSpec[] = [], detailFragments: { kind: DetailSpec['kind']; anchor: Point3; side: Side; runSeed: number; hostDepth: number; vertexStart: number; vertexCount: number }[] = [];
+  const horizonFragments: { band: HorizonBand; seed: number; ringSize: number; topHeightRange: number; center: Point3; vertexStart: number; vertexCount: number; indexStart: number; indexCount: number; bounds: { min: Point3; max: Point3 } }[] = [];
   const tint = new Color(layer.color);
   const capFaces = ShapeUtils.triangulateShape(layer.profile.map(([x, y]) => new Vector2(x, y)), []);
   const signatureCount = layer.runs.reduce((count, run) => count + run.z.length - 1, 0);
@@ -49,18 +60,19 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
     const index = positions.length / 3, shade = (.82 + Math.max(0, point[1] + 33) / 48 * .18) * tone;
     positions.push(...point); colors.push(tint.r * shade, tint.g * shade, tint.b * shade); uvs.push(...uv); return index;
   };
-  const appendDetail = (spec: DetailSpec) => {
-    const center = spec.points.reduce((sum, point) => sum.add(new Vector3(...point)), new Vector3()).multiplyScalar(1 / spec.points.length), vertexStart = positions.length / 3;
-    for (const face of spec.faces) {
-      const points = face.map((index) => new Vector3(...spec.points[index]!)) as [Vector3, Vector3, Vector3];
+  const appendFacets = (source: readonly Point3[], faces: readonly (readonly [number, number, number])[], baseTone: number) => {
+    const center = source.reduce((sum, point) => sum.add(new Vector3(...point)), new Vector3()).multiplyScalar(1 / source.length), vertexStart = positions.length / 3, indexStart = indices.length;
+    for (const face of faces) {
+      const points = face.map((index) => new Vector3(...source[index]!)) as [Vector3, Vector3, Vector3];
       const normal = points[1].clone().sub(points[0]).cross(points[2].clone().sub(points[0])), centroid = points[0].clone().add(points[1]).add(points[2]).multiplyScalar(1 / 3);
       if (normal.dot(centroid.sub(center)) < 0) [points[1], points[2]] = [points[2], points[1]];
       normal.copy(points[1]).sub(points[0]).cross(points[2].clone().sub(points[0])).normalize();
-      const abs = [Math.abs(normal.x), Math.abs(normal.y), Math.abs(normal.z)], tone = spec.tone * (normal.y > .45 ? 1.12 : normal.y < -.25 ? .78 : 1);
+      const abs = [Math.abs(normal.x), Math.abs(normal.y), Math.abs(normal.z)], tone = baseTone * (normal.y > .45 ? 1.12 : normal.y < -.25 ? .78 : 1);
       indices.push(...points.map((point) => addVertex([point.x, point.y, point.z], abs[1]! >= Math.max(abs[0]!, abs[2]!) ? [point.x * .08, -point.z * .055] : abs[0]! >= abs[2]! ? [-point.z * .055, point.y * .08] : [point.x * .08, point.y * .08], tone)));
     }
-    detailFragments.push({ kind: spec.kind, anchor: spec.anchor, side: spec.side, runSeed: spec.runSeed, hostDepth: spec.hostDepth, vertexStart, vertexCount: positions.length / 3 - vertexStart });
+    return { center: [center.x, center.y, center.z] as Point3, vertexStart, vertexCount: positions.length / 3 - vertexStart, indexStart, indexCount: indices.length - indexStart };
   };
+  const appendDetail = (spec: DetailSpec) => { const added = appendFacets(spec.points, spec.faces, spec.tone); detailFragments.push({ kind: spec.kind, anchor: spec.anchor, side: spec.side, runSeed: spec.runSeed, hostDepth: spec.hostDepth, vertexStart: added.vertexStart, vertexCount: added.vertexCount }); };
   const footStep = layer.profile.reduce((best, point, index) => point[1] < layer.profile[best]![1] || point[1] === layer.profile[best]![1] && point[0] < layer.profile[best]![0] ? index : best, 0);
   const detailScale = layer.name === 'near' ? [1, 1, 3.4] : layer.name === 'mid' ? [1.35, 1.05, 5.2] : [2, .75, 8];
   for (const run of layer.runs) {
@@ -104,6 +116,18 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   }
   const detailIndexStart = indices.length;
   for (const spec of detailSpecs) appendDetail(spec);
+  const horizonIndexStart = indices.length;
+  if (layer.name === 'far') for (const island of HORIZON_ISLANDS) {
+    const ringSize = 8, phase = seededUnit(island.seed, 397) * Math.PI * 2, notch = Math.floor(seededUnit(island.seed, 399) * ringSize);
+    const top = Array.from({ length: ringSize }, (_, step) => { const angle = Math.PI * 2 * step / ringSize + (seededUnit(island.seed, step + 401) - .5) * .14, radius = .82 + seededUnit(island.seed, step + 419) * .25; const shoulder = Math.sin(angle * 2 + phase) * 1.25 + Math.sin(angle * 3 - phase) * .65 - (step === notch ? 1.6 : 0); return [island.x + Math.cos(angle) * island.radiusX * radius, island.top + shoulder + (seededUnit(island.seed, step + 431) - .5) * .7, island.z + Math.sin(angle) * island.radiusZ * radius] as Point3; });
+    const points = [...top, ...top.map(([x, , z], step) => [island.x + (x - island.x) * 1.16, island.skirt + (seededUnit(island.seed, step + 443) - .5) * 1.1, island.z + (z - island.z) * 1.16] as Point3)];
+    const faces: [number, number, number][] = [];
+    for (let step = 1; step < ringSize - 1; step += 1) { faces.push([0, step, step + 1], [ringSize, ringSize + step + 1, ringSize + step]); }
+    for (let step = 0; step < ringSize; step += 1) { const next = (step + 1) % ringSize; faces.push([step, next, ringSize + next], [step, ringSize + next, ringSize + step]); }
+    const added = appendFacets(points, faces, island.band === 'near' ? .84 : island.band === 'mid' ? .96 : 1.06);
+    const axes = [0, 1, 2] as const, min = axes.map((axis) => Math.min(...points.map((point) => point[axis]))) as [number, number, number], max = axes.map((axis) => Math.max(...points.map((point) => point[axis]))) as [number, number, number];
+    horizonFragments.push({ band: island.band, seed: island.seed, ringSize, topHeightRange: Math.max(...top.map((point) => point[1])) - Math.min(...top.map((point) => point[1])), ...added, bounds: { min, max } });
+  }
   const geometry = new BufferGeometry();
   geometry.name = `${layer.objectName}-geometry`;
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
@@ -117,6 +141,7 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
     sideTriangleCount: signatureCount * layer.profile.length * 2,
     capTriangleCount: layer.runs.length * capFaces.length * 2, detailFragmentCount: detailFragments.length,
     detailTriangleCount: detailSpecs.reduce((count, spec) => count + spec.faces.length, 0), detailIndexStart, detailFragments,
+    horizonIslandCount: horizonFragments.length, horizonTriangleCount: horizonFragments.reduce((count, fragment) => count + fragment.indexCount / 3, 0), horizonIndexStart, horizonFragments,
     construction: 'closed-segmented-longitudinal-shelf-recess-buttress-foot-talus-strata-detail' };
   return geometry;
 }
