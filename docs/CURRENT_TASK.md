@@ -5,7 +5,7 @@
 Branch: `main`
 Required checkpoint baseline: `ecd5de640362a6e30c5d0157ecd1590be7673318`
 Frozen inherited-backlog anchor: `52ae9ae631fa3761f8f8737978af1840ba2df8a4`
-Status: **in progress — R1 runtime canyon replacement is the active user-authorized slice.** Its source scope is limited to `tideScarWorld.ts`, `tideScarWorld.test.ts`, and `WorldRenderer.ts`; no R1 source, test, browser frame, or candidate exists yet. Material-socket-probe-001 remains separate WIP_UNCOMMITTED: its two untracked scripts are preserved, unstaged, and blocked from Blender/process execution. Diagnostic `007` remains immutable at `3937ef6`; diagnostic `008` is not authorized.
+Status: **in progress — R1 runtime canyon replacement is the active user-authorized slice.** Its source scope remains limited to `tideScarWorld.ts`, `tideScarWorld.test.ts`, and `WorldRenderer.ts`. R1A now has a green, manually inspected solid-terrain source checkpoint ready for exact-path commit, but its desktop/portrait/landscape frames remain `MANUAL_BLOCKED` for primitive massing and portrait composition; it is not an accepted candidate and is not push-authorized. Material-socket-probe-001 remains separate WIP_UNCOMMITTED: its two untracked scripts are preserved, unstaged, and blocked from Blender/process execution. Diagnostic `007` remains immutable at `3937ef6`; diagnostic `008` is not authorized.
 
 C7 task authorization token: `TEMPLE-TR4-C7-TASK-SOURCE-CHAIN-AUTHORIZED`.
 
@@ -39,6 +39,8 @@ The binding construction, camera, material, lifecycle, anti-clipping, semantic-r
 This user-authorized visible-runtime slice supersedes the earlier sequencing hold for its exact scope only. It may change exactly `src/game/render/tideScarWorld.ts`, `src/game/render/tideScarWorld.test.ts`, and `src/game/render/WorldRenderer.ts`. It replaces the inward panorama/card approach with deterministic near/mid/far canyon geometry, a physically thick fractured route surround, and depth-safe atmospheric separation. It must preserve simulation, collision, replay hashes, one-canvas ownership, public input, and all existing lifecycle cleanup. No external asset, Blender launch, export, package/configuration change, or material-socket-probe path is permitted.
 
 The checkpoint requires a targeted renderer/world test, typecheck, and a manually inspected local browser gameplay frame before any follow-on hazard, character, or UI work. Its status remains in progress until that evidence exists; it does not accept the broader TR4 asset or runtime program.
+
+R1A's bounded claim is only that the runtime replaces panorama/cards with deterministic closed near/mid/far terrain, a thick modular causeway, stable responsive camera records, and the opening/ending-only pursuer lifecycle, with real zero-error browser frames. The same frames explicitly block high-fidelity acceptance: portrait road coverage is excessive, canyon silhouettes remain large faceted slabs, and the horizon lacks enough layered detail. After R1A is committed, R1B may continue in the same exact three-file subsystem scope as a new normal source checkpoint of at most 500 added or modified lines; it may refine portrait composition and add attached deterministic strata/talus detail, but it may not enter hazards, characters, UI, Blender, external assets, core/runtime rules, or formal evidence.
 
 ### Recovery-only atomic checkpoint exceptions
 
