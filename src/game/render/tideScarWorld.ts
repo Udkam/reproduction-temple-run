@@ -28,6 +28,7 @@ const SURFACE_TREATMENTS: Readonly<Record<CanyonLayerName, SurfaceTreatment>> = 
     roughness: .9, mapStrength: .38, mapFloor: .18 },
   } as const;
 const SURFACE_FACE_LIFT: Readonly<Record<SurfaceFace, number>> = { top: 0, shelf: 0, wall: 0, return: .025, underside: .03 };
+const SURFACE_HEMISPHERE_SHIFT: Readonly<Record<SurfaceFace, number>> = { top: 0, shelf: 0, wall: 0, return: .1, underside: .15 };
 const TALUS_FACES = [[0, 2, 4], [0, 4, 3], [0, 3, 5], [0, 5, 2], [1, 4, 2], [1, 3, 4], [1, 5, 3], [1, 2, 5]] as const;
 const STRATA_FACES = [[0, 2, 1], [3, 4, 5], [0, 1, 4], [0, 4, 3], [1, 2, 5], [1, 5, 4], [2, 0, 3], [2, 3, 5]] as const;
 const HORIZON_ISLANDS: readonly HorizonIsland[] = [
@@ -87,8 +88,8 @@ function createSurfaceMaterial(treatment: SurfaceTreatment): MeshStandardMateria
   material.onBeforeCompile = (shader) => {
     shader.uniforms.canyonMapStrength = { value: treatment.mapStrength };
     shader.uniforms.canyonMapFloor = { value: treatment.mapFloor };
-    shader.vertexShader = `attribute float surfaceBandStrength;\nattribute float surfaceBandFloor;\nattribute float surfaceFaceLift;\nvarying float vCanyonBandStrength;\nvarying float vCanyonBandFloor;\nvarying float vCanyonFaceLift;\nvarying vec3 vCanyonObjectPosition;\n${shader.vertexShader}`.replace('#include <begin_vertex>', '#include <begin_vertex>\n  vCanyonBandStrength = surfaceBandStrength;\n  vCanyonBandFloor = surfaceBandFloor;\n  vCanyonFaceLift = surfaceFaceLift;\n  vCanyonObjectPosition = position;');
-    shader.fragmentShader = `uniform float canyonMapStrength;\nuniform float canyonMapFloor;\nvarying float vCanyonBandStrength;\nvarying float vCanyonBandFloor;\nvarying float vCanyonFaceLift;\nvarying vec3 vCanyonObjectPosition;\n${shader.fragmentShader.replace('#include <map_fragment>', `
+    shader.vertexShader = `attribute float surfaceBandStrength;\nattribute float surfaceBandFloor;\nattribute float surfaceFaceLift;\nattribute float surfaceHemisphereShift;\nvarying float vCanyonBandStrength;\nvarying float vCanyonBandFloor;\nvarying float vCanyonFaceLift;\nvarying float vCanyonHemisphereShift;\nvarying vec3 vCanyonObjectPosition;\n${shader.vertexShader}`.replace('#include <begin_vertex>', '#include <begin_vertex>\n  vCanyonBandStrength = surfaceBandStrength;\n  vCanyonBandFloor = surfaceBandFloor;\n  vCanyonFaceLift = surfaceFaceLift;\n  vCanyonHemisphereShift = surfaceHemisphereShift;\n  vCanyonObjectPosition = position;');
+    shader.fragmentShader = `uniform float canyonMapStrength;\nuniform float canyonMapFloor;\nvarying float vCanyonBandStrength;\nvarying float vCanyonBandFloor;\nvarying float vCanyonFaceLift;\nvarying float vCanyonHemisphereShift;\nvarying vec3 vCanyonObjectPosition;\n${shader.fragmentShader.replace('#include <map_fragment>', `
 #ifdef USE_MAP
   vec4 sampledDiffuseColor = texture2D( map, vMapUv * 1.65 );
   vec4 broadBasalt = texture2D( map, vMapUv * 0.38 + vec2(0.17, 0.31) );
@@ -112,23 +113,23 @@ function createSurfaceMaterial(treatment: SurfaceTreatment): MeshStandardMateria
   diffuseColor *= sampledDiffuseColor;
 #endif`).replace('#include <lights_fragment_begin>', `#include <lights_fragment_begin>
 #if defined(RE_IndirectDiffuse) && (NUM_HEMI_LIGHTS > 0)
-  float canyonWeightFloor = min(0.135, vCanyonFaceLift * 5.2);
+  float canyonHemisphereShift = min(0.15, vCanyonHemisphereShift);
   #pragma unroll_loop_start
   for (int i = 0; i < NUM_HEMI_LIGHTS; i ++) {
     float canyonBaseWeight = saturate(0.5 * dot(geometryNormal, hemisphereLights[i].direction) + 0.5);
-    float canyonLiftedWeight = max(canyonBaseWeight, canyonWeightFloor);
+    float canyonEffectiveWeight = min(1.0, canyonBaseWeight + canyonHemisphereShift);
     vec3 canyonBaseIrradiance = mix(hemisphereLights[i].groundColor, hemisphereLights[i].skyColor, canyonBaseWeight);
-    vec3 canyonLiftedIrradiance = mix(hemisphereLights[i].groundColor, hemisphereLights[i].skyColor, canyonLiftedWeight);
-    irradiance += max(canyonLiftedIrradiance - canyonBaseIrradiance, vec3(0.0));
+    vec3 canyonEffectiveIrradiance = mix(hemisphereLights[i].groundColor, hemisphereLights[i].skyColor, canyonEffectiveWeight);
+    irradiance += canyonEffectiveIrradiance - canyonBaseIrradiance;
   }
   #pragma unroll_loop_end
 #endif`)}`;
   };
-  material.customProgramCacheKey = () => `tide-scar-r1e-v4-hemi-${treatment.mapStrength}-${treatment.mapFloor}`;
+  material.customProgramCacheKey = () => `tide-scar-r1e-v5-hemi-shift-${treatment.mapStrength}-${treatment.mapFloor}`;
   return material;
 }
 function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
-  const positions: number[] = [], colors: number[] = [], uvs: number[] = [], surfaceBands: number[] = [], surfaceFloors: number[] = [], surfaceFaceLifts: number[] = [], indices: number[] = [];
+  const positions: number[] = [], colors: number[] = [], uvs: number[] = [], surfaceBands: number[] = [], surfaceFloors: number[] = [], surfaceFaceLifts: number[] = [], surfaceHemisphereShifts: number[] = [], indices: number[] = [];
   const detailSpecs: DetailSpec[] = [], detailFragments: { kind: DetailSpec['kind']; anchor: Point3; side: Side; runSeed: number; hostDepth: number; vertexStart: number; vertexCount: number }[] = [];
   const horizonFragments: { band: HorizonBand; seed: number; ringSize: number; topHeightRange: number; center: Point3; vertexStart: number; vertexCount: number; indexStart: number; indexCount: number; bounds: { min: Point3; max: Point3 } }[] = [];
   const capFaces = ShapeUtils.triangulateShape(layer.profile.map(([x, y]) => new Vector2(x, y)), []);
@@ -136,7 +137,7 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   let endpointAreaRatio = 0;
   const addVertex = (point: Point3, normal: Vector3, face: SurfaceFace, band: CanyonLayerName = layer.name, baseTone = 1) => {
     const index = positions.length / 3, tint = SURFACE_TINTS[band], shade = surfaceShade(point, band, face, baseTone);
-    positions.push(...point); colors.push(tint.r * shade, tint.g * shade, tint.b * shade); uvs.push(...surfaceUv(point, normal, band)); surfaceBands.push(SURFACE_TREATMENTS[band].mapStrength); surfaceFloors.push(SURFACE_TREATMENTS[band].mapFloor); surfaceFaceLifts.push(SURFACE_FACE_LIFT[face]); return index;
+    positions.push(...point); colors.push(tint.r * shade, tint.g * shade, tint.b * shade); uvs.push(...surfaceUv(point, normal, band)); surfaceBands.push(SURFACE_TREATMENTS[band].mapStrength); surfaceFloors.push(SURFACE_TREATMENTS[band].mapFloor); surfaceFaceLifts.push(SURFACE_FACE_LIFT[face]); surfaceHemisphereShifts.push(SURFACE_HEMISPHERE_SHIFT[face]); return index;
   };
   const appendFacets = (source: readonly Point3[], faces: readonly (readonly [number, number, number])[], baseTone: number, preserveWinding = false, band: CanyonLayerName = layer.name, faceKinds?: readonly SurfaceFace[]) => {
     const center = source.reduce((sum, point) => sum.add(new Vector3(...point)), new Vector3()).multiplyScalar(1 / source.length), vertexStart = positions.length / 3, indexStart = indices.length;
@@ -240,6 +241,7 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   geometry.setAttribute('surfaceBandStrength', new Float32BufferAttribute(surfaceBands, 1));
   geometry.setAttribute('surfaceBandFloor', new Float32BufferAttribute(surfaceFloors, 1));
   geometry.setAttribute('surfaceFaceLift', new Float32BufferAttribute(surfaceFaceLifts, 1));
+  geometry.setAttribute('surfaceHemisphereShift', new Float32BufferAttribute(surfaceHemisphereShifts, 1));
   geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2)); geometry.setIndex(indices);
   geometry.computeVertexNormals();
   geometry.computeBoundingBox();
