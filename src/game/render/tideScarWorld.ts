@@ -60,12 +60,12 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
     const index = positions.length / 3, shade = (.82 + Math.max(0, point[1] + 33) / 48 * .18) * tone;
     positions.push(...point); colors.push(tint.r * shade, tint.g * shade, tint.b * shade); uvs.push(...uv); return index;
   };
-  const appendFacets = (source: readonly Point3[], faces: readonly (readonly [number, number, number])[], baseTone: number) => {
+  const appendFacets = (source: readonly Point3[], faces: readonly (readonly [number, number, number])[], baseTone: number, preserveWinding = false) => {
     const center = source.reduce((sum, point) => sum.add(new Vector3(...point)), new Vector3()).multiplyScalar(1 / source.length), vertexStart = positions.length / 3, indexStart = indices.length;
     for (const face of faces) {
       const points = face.map((index) => new Vector3(...source[index]!)) as [Vector3, Vector3, Vector3];
       const normal = points[1].clone().sub(points[0]).cross(points[2].clone().sub(points[0])), centroid = points[0].clone().add(points[1]).add(points[2]).multiplyScalar(1 / 3);
-      if (normal.dot(centroid.sub(center)) < 0) [points[1], points[2]] = [points[2], points[1]];
+      if (!preserveWinding && normal.dot(centroid.sub(center)) < 0) [points[1], points[2]] = [points[2], points[1]];
       normal.copy(points[1]).sub(points[0]).cross(points[2].clone().sub(points[0])).normalize();
       const abs = [Math.abs(normal.x), Math.abs(normal.y), Math.abs(normal.z)], tone = baseTone * (normal.y > .45 ? 1.12 : normal.y < -.25 ? .78 : 1);
       indices.push(...points.map((point) => addVertex([point.x, point.y, point.z], abs[1]! >= Math.max(abs[0]!, abs[2]!) ? [point.x * .08, -point.z * .055] : abs[0]! >= abs[2]! ? [-point.z * .055, point.y * .08] : [point.x * .08, point.y * .08], tone)));
@@ -118,15 +118,35 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   for (const spec of detailSpecs) appendDetail(spec);
   const horizonIndexStart = indices.length;
   if (layer.name === 'far') for (const island of HORIZON_ISLANDS) {
-    const ringSize = 8, phase = seededUnit(island.seed, 397) * Math.PI * 2, notch = Math.floor(seededUnit(island.seed, 399) * ringSize);
-    const top = Array.from({ length: ringSize }, (_, step) => { const angle = Math.PI * 2 * step / ringSize + (seededUnit(island.seed, step + 401) - .5) * .14, radius = .82 + seededUnit(island.seed, step + 419) * .25; const shoulder = Math.sin(angle * 2 + phase) * 1.25 + Math.sin(angle * 3 - phase) * .65 - (step === notch ? 1.6 : 0); return [island.x + Math.cos(angle) * island.radiusX * radius, island.top + shoulder + (seededUnit(island.seed, step + 431) - .5) * .7, island.z + Math.sin(angle) * island.radiusZ * radius] as Point3; });
-    const points = [...top, ...top.map(([x, , z], step) => [island.x + (x - island.x) * 1.16, island.skirt + (seededUnit(island.seed, step + 443) - .5) * 1.1, island.z + (z - island.z) * 1.16] as Point3)];
+    const ringSize = 8, upperNotch = Math.floor(seededUnit(island.seed, 399) * ringSize), lowerNotch = (upperNotch + 2 + Math.floor(seededUnit(island.seed, 397) * 5)) % ringSize, ringDistance = (a: number, b: number) => Math.min((a - b + ringSize) % ringSize, (b - a + ringSize) % ringSize);
+    const angles = Array.from({ length: ringSize }, (_, step) => Math.PI * 2 * step / ringSize + (seededUnit(island.seed, step + 401) - .5) * .13);
+    const baseRadius = angles.map((_, step) => .86 + seededUnit(island.seed, step + 419) * .2);
+    const direction = island.seed % 4 === 1 ? 1 : -1, upperX = (seededUnit(island.seed, 449) - .5) * island.radiusX * .1, upperZ = (seededUnit(island.seed, 457) - .5) * island.radiusZ * .1, lowerX = upperX - direction * island.radiusX * (.012 + seededUnit(island.seed, 461) * .013), lowerZ = upperZ + direction * island.radiusZ * (.008 + seededUnit(island.seed, 463) * .012);
+    const upperDrop = 1.3 + seededUnit(island.seed, 467) * 1.5, lowerDrop = 1.3 + seededUnit(island.seed, 479) * 1.5, upperOuter = .7 + seededUnit(island.seed, 487) * .14, topInner = upperOuter - .18 - seededUnit(island.seed, 491) * .14, lowerInner = upperOuter + (seededUnit(island.seed, 499) - .5) * .1, lowerOuter = Math.min(1.06, lowerInner + .16 + seededUnit(island.seed, 509) * .1), deepScale = lowerOuter * (.97 + seededUnit(island.seed, 521) * .05), skirtScale = Math.min(1.08, deepScale + .02 + seededUnit(island.seed, 523) * .04);
+    const upperCutDirection = seededUnit(island.seed, 547) > .5 ? 1 : -1, lowerCutDirection = seededUnit(island.seed + 13, 547) > .5 ? 1 : -1, upperCut = .38 + seededUnit(island.seed, 557) * .1, lowerCut = .38 + seededUnit(island.seed + 17, 557) * .1, upperShoulder = .74 + seededUnit(island.seed, 563) * .1, lowerShoulder = .74 + seededUnit(island.seed + 19, 563) * .1;
+    const cutStations = [upperNotch, (upperNotch + upperCutDirection + ringSize) % ringSize, lowerNotch, (lowerNotch + lowerCutDirection + ringSize) % ringSize], overhang = Array.from({ length: ringSize }, (_, step) => step).filter((step) => !cutStations.includes(step)).sort((a, b) => Math.min(...cutStations.map((cut) => ringDistance(b, cut))) - Math.min(...cutStations.map((cut) => ringDistance(a, cut))) || seededUnit(island.seed, b + 571) - seededUnit(island.seed, a + 571))[0]!;
+    const heights = [island.top, island.top - upperDrop, island.top - upperDrop - lowerDrop, island.skirt].map((height, band) => angles.map((_, step) => height + (Math.floor(seededUnit(island.seed + band * 29, step + 541) * 3) - 1) * (band === 0 ? .08 : band === 1 ? .06 : .08)));
+    const tiers = [
+      { scale: topInner, band: 0, cuts: 0, x: upperX - direction * island.radiusX * (.012 + seededUnit(island.seed, 527) * .013), z: upperZ + direction * island.radiusZ * (.009 + seededUnit(island.seed, 529) * .009) },
+      { scale: upperOuter, band: 0, cuts: 0, x: upperX, z: upperZ },
+      { scale: lowerInner, band: 1, cuts: 1, x: upperX + direction * island.radiusX * .01, z: upperZ - direction * island.radiusZ * .008 },
+      { scale: lowerOuter, band: 1, cuts: 2, x: lowerX, z: lowerZ },
+      { scale: deepScale, band: 2, cuts: 2, x: lowerX - direction * island.radiusX * .01, z: lowerZ + direction * island.radiusZ * .008 },
+      { scale: skirtScale, band: 3, cuts: 2, x: (seededUnit(island.seed, 533) - .5) * island.radiusX * .04, z: (seededUnit(island.seed, 537) - .5) * island.radiusZ * .04 },
+    ] as const;
+    const rings = tiers.map((tier, tierIndex) => angles.map((angle, step) => {
+      const upperFactor = step === upperNotch ? upperCut : step === (upperNotch + upperCutDirection + ringSize) % ringSize ? upperShoulder : 1, lowerFactor = step === lowerNotch ? lowerCut : step === (lowerNotch + lowerCutDirection + ringSize) % ringSize ? lowerShoulder : 1, notchScale = tier.cuts === 0 ? upperFactor : tier.cuts === 2 ? lowerFactor : Math.min(upperFactor, Math.max(.8, lowerFactor));
+      const ledgeScale = step === overhang ? tierIndex === 1 ? 1.14 : tierIndex === 2 ? .92 : 1 : 1, radius = tier.scale * baseRadius[step]! * notchScale * ledgeScale;
+      return [island.x + tier.x + Math.cos(angle) * island.radiusX * radius, heights[tier.band]![step]!, island.z + tier.z + Math.sin(angle) * island.radiusZ * radius] as Point3;
+    }));
+    const points = rings.flat(), topCenter = points.length, bottomCenter = points.length + 1;
+    points.push([rings[0]!.reduce((sum, point) => sum + point[0], 0) / ringSize, rings[0]!.reduce((sum, point) => sum + point[1], 0) / ringSize, rings[0]!.reduce((sum, point) => sum + point[2], 0) / ringSize], [rings[5]!.reduce((sum, point) => sum + point[0], 0) / ringSize, rings[5]!.reduce((sum, point) => sum + point[1], 0) / ringSize, rings[5]!.reduce((sum, point) => sum + point[2], 0) / ringSize]);
     const faces: [number, number, number][] = [];
-    for (let step = 1; step < ringSize - 1; step += 1) { faces.push([0, step, step + 1], [ringSize, ringSize + step + 1, ringSize + step]); }
-    for (let step = 0; step < ringSize; step += 1) { const next = (step + 1) % ringSize; faces.push([step, next, ringSize + next], [step, ringSize + next, ringSize + step]); }
-    const added = appendFacets(points, faces, island.band === 'near' ? .84 : island.band === 'mid' ? .96 : 1.06);
+    const pushHorizonFace = (face: [number, number, number], direction: 'up' | 'down' | 'out') => { const [a, b, c] = face.map((index) => new Vector3(...points[index]!)) as [Vector3, Vector3, Vector3], normal = b.clone().sub(a).cross(c.clone().sub(a)), centroid = a.clone().add(b).add(c).multiplyScalar(1 / 3), facing = direction === 'up' ? normal.y : direction === 'down' ? -normal.y : normal.x * (centroid.x - island.x) + normal.z * (centroid.z - island.z); if (facing < 0) [face[1], face[2]] = [face[2], face[1]]; faces.push(face); };
+    for (let step = 0; step < ringSize; step += 1) { const next = (step + 1) % ringSize; pushHorizonFace([topCenter, next, step], 'up'); pushHorizonFace([bottomCenter, ringSize * 5 + step, ringSize * 5 + next], 'down'); for (let tier = 0; tier < tiers.length - 1; tier += 1) { const upper = tier * ringSize + step, upperNext = tier * ringSize + next, lower = upper + ringSize, lowerNext = upperNext + ringSize, direction = tier === 0 || tier === 2 ? 'up' : 'out'; pushHorizonFace([upper, upperNext, lowerNext], direction); pushHorizonFace([upper, lowerNext, lower], direction); } }
+    const added = appendFacets(points, faces, island.band === 'near' ? .84 : island.band === 'mid' ? .96 : 1.06, true);
     const axes = [0, 1, 2] as const, min = axes.map((axis) => Math.min(...points.map((point) => point[axis]))) as [number, number, number], max = axes.map((axis) => Math.max(...points.map((point) => point[axis]))) as [number, number, number];
-    horizonFragments.push({ band: island.band, seed: island.seed, ringSize, topHeightRange: Math.max(...top.map((point) => point[1])) - Math.min(...top.map((point) => point[1])), ...added, bounds: { min, max } });
+    horizonFragments.push({ band: island.band, seed: island.seed, ringSize, topHeightRange: Math.max(...rings[0]!.map((point) => point[1])) - Math.min(...rings[0]!.map((point) => point[1])), ...added, bounds: { min, max } });
   }
   const geometry = new BufferGeometry();
   geometry.name = `${layer.objectName}-geometry`;
