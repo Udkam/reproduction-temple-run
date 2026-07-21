@@ -224,8 +224,9 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
       { scale: skirtScale, band: 3, cuts: 2, x: (seededUnit(island.seed, 533) - .5) * island.radiusX * .04, z: (seededUnit(island.seed, 537) - .5) * island.radiusZ * .04 },
     ] as const;
     const rings = tiers.map((tier, tierIndex) => angles.map((angle, step) => {
-      const upperFactor = step === upperNotch ? upperCut : step === (upperNotch + upperCutDirection + ringSize) % ringSize ? upperShoulder : 1, lowerFactor = step === lowerNotch ? lowerCut : step === (lowerNotch + lowerCutDirection + ringSize) % ringSize ? lowerShoulder : 1, notchScale = tier.cuts === 0 ? upperFactor : tier.cuts === 2 ? lowerFactor : Math.min(upperFactor, Math.max(.8, lowerFactor));
-      const ledgeScale = step === overhang ? tierIndex === 1 ? 1.14 : tierIndex === 2 ? .92 : 1 : 1, radius = tier.scale * baseRadius[step]! * notchScale * ledgeScale;
+      const upperFactor = step === upperNotch ? upperCut : step === (upperNotch + upperCutDirection + ringSize) % ringSize ? upperShoulder : 1, lowerFactor = step === lowerNotch ? lowerCut : step === (lowerNotch + lowerCutDirection + ringSize) % ringSize ? lowerShoulder : 1;
+      const upperLedgeScale = step === overhang ? 1.14 : 1, ledgeScale = step === overhang ? tierIndex === 1 ? 1.14 : tierIndex === 2 ? .92 : 1 : 1;
+      const notchScale = tier.cuts === 0 ? upperFactor : tier.cuts === 2 ? lowerFactor : island.band === 'far' ? Math.min(upperFactor, Math.max(.8, lowerFactor)) : (upperOuter * upperFactor * upperLedgeScale + .04) / (tier.scale * ledgeScale), radius = tier.scale * baseRadius[step]! * notchScale * ledgeScale;
       return [island.x + tier.x + Math.cos(angle) * island.radiusX * radius, heights[tier.band]![step]!, island.z + tier.z + Math.sin(angle) * island.radiusZ * radius] as Point3;
     }));
     const points = rings.flat(), topCenter = points.length, bottomCenter = points.length + 1;
