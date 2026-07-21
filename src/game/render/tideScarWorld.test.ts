@@ -132,6 +132,16 @@ describe('Tide Scar geometric canyon presentation', () => {
       ['tide-scar-mid-interrupted-buttress-recesses', '3013352e2ba6fb5ef670fcaa8e0d724799713011eb054c67557e848966225906', 1152, 1488, [-35.438621520996094, -18.989492416381836, -121], [41.28934860229492, 6.292722225189209, -24]],
       ['tide-scar-far-low-ridge-mesa-chains', '129a73ae4546fe947685debdd2602f9b8d05fc07c60bb01c51db4d6fe5962330', 4392, 4656, [-62.908966064453125, -17.7822322845459, -192], [63.154701232910156, 6.28000020980835, -37.97065734863281]],
     ]);
+    const hemisphereFloors = { unchanged: new Set<string>(), returns: new Set<string>(), undersides: new Set<string>() }, hemisphereWeights = { vertical: [] as number[], underside: [] as number[] };
+    const recordHemisphereWeight = (normalY: number, faceLift: number) => {
+      const baseWeight = Math.min(1, Math.max(0, .5 * normalY + .5)), weightFloor = Math.min(.135, faceLift * 5.2), effectiveWeight = Math.max(baseWeight, weightFloor), lift = faceLift.toFixed(5);
+      if (lift === '0.00000') { hemisphereFloors.unchanged.add(weightFloor.toFixed(3)); expect(effectiveWeight).toBe(baseWeight); }
+      else if (lift === '0.02500') hemisphereFloors.returns.add(weightFloor.toFixed(3));
+      else if (lift === '0.03000') hemisphereFloors.undersides.add(weightFloor.toFixed(3));
+      else expect.unreachable(`unexpected surface face lift ${lift}`);
+      if (normalY < -.55) hemisphereWeights.underside.push(effectiveWeight);
+      else if (normalY <= .55) hemisphereWeights.vertical.push(effectiveWeight);
+    };
     for (const [meshIndex, mesh] of firstMeshes.entries()) {
       expect(Array.isArray(mesh.material)).toBe(false); expect(mesh.geometry.groups).toHaveLength(0);
       const replay = secondMeshes[meshIndex]!;
@@ -148,6 +158,9 @@ describe('Tide Scar geometric canyon presentation', () => {
         roughness: replayMaterial.roughness, metalness: replayMaterial.metalness, vertexColors: replayMaterial.vertexColors, flatShading: replayMaterial.flatShading,
         program: replayMaterial.customProgramCacheKey() });
     }
+    const programKeys = firstMeshes.filter((mesh) => LAYERS.some(([name]) => name === mesh.name)).map((mesh) => (mesh.material as MeshStandardMaterial).customProgramCacheKey()), replayProgramKeys = secondMeshes.filter((mesh) => LAYERS.some(([name]) => name === mesh.name)).map((mesh) => (mesh.material as MeshStandardMaterial).customProgramCacheKey());
+    expect(programKeys).toEqual(['tide-scar-r1e-v4-hemi-0.78-0.1', 'tide-scar-r1e-v4-hemi-0.58-0.14', 'tide-scar-r1e-v4-hemi-0.38-0.18']); expect(programKeys.every((key) => key.includes('r1e-v4-hemi'))).toBe(true);
+    expect(new Set(programKeys).size).toBe(3); expect(replayProgramKeys).toEqual(programKeys);
     for (const [name, layer] of LAYERS) {
       const mesh = first.root.getObjectByName(name) as Mesh, meshPosition = mesh.geometry.getAttribute('position'), meshUv = mesh.geometry.getAttribute('uv'), meshIndex = mesh.geometry.getIndex()!;
       const end = layer === 'far' ? meshIndex.count - 12 * 96 * 3 : meshIndex.count, scales: number[] = [], strengths = new Set<string>(), floors = new Set<string>(), faceLifts = { upward: new Set<string>(), vertical: new Set<string>(), underside: new Set<string>() }, coverage = { upward: 0, vertical: 0, underside: 0 }, strengthAttribute = mesh.geometry.getAttribute('surfaceBandStrength'), floorAttribute = mesh.geometry.getAttribute('surfaceBandFloor'), faceLiftAttribute = mesh.geometry.getAttribute('surfaceFaceLift');
@@ -158,7 +171,7 @@ describe('Tide Scar geometric canyon presentation', () => {
         const normal = points[1].clone().sub(points[0]).cross(points[2].clone().sub(points[0])), length = normal.length(), uvArea = Math.abs((texture[1]![0] - texture[0]![0]) * (texture[2]![1] - texture[0]![1]) - (texture[1]![1] - texture[0]![1]) * (texture[2]![0] - texture[0]![0])) / 2;
         expect(length).toBeGreaterThan(1e-4); expect(uvArea).toBeGreaterThan(1e-7);
         const normalY = normal.y / length, scale = Math.sqrt(uvArea / (Math.max(Math.abs(normal.x), Math.abs(normal.y), Math.abs(normal.z)) / 2)); scales.push(scale);
-        const category = normalY > .55 ? 'upward' : normalY < -.55 ? 'underside' : 'vertical'; coverage[category] += 1; const triangleLifts = new Set(vertices.map((vertex) => faceLiftAttribute.getX(vertex).toFixed(5))); expect(triangleLifts.size).toBe(1); faceLifts[category].add([...triangleLifts][0]!);
+        const category = normalY > .55 ? 'upward' : normalY < -.55 ? 'underside' : 'vertical'; coverage[category] += 1; const triangleLifts = new Set(vertices.map((vertex) => faceLiftAttribute.getX(vertex).toFixed(5))); expect(triangleLifts.size).toBe(1); faceLifts[category].add([...triangleLifts][0]!); recordHemisphereWeight(normalY, faceLiftAttribute.getX(vertices[0]!));
       }
       expect(Object.values(coverage).every((count) => count > 0)).toBe(true);
       const meanScale = scales.reduce((sum, scale) => sum + scale, 0) / scales.length, range = layer === 'near' ? [.08, .1] : layer === 'mid' ? [.06, .08] : [.045, .06];
@@ -177,7 +190,7 @@ describe('Tide Scar geometric canyon presentation', () => {
       expect(Number.isFinite(scale)).toBe(true); expect(uvArea).toBeGreaterThan(1e-7);
       const value = vertices.map((vertex) => color.getX(vertex) * .2126 + color.getY(vertex) * .7152 + color.getZ(vertex) * .0722).reduce((sum, entry) => sum + entry, 0) / 3;
       const strengths = vertices.map((vertex) => surfaceBand.getX(vertex)), floors = vertices.map((vertex) => surfaceFloor.getX(vertex)), faceLifts = vertices.map((vertex) => surfaceFaceLift.getX(vertex)); expect(new Set(strengths).size).toBe(1); expect(new Set(floors).size).toBe(1); expect(new Set(faceLifts).size).toBe(1);
-      faces.push({ keys, value, scale, normalY: normal.y / normalLength, strength: strengths[0]!, floor: floors[0]!, faceLift: faceLifts[0]! });
+      faces.push({ keys, value, scale, normalY: normal.y / normalLength, strength: strengths[0]!, floor: floors[0]!, faceLift: faceLifts[0]! }); recordHemisphereWeight(normal.y / normalLength, faceLifts[0]!);
       for (let step = 0; step < 3; step += 1) { const a = keys[step]!, b = keys[(step + 1) % 3]!; welded.set(a, points[step]!); welded.set(b, points[(step + 1) % 3]!); if (!adjacency.has(a)) adjacency.set(a, new Set()); if (!adjacency.has(b)) adjacency.set(b, new Set()); adjacency.get(a)!.add(b); adjacency.get(b)!.add(a); }
     }
     const pending = new Set(adjacency.keys()), components: Set<string>[] = [];
@@ -210,6 +223,9 @@ describe('Tide Scar geometric canyon presentation', () => {
     expect(bands[0]!.variation).toBeGreaterThan(bands[1]!.variation); expect(bands[1]!.variation).toBeGreaterThan(bands[2]!.variation);
     expect(bands[0]!.contrast).toBeGreaterThan(bands[1]!.contrast); expect(bands[1]!.contrast).toBeGreaterThan(bands[2]!.contrast); expect(bands[2]!.contrast).toBeGreaterThan(.12);
     expect(bands.map((band) => band.strength)).toEqual([expect.closeTo(.78, 5), expect.closeTo(.58, 5), expect.closeTo(.38, 5)]); expect(bands.map((band) => band.floor)).toEqual([expect.closeTo(.1, 5), expect.closeTo(.14, 5), expect.closeTo(.18, 5)]);
+    expect(hemisphereFloors).toEqual({ unchanged: new Set(['0.000']), returns: new Set(['0.130']), undersides: new Set(['0.135']) });
+    expect(Math.max(...[...hemisphereFloors.returns, ...hemisphereFloors.undersides].map(Number))).toBeLessThan(.225);
+    expect(Math.min(...hemisphereWeights.vertical)).toBeGreaterThan(Math.max(...hemisphereWeights.underside));
     first.dispose(); second.dispose();
   });
   it('uses six deterministic fractured causeway signatures with real side mass', () => {
@@ -310,11 +326,16 @@ describe('Tide Scar geometric canyon presentation', () => {
         const surface = material as MeshStandardMaterial, isCanyonBand = LAYERS.some(([name]) => name === object.name);
         expect(surface.map).toBe(isCanyonBand ? texture : null);
         if (isCanyonBand) {
-          const shader: { uniforms: Record<string, { value: number }>; vertexShader: string; fragmentShader: string } = { uniforms: {}, vertexShader: '#include <begin_vertex>', fragmentShader: '#include <map_fragment>' };
+          const shader: { uniforms: Record<string, { value: number }>; vertexShader: string; fragmentShader: string } = { uniforms: {}, vertexShader: '#include <begin_vertex>', fragmentShader: '#include <map_fragment>\n#include <lights_fragment_begin>\n#include <lights_fragment_maps>\n#include <lights_fragment_end>\n#include <aomap_fragment>' };
           surface.onBeforeCompile(shader as never, {} as never);
           expect(surface.color.getHex()).toBe(0xffffff); expect(surface.vertexColors).toBe(true); expect(surface.emissive.getHex()).toBe(0); expect(surface.emissiveIntensity).toBe(0);
           expect(shader.vertexShader).toContain('attribute float surfaceBandStrength'); expect(shader.vertexShader).toContain('attribute float surfaceFaceLift'); expect(shader.vertexShader).toContain('vCanyonFaceLift = surfaceFaceLift'); expect(shader.vertexShader).toContain('vCanyonObjectPosition = position');
           expect(shader.fragmentShader).toContain('texture2D( map, vMapUv * 1.65 )'); expect(shader.fragmentShader).toContain('microValue - 0.039'); expect(shader.fragmentShader).toContain('max(vCanyonBandStrength, canyonMapStrength)'); expect(shader.fragmentShader).toContain('min(vCanyonBandFloor, canyonMapFloor)'); expect(shader.fragmentShader).toContain('faceMinimum = bandFloor + 0.16 + vCanyonFaceLift'); expect(shader.fragmentShader).toContain('textureDetail + worldDetail'); expect(shader.fragmentShader).toContain('diffuseColor *= sampledDiffuseColor'); expect(shader.fragmentShader).not.toContain('#include <map_fragment>');
+          const lightBegin = shader.fragmentShader.indexOf('#include <lights_fragment_begin>'), hemiGuard = shader.fragmentShader.indexOf('#if defined(RE_IndirectDiffuse) && (NUM_HEMI_LIGHTS > 0)'), lightMaps = shader.fragmentShader.indexOf('#include <lights_fragment_maps>'), lightEnd = shader.fragmentShader.indexOf('#include <lights_fragment_end>'), ao = shader.fragmentShader.indexOf('#include <aomap_fragment>');
+          expect(shader.fragmentShader.slice(lightBegin, hemiGuard)).toBe('#include <lights_fragment_begin>\n'); expect(lightBegin).toBeGreaterThan(-1); expect(hemiGuard).toBeGreaterThan(lightBegin); expect(lightMaps).toBeGreaterThan(hemiGuard); expect(lightEnd).toBeGreaterThan(lightMaps); expect(ao).toBeGreaterThan(lightEnd);
+          const guardedDelta = shader.fragmentShader.slice(hemiGuard, lightMaps);
+          expect(guardedDelta).toContain('canyonWeightFloor = min(0.135, vCanyonFaceLift * 5.2)'); expect(guardedDelta).toContain('canyonBaseWeight = saturate(0.5 * dot(geometryNormal, hemisphereLights[i].direction) + 0.5)'); expect(guardedDelta).toContain('mix(hemisphereLights[i].groundColor, hemisphereLights[i].skyColor, canyonBaseWeight)'); expect(guardedDelta).toContain('irradiance += max(canyonLiftedIrradiance - canyonBaseIrradiance, vec3(0.0))'); expect(guardedDelta.match(/irradiance \+=/g)).toHaveLength(1);
+          for (const assignment of [/\bnormal\s*(?:\+|-|\*|\/)?=/, /\bgeometryNormal\s*(?:\+|-|\*|\/)?=/, /reflectedLight\.directDiffuse\s*(?:\+|-|\*|\/)?=/, /reflectedLight\.directSpecular\s*(?:\+|-|\*|\/)?=/, /\boutgoingLight\s*(?:\+|-|\*|\/)?=/, /\btotalEmissiveRadiance\s*(?:\+|-|\*|\/)?=/, /\bgl_FragColor\s*(?:\+|-|\*|\/)?=/]) expect(guardedDelta).not.toMatch(assignment);
           remaps.push({ strength: shader.uniforms.canyonMapStrength!.value, floor: shader.uniforms.canyonMapFloor!.value }); roughnesses.push(surface.roughness);
         }
         material.addEventListener('dispose', () => { materialDisposals += 1; });

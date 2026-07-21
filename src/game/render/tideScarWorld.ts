@@ -110,9 +110,21 @@ function createSurfaceMaterial(treatment: SurfaceTreatment): MeshStandardMateria
   vec3 basaltHue = mix(vec3(1.0), sampledDiffuseColor.rgb / max(microValue, 0.02), 0.58);
   sampledDiffuseColor.rgb = basaltHue * basaltValue;
   diffuseColor *= sampledDiffuseColor;
+#endif`).replace('#include <lights_fragment_begin>', `#include <lights_fragment_begin>
+#if defined(RE_IndirectDiffuse) && (NUM_HEMI_LIGHTS > 0)
+  float canyonWeightFloor = min(0.135, vCanyonFaceLift * 5.2);
+  #pragma unroll_loop_start
+  for (int i = 0; i < NUM_HEMI_LIGHTS; i ++) {
+    float canyonBaseWeight = saturate(0.5 * dot(geometryNormal, hemisphereLights[i].direction) + 0.5);
+    float canyonLiftedWeight = max(canyonBaseWeight, canyonWeightFloor);
+    vec3 canyonBaseIrradiance = mix(hemisphereLights[i].groundColor, hemisphereLights[i].skyColor, canyonBaseWeight);
+    vec3 canyonLiftedIrradiance = mix(hemisphereLights[i].groundColor, hemisphereLights[i].skyColor, canyonLiftedWeight);
+    irradiance += max(canyonLiftedIrradiance - canyonBaseIrradiance, vec3(0.0));
+  }
+  #pragma unroll_loop_end
 #endif`)}`;
   };
-  material.customProgramCacheKey = () => `tide-scar-r1e-basalt-${treatment.mapStrength}-${treatment.mapFloor}`;
+  material.customProgramCacheKey = () => `tide-scar-r1e-v4-hemi-${treatment.mapStrength}-${treatment.mapFloor}`;
   return material;
 }
 function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
