@@ -8,6 +8,15 @@ import { WORLD_METRICS } from './theme';
 const LAYERS = [['tide-scar-near-fractured-inner-lips', 'near', 3, 13, 10, 6, 0],
   ['tide-scar-mid-interrupted-buttress-recesses', 'mid', 4, 14, 12, 8, 0],
   ['tide-scar-far-low-ridge-mesa-chains', 'far', 4, 11, 12, 8, 12]] as const;
+async function geometryFingerprint(mesh: Mesh): Promise<string> {
+  const views = [mesh.geometry.getAttribute('position').array, mesh.geometry.getIndex()!.array]
+    .map((array) => new Uint8Array(array.buffer, array.byteOffset, array.byteLength));
+  const payload = new Uint8Array(8 + views[0]!.byteLength + views[1]!.byteLength), header = new DataView(payload.buffer);
+  header.setUint32(0, views[0]!.byteLength, true); header.setUint32(4, views[1]!.byteLength, true);
+  payload.set(views[0]!, 8); payload.set(views[1]!, 8 + views[0]!.byteLength);
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', payload));
+  return Array.from(digest, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
 describe('Tide Scar geometric canyon presentation', () => {
   it('builds thick, distinct near/mid/far topology without panorama, plane, or instanced-card geometry', () => {
     const world = new TideScarWorld();
@@ -111,6 +120,98 @@ describe('Tide Scar geometric canyon presentation', () => {
       'tide-scar-far-middle-near-mist-bands']) expect(world.root.getObjectByName(forbidden)).toBeUndefined();
     world.dispose();
   });
+  it('preserves R1D massing while actual R1E faces carry deterministic depth-scaled basalt treatment', async () => {
+    const first = new TideScarWorld(), second = new TideScarWorld();
+    const collectMeshes = (world: TideScarWorld) => { const meshes: Mesh[] = []; world.root.traverse((object) => { if (object instanceof Mesh) meshes.push(object); }); return meshes; };
+    const firstMeshes = collectMeshes(first), secondMeshes = collectMeshes(second);
+    expect(firstMeshes).toHaveLength(4); expect(secondMeshes).toHaveLength(4);
+    const fingerprints = await Promise.all(firstMeshes.map(async (mesh) => { mesh.geometry.computeBoundingBox(); return [mesh.name, await geometryFingerprint(mesh), mesh.geometry.getAttribute('position').count, mesh.geometry.getIndex()!.count, mesh.geometry.boundingBox!.min.toArray(), mesh.geometry.boundingBox!.max.toArray()]; }));
+    expect(fingerprints).toEqual([
+      ['tide-scar-faceted-abyss-bed', '4f4032aa4676afa4d2b6f92367b309c7e952500b7743df3d0e82db1e7f8c4b52', 90, 432, [-120, -33.034568786621094, -240], [120, -22.416658401489258, 30]],
+      ['tide-scar-near-fractured-inner-lips', 'b80bb17b7a162c86e04928d1f919bd6e9857a2323d23ad2d39ae3f43d57e6e68', 862, 1122, [-20.217283248901367, -15.600470542907715, -93], [17.62417221069336, 4.526494979858398, -5]],
+      ['tide-scar-mid-interrupted-buttress-recesses', '3013352e2ba6fb5ef670fcaa8e0d724799713011eb054c67557e848966225906', 1152, 1488, [-35.438621520996094, -18.989492416381836, -121], [41.28934860229492, 6.292722225189209, -24]],
+      ['tide-scar-far-low-ridge-mesa-chains', '129a73ae4546fe947685debdd2602f9b8d05fc07c60bb01c51db4d6fe5962330', 4392, 4656, [-62.908966064453125, -17.7822322845459, -192], [63.154701232910156, 6.28000020980835, -37.97065734863281]],
+    ]);
+    for (const [meshIndex, mesh] of firstMeshes.entries()) {
+      expect(Array.isArray(mesh.material)).toBe(false); expect(mesh.geometry.groups).toHaveLength(0);
+      const replay = secondMeshes[meshIndex]!;
+      expect(Array.from(mesh.geometry.getAttribute('position').array)).toEqual(Array.from(replay.geometry.getAttribute('position').array));
+      expect(Array.from(mesh.geometry.getIndex()!.array)).toEqual(Array.from(replay.geometry.getIndex()!.array));
+      expect(Array.from(mesh.geometry.getAttribute('uv').array)).toEqual(Array.from(replay.geometry.getAttribute('uv').array));
+      expect(Array.from(mesh.geometry.getAttribute('color').array)).toEqual(Array.from(replay.geometry.getAttribute('color').array));
+      expect(Array.from(mesh.geometry.getAttribute('normal').array)).toEqual(Array.from(replay.geometry.getAttribute('normal').array));
+      if (LAYERS.some(([name]) => name === mesh.name)) for (const attributeName of ['surfaceBandStrength', 'surfaceBandFloor', 'surfaceFaceLift']) { const attribute = mesh.geometry.getAttribute(attributeName), replayAttribute = replay.geometry.getAttribute(attributeName); expect(attribute.count).toBe(mesh.geometry.getAttribute('position').count); expect(Array.from(attribute.array)).toEqual(Array.from(replayAttribute.array)); }
+      const material = mesh.material as MeshStandardMaterial, replayMaterial = replay.material as MeshStandardMaterial;
+      expect({ color: material.color.getHex(), emissive: material.emissive.getHex(), emissiveIntensity: material.emissiveIntensity,
+        roughness: material.roughness, metalness: material.metalness, vertexColors: material.vertexColors, flatShading: material.flatShading,
+        program: material.customProgramCacheKey() }).toEqual({ color: replayMaterial.color.getHex(), emissive: replayMaterial.emissive.getHex(), emissiveIntensity: replayMaterial.emissiveIntensity,
+        roughness: replayMaterial.roughness, metalness: replayMaterial.metalness, vertexColors: replayMaterial.vertexColors, flatShading: replayMaterial.flatShading,
+        program: replayMaterial.customProgramCacheKey() });
+    }
+    for (const [name, layer] of LAYERS) {
+      const mesh = first.root.getObjectByName(name) as Mesh, meshPosition = mesh.geometry.getAttribute('position'), meshUv = mesh.geometry.getAttribute('uv'), meshIndex = mesh.geometry.getIndex()!;
+      const end = layer === 'far' ? meshIndex.count - 12 * 96 * 3 : meshIndex.count, scales: number[] = [], strengths = new Set<string>(), floors = new Set<string>(), faceLifts = { upward: new Set<string>(), vertical: new Set<string>(), underside: new Set<string>() }, coverage = { upward: 0, vertical: 0, underside: 0 }, strengthAttribute = mesh.geometry.getAttribute('surfaceBandStrength'), floorAttribute = mesh.geometry.getAttribute('surfaceBandFloor'), faceLiftAttribute = mesh.geometry.getAttribute('surfaceFaceLift');
+      for (let offset = 0; offset < end; offset += 3) {
+        const vertices = [0, 1, 2].map((step) => meshIndex.getX(offset + step)), points = vertices.map((vertex) => new Vector3().fromBufferAttribute(meshPosition, vertex)) as [Vector3, Vector3, Vector3], texture = vertices.map((vertex) => [meshUv.getX(vertex), meshUv.getY(vertex)] as const);
+        expect(texture.flat().every(Number.isFinite)).toBe(true);
+        for (const vertex of vertices) { const strength = strengthAttribute.getX(vertex), floor = floorAttribute.getX(vertex), faceLift = faceLiftAttribute.getX(vertex); expect(Number.isFinite(strength) && Number.isFinite(floor) && Number.isFinite(faceLift)).toBe(true); strengths.add(strength.toFixed(5)); floors.add(floor.toFixed(5)); }
+        const normal = points[1].clone().sub(points[0]).cross(points[2].clone().sub(points[0])), length = normal.length(), uvArea = Math.abs((texture[1]![0] - texture[0]![0]) * (texture[2]![1] - texture[0]![1]) - (texture[1]![1] - texture[0]![1]) * (texture[2]![0] - texture[0]![0])) / 2;
+        expect(length).toBeGreaterThan(1e-4); expect(uvArea).toBeGreaterThan(1e-7);
+        const normalY = normal.y / length, scale = Math.sqrt(uvArea / (Math.max(Math.abs(normal.x), Math.abs(normal.y), Math.abs(normal.z)) / 2)); scales.push(scale);
+        const category = normalY > .55 ? 'upward' : normalY < -.55 ? 'underside' : 'vertical'; coverage[category] += 1; const triangleLifts = new Set(vertices.map((vertex) => faceLiftAttribute.getX(vertex).toFixed(5))); expect(triangleLifts.size).toBe(1); faceLifts[category].add([...triangleLifts][0]!);
+      }
+      expect(Object.values(coverage).every((count) => count > 0)).toBe(true);
+      const meanScale = scales.reduce((sum, scale) => sum + scale, 0) / scales.length, range = layer === 'near' ? [.08, .1] : layer === 'mid' ? [.06, .08] : [.045, .06];
+      expect(meanScale).toBeGreaterThanOrEqual(range[0]!); expect(meanScale).toBeLessThanOrEqual(range[1]!);
+      expect([...strengths]).toEqual([(layer === 'near' ? .78 : layer === 'mid' ? .58 : .38).toFixed(5)]); expect([...floors]).toEqual([(layer === 'near' ? .1 : layer === 'mid' ? .14 : .18).toFixed(5)]);
+      expect([...faceLifts.upward]).toEqual(['0.00000']); expect(faceLifts.underside.has('0.03000')).toBe(true); expect([...faceLifts.underside].every((lift) => lift === '0.03000' || lift === '0.02500')).toBe(true); expect(faceLifts.vertical).toEqual(new Set(['0.00000', '0.02500']));
+    }
+    const farMesh = first.root.getObjectByName(LAYERS[2][0]) as Mesh, position = farMesh.geometry.getAttribute('position'), uv = farMesh.geometry.getAttribute('uv'), color = farMesh.geometry.getAttribute('color'), surfaceBand = farMesh.geometry.getAttribute('surfaceBandStrength'), surfaceFloor = farMesh.geometry.getAttribute('surfaceBandFloor'), surfaceFaceLift = farMesh.geometry.getAttribute('surfaceFaceLift'), index = farMesh.geometry.getIndex()!;
+    type Face = { keys: [string, string, string]; value: number; scale: number; normalY: number; strength: number; floor: number; faceLift: number };
+    const horizonStart = index.count - 12 * 96 * 3, keyOf = (point: Vector3) => point.toArray().map((value) => Math.round(value * 1e5)).join(':'), welded = new Map<string, Vector3>(), adjacency = new Map<string, Set<string>>(), faces: Face[] = [];
+    for (let offset = horizonStart; offset < index.count; offset += 3) {
+      const vertices = [0, 1, 2].map((step) => index.getX(offset + step)), points = vertices.map((vertex) => new Vector3().fromBufferAttribute(position, vertex)) as [Vector3, Vector3, Vector3], keys = points.map(keyOf) as [string, string, string];
+      const normal = points[1].clone().sub(points[0]).cross(points[2].clone().sub(points[0])), normalLength = normal.length(); expect(normalLength).toBeGreaterThan(1e-4);
+      const texture = vertices.map((vertex) => [uv.getX(vertex), uv.getY(vertex)] as const), uvArea = Math.abs((texture[1]![0] - texture[0]![0]) * (texture[2]![1] - texture[0]![1]) - (texture[1]![1] - texture[0]![1]) * (texture[2]![0] - texture[0]![0])) / 2;
+      const projectedArea = Math.max(Math.abs(normal.x), Math.abs(normal.y), Math.abs(normal.z)) / 2, scale = Math.sqrt(uvArea / projectedArea);
+      expect(Number.isFinite(scale)).toBe(true); expect(uvArea).toBeGreaterThan(1e-7);
+      const value = vertices.map((vertex) => color.getX(vertex) * .2126 + color.getY(vertex) * .7152 + color.getZ(vertex) * .0722).reduce((sum, entry) => sum + entry, 0) / 3;
+      const strengths = vertices.map((vertex) => surfaceBand.getX(vertex)), floors = vertices.map((vertex) => surfaceFloor.getX(vertex)), faceLifts = vertices.map((vertex) => surfaceFaceLift.getX(vertex)); expect(new Set(strengths).size).toBe(1); expect(new Set(floors).size).toBe(1); expect(new Set(faceLifts).size).toBe(1);
+      faces.push({ keys, value, scale, normalY: normal.y / normalLength, strength: strengths[0]!, floor: floors[0]!, faceLift: faceLifts[0]! });
+      for (let step = 0; step < 3; step += 1) { const a = keys[step]!, b = keys[(step + 1) % 3]!; welded.set(a, points[step]!); welded.set(b, points[(step + 1) % 3]!); if (!adjacency.has(a)) adjacency.set(a, new Set()); if (!adjacency.has(b)) adjacency.set(b, new Set()); adjacency.get(a)!.add(b); adjacency.get(b)!.add(a); }
+    }
+    const pending = new Set(adjacency.keys()), components: Set<string>[] = [];
+    while (pending.size > 0) { const component = new Set<string>(), queue = [pending.values().next().value as string]; while (queue.length > 0) { const key = queue.pop()!; if (!pending.delete(key)) continue; component.add(key); queue.push(...adjacency.get(key)!); } components.push(component); }
+    expect(components).toHaveLength(12);
+    const actual = components.map((component) => {
+      const points = [...component].map((key) => welded.get(key)!), componentFaces = faces.filter((face) => face.keys.every((key) => component.has(key))), capCenters = [...component].filter((key) => adjacency.get(key)!.size === 8).sort((a, b) => welded.get(b)!.y - welded.get(a)!.y), topCenter = capCenters[0]!, bottomCenter = capCenters[1]!;
+      expect(capCenters).toHaveLength(2); expect(componentFaces).toHaveLength(96);
+      const samples = { top: [] as number[], shelf: [] as number[], vertical: [] as number[], underside: [] as number[] }, minimumSamples = { top: [] as number[], shelf: [] as number[], vertical: [] as number[], underside: [] as number[] }, faceLifts = { top: new Set<string>(), shelf: new Set<string>(), vertical: new Set<string>(), underside: new Set<string>() };
+      for (const face of componentFaces) { const category = face.normalY > .55 ? face.keys.includes(topCenter) ? 'top' : 'shelf' : face.normalY < -.55 ? 'underside' : 'vertical', semanticFace = face.keys.includes(topCenter) ? 'top' : face.keys.includes(bottomCenter) ? 'underside' : face.normalY > .55 ? 'shelf' : 'vertical'; samples[category].push(face.value); minimumSamples[semanticFace].push(face.value * (face.floor + .16 + face.faceLift)); faceLifts[semanticFace].add(face.faceLift.toFixed(5)); }
+      for (const values of Object.values(samples)) expect(values.length).toBeGreaterThan(0);
+      expect([...faceLifts.top]).toEqual(['0.00000']); expect([...faceLifts.shelf]).toEqual(['0.00000']); expect(faceLifts.vertical).toEqual(new Set(['0.00000', '0.02500'])); expect([...faceLifts.underside]).toEqual(['0.03000']);
+      const means = Object.fromEntries(Object.entries(samples).map(([kind, values]) => [kind, values.reduce((sum, value) => sum + value, 0) / values.length])) as Record<keyof typeof samples, number>;
+      expect(means.top).toBeGreaterThan(means.shelf); expect(means.shelf).toBeGreaterThan(means.vertical); expect(means.vertical).toBeGreaterThan(means.underside);
+      const minimumMeans = Object.fromEntries(Object.entries(minimumSamples).map(([kind, values]) => [kind, values.reduce((sum, value) => sum + value, 0) / values.length])) as Record<keyof typeof minimumSamples, number>;
+      expect(minimumMeans.top).toBeGreaterThan(minimumMeans.shelf); expect(minimumMeans.shelf).toBeGreaterThan(minimumMeans.vertical); expect(minimumMeans.vertical).toBeGreaterThan(minimumMeans.underside);
+      const normalized = Object.entries(samples).flatMap(([kind, values]) => values.map((value) => value / means[kind as keyof typeof samples])), variation = Math.sqrt(normalized.reduce((sum, value) => sum + (value - 1) ** 2, 0) / normalized.length);
+      expect(Math.min(...componentFaces.map((face) => face.value))).toBeGreaterThan(.12); expect(Math.max(...componentFaces.map((face) => face.scale)) / Math.min(...componentFaces.map((face) => face.scale))).toBeLessThan(1.001);
+      return { centerZ: points.reduce((sum, point) => sum + point.z, 0) / points.length, means, variation, scale: componentFaces.reduce((sum, face) => sum + face.scale, 0) / componentFaces.length, strength: componentFaces[0]!.strength, floor: componentFaces[0]!.floor };
+    }).sort((a, b) => b.centerZ - a.centerZ);
+    const bands = [actual.slice(0, 4), actual.slice(4, 8), actual.slice(8, 12)].map((band) => ({
+      scale: band.reduce((sum, component) => sum + component.scale, 0) / band.length,
+      variation: band.reduce((sum, component) => sum + component.variation, 0) / band.length,
+      contrast: band.reduce((sum, component) => sum + (component.means.top - component.means.underside) / component.means.shelf, 0) / band.length,
+      strength: band.reduce((sum, component) => sum + component.strength, 0) / band.length,
+      floor: band.reduce((sum, component) => sum + component.floor, 0) / band.length,
+    }));
+    expect(bands[0]!.scale).toBeGreaterThan(bands[1]!.scale); expect(bands[1]!.scale).toBeGreaterThan(bands[2]!.scale); expect(bands[0]!.scale / bands[2]!.scale).toBeLessThan(2);
+    expect(bands[0]!.scale).toBeGreaterThanOrEqual(.08); expect(bands[0]!.scale).toBeLessThanOrEqual(.1); expect(bands[1]!.scale).toBeGreaterThanOrEqual(.06); expect(bands[1]!.scale).toBeLessThanOrEqual(.08); expect(bands[2]!.scale).toBeGreaterThanOrEqual(.045); expect(bands[2]!.scale).toBeLessThanOrEqual(.06);
+    expect(bands[0]!.variation).toBeGreaterThan(bands[1]!.variation); expect(bands[1]!.variation).toBeGreaterThan(bands[2]!.variation);
+    expect(bands[0]!.contrast).toBeGreaterThan(bands[1]!.contrast); expect(bands[1]!.contrast).toBeGreaterThan(bands[2]!.contrast); expect(bands[2]!.contrast).toBeGreaterThan(.12);
+    expect(bands.map((band) => band.strength)).toEqual([expect.closeTo(.78, 5), expect.closeTo(.58, 5), expect.closeTo(.38, 5)]); expect(bands.map((band) => band.floor)).toEqual([expect.closeTo(.1, 5), expect.closeTo(.14, 5), expect.closeTo(.18, 5)]);
+    first.dispose(); second.dispose();
+  });
   it('uses six deterministic fractured causeway signatures with real side mass', () => {
     const fingerprints = new Set<string>(), vertexCounts = new Set<number>(), edgeEvents = new Set<string>();
     for (let signature = 0; signature < 6; signature += 1) {
@@ -191,23 +292,41 @@ describe('Tide Scar geometric canyon presentation', () => {
     first.dispose();
     second.dispose();
   });
-  it('keeps setPanorama as a non-owning no-op and releases every owned geometry and material', () => {
+  it('binds and clears one non-owning basalt map across all canyon bands, then releases only owned resources', () => {
     const world = new TideScarWorld();
     const texture = new Texture();
     let textureDisposals = 0; let geometryDisposals = 0; let materialDisposals = 0;
     texture.addEventListener('dispose', () => { textureDisposals += 1; });
     world.setPanorama(texture);
     expect(world.hasPanorama).toBe(false);
+    for (const [name] of LAYERS) expect(((world.root.getObjectByName(name) as Mesh).material as MeshStandardMaterial).map).toBeNull();
     world.setSurfaceMap(texture);
+    const remaps: { strength: number; floor: number }[] = [], roughnesses: number[] = [];
     world.root.traverse((object) => {
       if (!(object instanceof Mesh)) return;
       object.geometry.addEventListener('dispose', () => { geometryDisposals += 1; });
       const materials = Array.isArray(object.material) ? object.material : [object.material];
       for (const material of materials) {
-        expect((material as MeshStandardMaterial).map).toBe(object.name === LAYERS[0][0] ? texture : null);
+        const surface = material as MeshStandardMaterial, isCanyonBand = LAYERS.some(([name]) => name === object.name);
+        expect(surface.map).toBe(isCanyonBand ? texture : null);
+        if (isCanyonBand) {
+          const shader: { uniforms: Record<string, { value: number }>; vertexShader: string; fragmentShader: string } = { uniforms: {}, vertexShader: '#include <begin_vertex>', fragmentShader: '#include <map_fragment>' };
+          surface.onBeforeCompile(shader as never, {} as never);
+          expect(surface.color.getHex()).toBe(0xffffff); expect(surface.vertexColors).toBe(true); expect(surface.emissive.getHex()).toBe(0); expect(surface.emissiveIntensity).toBe(0);
+          expect(shader.vertexShader).toContain('attribute float surfaceBandStrength'); expect(shader.vertexShader).toContain('attribute float surfaceFaceLift'); expect(shader.vertexShader).toContain('vCanyonFaceLift = surfaceFaceLift'); expect(shader.vertexShader).toContain('vCanyonObjectPosition = position');
+          expect(shader.fragmentShader).toContain('texture2D( map, vMapUv * 1.65 )'); expect(shader.fragmentShader).toContain('microValue - 0.039'); expect(shader.fragmentShader).toContain('max(vCanyonBandStrength, canyonMapStrength)'); expect(shader.fragmentShader).toContain('min(vCanyonBandFloor, canyonMapFloor)'); expect(shader.fragmentShader).toContain('faceMinimum = bandFloor + 0.16 + vCanyonFaceLift'); expect(shader.fragmentShader).toContain('textureDetail + worldDetail'); expect(shader.fragmentShader).toContain('diffuseColor *= sampledDiffuseColor'); expect(shader.fragmentShader).not.toContain('#include <map_fragment>');
+          remaps.push({ strength: shader.uniforms.canyonMapStrength!.value, floor: shader.uniforms.canyonMapFloor!.value }); roughnesses.push(surface.roughness);
+        }
         material.addEventListener('dispose', () => { materialDisposals += 1; });
       }
     });
+    expect(remaps).toEqual([{ strength: .78, floor: .1 }, { strength: .58, floor: .14 }, { strength: .38, floor: .18 }]);
+    expect(roughnesses.every((roughness) => roughness >= .64 && roughness <= .9)).toBe(true);
+    for (let band = 1; band < remaps.length; band += 1) { expect(remaps[band - 1]!.strength - remaps[band]!.strength).toBeGreaterThanOrEqual(.15); expect(remaps[band]!.floor - remaps[band - 1]!.floor).toBeGreaterThanOrEqual(.03); }
+    expect(Math.max(...remaps.map((remap) => remap.floor))).toBeLessThanOrEqual(.25);
+    world.setSurfaceMap(null);
+    for (const [name] of LAYERS) expect(((world.root.getObjectByName(name) as Mesh).material as MeshStandardMaterial).map).toBeNull();
+    world.setSurfaceMap(texture);
     world.dispose();
     world.dispose();
     expect(geometryDisposals).toBe(4);

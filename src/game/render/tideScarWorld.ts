@@ -5,11 +5,29 @@ import { PALETTE } from './theme';
 type CanyonLayerName = 'near' | 'mid' | 'far';
 type Side = -1 | 1;
 interface ShelfRun { side: Side; z: readonly number[]; inner: number; width: number; top: number; foot: number; seed: number }
-interface ShelfLayer { name: CanyonLayerName; objectName: string; color: number; runs: readonly ShelfRun[]; profile: readonly [number, number][] }
+interface ShelfLayer { name: CanyonLayerName; objectName: string; runs: readonly ShelfRun[]; profile: readonly [number, number][] }
 type Point3 = readonly [number, number, number];
 interface DetailSpec { kind: 'talus' | 'strata'; anchor: Point3; side: Side; runSeed: number; hostDepth: number; points: readonly Point3[]; faces: readonly (readonly [number, number, number])[]; tone: number }
 type HorizonBand = 'near' | 'mid' | 'far';
 interface HorizonIsland { x: number; z: number; radiusX: number; radiusZ: number; top: number; skirt: number; seed: number; band: HorizonBand }
+type SurfaceFace = 'top' | 'shelf' | 'wall' | 'return' | 'underside';
+interface SurfaceTreatment {
+  tint: number; uvScale: number; frequency: number; variation: number;
+  values: Readonly<Record<SurfaceFace, number>>;
+  roughness: number; mapStrength: number; mapFloor: number;
+}
+const SURFACE_TREATMENTS: Readonly<Record<CanyonLayerName, SurfaceTreatment>> = {
+  near: { tint: 0xd4dfe1, uvScale: .09, frequency: .36, variation: .09,
+    values: { top: 1.15, shelf: 1.08, wall: 1, return: .94, underside: .86 },
+    roughness: .84, mapStrength: .78, mapFloor: .1 },
+  mid: { tint: 0xd4dfe1, uvScale: .07, frequency: .22, variation: .052,
+    values: { top: 1.1, shelf: 1.04, wall: .98, return: .94, underside: .89 },
+    roughness: .89, mapStrength: .58, mapFloor: .14 },
+  far: { tint: 0xd4dfe1, uvScale: .052, frequency: .12, variation: .024,
+    values: { top: 1.065, shelf: 1.03, wall: .99, return: .96, underside: .92 },
+    roughness: .9, mapStrength: .38, mapFloor: .18 },
+  } as const;
+const SURFACE_FACE_LIFT: Readonly<Record<SurfaceFace, number>> = { top: 0, shelf: 0, wall: 0, return: .025, underside: .03 };
 const TALUS_FACES = [[0, 2, 4], [0, 4, 3], [0, 3, 5], [0, 5, 2], [1, 4, 2], [1, 3, 4], [1, 5, 3], [1, 2, 5]] as const;
 const STRATA_FACES = [[0, 2, 1], [3, 4, 5], [0, 1, 4], [0, 4, 3], [1, 2, 5], [1, 5, 4], [2, 0, 3], [2, 3, 5]] as const;
 const HORIZON_ISLANDS: readonly HorizonIsland[] = [
@@ -21,19 +39,19 @@ const HORIZON_ISLANDS: readonly HorizonIsland[] = [
   { x: 12, z: -124, radiusX: 5, radiusZ: 15, top: 5.5, skirt: -6.8, seed: 461, band: 'far' }, { x: 34, z: -132, radiusX: 11, radiusZ: 17, top: 5.7, skirt: -7.3, seed: 463, band: 'far' },
 ] as const;
 const SHELF_LAYERS: readonly ShelfLayer[] = [
-  { name: 'near', objectName: 'tide-scar-near-fractured-inner-lips', color: 0x9cabb0,
+  { name: 'near', objectName: 'tide-scar-near-fractured-inner-lips',
     profile: [[0, 1], [.34, 1.02], [.3, .76], [.58, .72], [.75, .8], [1, .4], [.82, 0], [.12, 0], [.12, .22], [.28, .22], [.22, .42], [.06, .42], [.06, .7]],
     runs: [
       { side: -1, z: [-5, -12, -19, -26, -33], inner: 12, width: 6.5, top: 3, foot: -13, seed: 11 }, { side: 1, z: [-39, -47, -55, -63], inner: 11, width: 7, top: 3.8, foot: -15, seed: 17 },
       { side: -1, z: [-69, -77, -85, -93], inner: 14, width: 5.8, top: 2.8, foot: -12, seed: 23 },
     ] },
-  { name: 'mid', objectName: 'tide-scar-mid-interrupted-buttress-recesses', color: 0x657985,
+  { name: 'mid', objectName: 'tide-scar-mid-interrupted-buttress-recesses',
     profile: [[0, 1], [.2, 1], [.22, .68], [.48, .66], [.6, .84], [.9, .82], [1, .35], [.74, 0], [.08, 0], [.08, .24], [.22, .24], [.16, .48], [.04, .48], [.04, .74]],
     runs: [
       { side: -1, z: [-24, -33, -42, -51], inner: 14, width: 8, top: 5.4, foot: -17, seed: 41 }, { side: 1, z: [-44, -53, -62, -71], inner: 18, width: 10, top: 6, foot: -18, seed: 47 },
       { side: -1, z: [-66, -76, -86, -96], inner: 22, width: 12, top: 6.5, foot: -19, seed: 53 }, { side: 1, z: [-91, -101, -111, -121], inner: 26, width: 14, top: 5.6, foot: -18, seed: 59 },
     ] },
-  { name: 'far', objectName: 'tide-scar-far-low-ridge-mesa-chains', color: 0x87979d,
+  { name: 'far', objectName: 'tide-scar-far-low-ridge-mesa-chains',
     profile: [[0, 1], [.32, 1], [.45, .72], [.72, .7], [1, .38], [.86, 0], [.1, 0], [.1, .28], [.24, .28], [.08, .55], [.04, .76]],
     runs: [
       { side: -1, z: [-78, -90, -102, -114], inner: 12, width: 12, top: 3.8, foot: -12, seed: 89 }, { side: 1, z: [-96, -108, -120, -132], inner: 16, width: 15, top: 4.8, foot: -14, seed: 97 },
@@ -48,27 +66,75 @@ function seededUnit(index: number, salt: number): number {
   value ^= value >>> 16;
   return (value >>> 0) / 0xffffffff;
 }
+const SURFACE_TINTS: Readonly<Record<CanyonLayerName, Color>> = {
+  near: new Color(SURFACE_TREATMENTS.near.tint),
+  mid: new Color(SURFACE_TREATMENTS.mid.tint),
+  far: new Color(SURFACE_TREATMENTS.far.tint),
+};
+function surfaceUv(point: Point3, normal: Vector3, band: CanyonLayerName): readonly [number, number] {
+  const scale = SURFACE_TREATMENTS[band].uvScale, ax = Math.abs(normal.x), ay = Math.abs(normal.y), az = Math.abs(normal.z);
+  if (ay >= Math.max(ax, az)) return [point[0] * scale, -point[2] * scale];
+  return ax >= az ? [-point[2] * scale, point[1] * scale] : [point[0] * scale, point[1] * scale];
+}
+function surfaceShade(point: Point3, band: CanyonLayerName, face: SurfaceFace, baseTone: number): number {
+  const treatment = SURFACE_TREATMENTS[band], frequency = treatment.frequency;
+  const broad = Math.sin((point[0] * .83 + point[2] * .56 + point[1] * .31) * frequency);
+  const cross = Math.sin((point[0] * -.29 + point[2] * .91 - point[1] * .17) * frequency * .73 + 1.4);
+  return Math.max(.48, Math.min(1.22, baseTone * treatment.values[face] * (1 + treatment.variation * (broad * .62 + cross * .38))));
+}
+function createSurfaceMaterial(treatment: SurfaceTreatment): MeshStandardMaterial {
+  const material = new MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: treatment.roughness, metalness: 0, flatShading: true, emissive: 0, emissiveIntensity: 0 });
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.canyonMapStrength = { value: treatment.mapStrength };
+    shader.uniforms.canyonMapFloor = { value: treatment.mapFloor };
+    shader.vertexShader = `attribute float surfaceBandStrength;\nattribute float surfaceBandFloor;\nattribute float surfaceFaceLift;\nvarying float vCanyonBandStrength;\nvarying float vCanyonBandFloor;\nvarying float vCanyonFaceLift;\nvarying vec3 vCanyonObjectPosition;\n${shader.vertexShader}`.replace('#include <begin_vertex>', '#include <begin_vertex>\n  vCanyonBandStrength = surfaceBandStrength;\n  vCanyonBandFloor = surfaceBandFloor;\n  vCanyonFaceLift = surfaceFaceLift;\n  vCanyonObjectPosition = position;');
+    shader.fragmentShader = `uniform float canyonMapStrength;\nuniform float canyonMapFloor;\nvarying float vCanyonBandStrength;\nvarying float vCanyonBandFloor;\nvarying float vCanyonFaceLift;\nvarying vec3 vCanyonObjectPosition;\n${shader.fragmentShader.replace('#include <map_fragment>', `
+#ifdef USE_MAP
+  vec4 sampledDiffuseColor = texture2D( map, vMapUv * 1.65 );
+  vec4 broadBasalt = texture2D( map, vMapUv * 0.38 + vec2(0.17, 0.31) );
+  #ifdef DECODE_VIDEO_TEXTURE
+    sampledDiffuseColor = sRGBTransferEOTF( sampledDiffuseColor );
+    broadBasalt = sRGBTransferEOTF( broadBasalt );
+  #endif
+  const vec3 basaltLuma = vec3(0.2126, 0.7152, 0.0722);
+  float microValue = dot(sampledDiffuseColor.rgb, basaltLuma);
+  float macroValue = dot(broadBasalt.rgb, basaltLuma);
+  float bandStrength = max(vCanyonBandStrength, canyonMapStrength);
+  float bandFloor = min(vCanyonBandFloor, canyonMapFloor);
+  float strata = sin(vCanyonObjectPosition.y * 1.08 + sin(vCanyonObjectPosition.x * 0.11 + vCanyonObjectPosition.z * 0.08) * 1.15);
+  float mineralBreak = sin(vCanyonObjectPosition.x * 0.13 - vCanyonObjectPosition.z * 0.09 + vCanyonObjectPosition.y * 0.27);
+  float textureDetail = (microValue - 0.039) * (3.2 + 6.8 * bandStrength) + (macroValue - 0.039) * (1.6 + 4.2 * bandStrength);
+  float worldDetail = (strata * 0.68 + mineralBreak * 0.32) * (0.012 + 0.07 * bandStrength);
+  float faceMinimum = bandFloor + 0.16 + vCanyonFaceLift;
+  float basaltValue = clamp(0.38 + bandFloor * 0.42 + textureDetail + worldDetail, faceMinimum, 0.7);
+  vec3 basaltHue = mix(vec3(1.0), sampledDiffuseColor.rgb / max(microValue, 0.02), 0.58);
+  sampledDiffuseColor.rgb = basaltHue * basaltValue;
+  diffuseColor *= sampledDiffuseColor;
+#endif`)}`;
+  };
+  material.customProgramCacheKey = () => `tide-scar-r1e-basalt-${treatment.mapStrength}-${treatment.mapFloor}`;
+  return material;
+}
 function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
-  const positions: number[] = [], colors: number[] = [], uvs: number[] = [], indices: number[] = [];
+  const positions: number[] = [], colors: number[] = [], uvs: number[] = [], surfaceBands: number[] = [], surfaceFloors: number[] = [], surfaceFaceLifts: number[] = [], indices: number[] = [];
   const detailSpecs: DetailSpec[] = [], detailFragments: { kind: DetailSpec['kind']; anchor: Point3; side: Side; runSeed: number; hostDepth: number; vertexStart: number; vertexCount: number }[] = [];
   const horizonFragments: { band: HorizonBand; seed: number; ringSize: number; topHeightRange: number; center: Point3; vertexStart: number; vertexCount: number; indexStart: number; indexCount: number; bounds: { min: Point3; max: Point3 } }[] = [];
-  const tint = new Color(layer.color);
   const capFaces = ShapeUtils.triangulateShape(layer.profile.map(([x, y]) => new Vector2(x, y)), []);
   const signatureCount = layer.runs.reduce((count, run) => count + run.z.length - 1, 0);
   let endpointAreaRatio = 0;
-  const addVertex = (point: readonly [number, number, number], uv: readonly [number, number], tone = 1) => {
-    const index = positions.length / 3, shade = (.82 + Math.max(0, point[1] + 33) / 48 * .18) * tone;
-    positions.push(...point); colors.push(tint.r * shade, tint.g * shade, tint.b * shade); uvs.push(...uv); return index;
+  const addVertex = (point: Point3, normal: Vector3, face: SurfaceFace, band: CanyonLayerName = layer.name, baseTone = 1) => {
+    const index = positions.length / 3, tint = SURFACE_TINTS[band], shade = surfaceShade(point, band, face, baseTone);
+    positions.push(...point); colors.push(tint.r * shade, tint.g * shade, tint.b * shade); uvs.push(...surfaceUv(point, normal, band)); surfaceBands.push(SURFACE_TREATMENTS[band].mapStrength); surfaceFloors.push(SURFACE_TREATMENTS[band].mapFloor); surfaceFaceLifts.push(SURFACE_FACE_LIFT[face]); return index;
   };
-  const appendFacets = (source: readonly Point3[], faces: readonly (readonly [number, number, number])[], baseTone: number, preserveWinding = false) => {
+  const appendFacets = (source: readonly Point3[], faces: readonly (readonly [number, number, number])[], baseTone: number, preserveWinding = false, band: CanyonLayerName = layer.name, faceKinds?: readonly SurfaceFace[]) => {
     const center = source.reduce((sum, point) => sum.add(new Vector3(...point)), new Vector3()).multiplyScalar(1 / source.length), vertexStart = positions.length / 3, indexStart = indices.length;
-    for (const face of faces) {
+    for (const [faceIndex, face] of faces.entries()) {
       const points = face.map((index) => new Vector3(...source[index]!)) as [Vector3, Vector3, Vector3];
       const normal = points[1].clone().sub(points[0]).cross(points[2].clone().sub(points[0])), centroid = points[0].clone().add(points[1]).add(points[2]).multiplyScalar(1 / 3);
       if (!preserveWinding && normal.dot(centroid.sub(center)) < 0) [points[1], points[2]] = [points[2], points[1]];
       normal.copy(points[1]).sub(points[0]).cross(points[2].clone().sub(points[0])).normalize();
-      const abs = [Math.abs(normal.x), Math.abs(normal.y), Math.abs(normal.z)], tone = baseTone * (normal.y > .45 ? 1.12 : normal.y < -.25 ? .78 : 1);
-      indices.push(...points.map((point) => addVertex([point.x, point.y, point.z], abs[1]! >= Math.max(abs[0]!, abs[2]!) ? [point.x * .08, -point.z * .055] : abs[0]! >= abs[2]! ? [-point.z * .055, point.y * .08] : [point.x * .08, point.y * .08], tone)));
+      const kind = faceKinds?.[faceIndex] ?? (normal.y > .55 ? 'shelf' : normal.y < -.55 ? 'underside' : 'wall');
+      indices.push(...points.map((point) => addVertex([point.x, point.y, point.z], normal, kind, band, baseTone)));
     }
     return { center: [center.x, center.y, center.z] as Point3, vertexStart, vertexCount: positions.length / 3 - vertexStart, indexStart, indexCount: indices.length - indexStart };
   };
@@ -97,8 +163,14 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
       for (let step = 0; step < layer.profile.length; step += 1) {
         const next = (step + 1) % layer.profile.length;
         const quad = [stations[station]![step]!, stations[station + 1]![step]!, stations[station + 1]![next]!, stations[station]![next]!];
-        const horizontal = Math.abs(quad[3][1] - quad[0][1]) <= Math.abs(quad[3][0] - quad[0][0]) * .45, innerWall = step >= layer.profile.length - 5 || step === layer.profile.length - 1, tone = horizontal ? 1.12 : innerWall ? .94 : step > layer.profile.length * .38 ? .78 : .98;
-        const vertex = quad.map((point) => addVertex(point, horizontal ? [point[0] * .08, -point[2] * .055] : [-point[2] * .055, point[1] * .08], tone));
+        const normalOrder = run.side < 0 ? [quad[0]!, quad[1]!, quad[2]!] : [quad[0]!, quad[2]!, quad[1]!];
+        const normal = new Vector3(...normalOrder[1]).sub(new Vector3(...normalOrder[0])).cross(new Vector3(...normalOrder[2]).sub(new Vector3(...normalOrder[0]))).normalize();
+        const secondOrder = run.side < 0 ? [quad[0]!, quad[2]!, quad[3]!] : [quad[0]!, quad[3]!, quad[2]!];
+        const secondNormal = new Vector3(...secondOrder[1]).sub(new Vector3(...secondOrder[0])).cross(new Vector3(...secondOrder[2]).sub(new Vector3(...secondOrder[0]))).normalize();
+        const innerWall = step >= layer.profile.length - 5 || step === layer.profile.length - 1;
+        const minNormalY = Math.min(normal.y, secondNormal.y), maxNormalY = Math.max(normal.y, secondNormal.y);
+        const kind: SurfaceFace = minNormalY > .55 ? step === 0 ? 'top' : 'shelf' : maxNormalY < -.55 ? 'underside' : minNormalY < -.55 || innerWall ? 'return' : 'wall';
+        const vertex = quad.map((point) => addVertex(point, normal, kind));
         if (run.side < 0) indices.push(vertex[0]!, vertex[1]!, vertex[2]!, vertex[0]!, vertex[2]!, vertex[3]!);
         else indices.push(vertex[0]!, vertex[2]!, vertex[1]!, vertex[0]!, vertex[3]!, vertex[2]!);
       }
@@ -110,7 +182,8 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
         const crossZ = (triangle[1][0] - triangle[0][0]) * (triangle[2][1] - triangle[0][1])
           - (triangle[1][1] - triangle[0][1]) * (triangle[2][0] - triangle[0][0]);
         const oriented = crossZ * targetNormalZ < 0 ? [triangle[0], triangle[2], triangle[1]] : triangle;
-        indices.push(...oriented.map((point) => addVertex(point, [point[0] * .08, point[1] * .08], 1.06)));
+        const normal = new Vector3(...oriented[1]).sub(new Vector3(...oriented[0])).cross(new Vector3(...oriented[2]).sub(new Vector3(...oriented[0]))).normalize();
+        indices.push(...oriented.map((point) => addVertex(point, normal, 'return', layer.name, 1.02)));
       }
     }
   }
@@ -141,10 +214,10 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
     }));
     const points = rings.flat(), topCenter = points.length, bottomCenter = points.length + 1;
     points.push([rings[0]!.reduce((sum, point) => sum + point[0], 0) / ringSize, rings[0]!.reduce((sum, point) => sum + point[1], 0) / ringSize, rings[0]!.reduce((sum, point) => sum + point[2], 0) / ringSize], [rings[5]!.reduce((sum, point) => sum + point[0], 0) / ringSize, rings[5]!.reduce((sum, point) => sum + point[1], 0) / ringSize, rings[5]!.reduce((sum, point) => sum + point[2], 0) / ringSize]);
-    const faces: [number, number, number][] = [];
-    const pushHorizonFace = (face: [number, number, number], direction: 'up' | 'down' | 'out') => { const [a, b, c] = face.map((index) => new Vector3(...points[index]!)) as [Vector3, Vector3, Vector3], normal = b.clone().sub(a).cross(c.clone().sub(a)), centroid = a.clone().add(b).add(c).multiplyScalar(1 / 3), facing = direction === 'up' ? normal.y : direction === 'down' ? -normal.y : normal.x * (centroid.x - island.x) + normal.z * (centroid.z - island.z); if (facing < 0) [face[1], face[2]] = [face[2], face[1]]; faces.push(face); };
-    for (let step = 0; step < ringSize; step += 1) { const next = (step + 1) % ringSize; pushHorizonFace([topCenter, next, step], 'up'); pushHorizonFace([bottomCenter, ringSize * 5 + step, ringSize * 5 + next], 'down'); for (let tier = 0; tier < tiers.length - 1; tier += 1) { const upper = tier * ringSize + step, upperNext = tier * ringSize + next, lower = upper + ringSize, lowerNext = upperNext + ringSize, direction = tier === 0 || tier === 2 ? 'up' : 'out'; pushHorizonFace([upper, upperNext, lowerNext], direction); pushHorizonFace([upper, lowerNext, lower], direction); } }
-    const added = appendFacets(points, faces, island.band === 'near' ? .84 : island.band === 'mid' ? .96 : 1.06, true);
+    const faces: [number, number, number][] = [], faceKinds: SurfaceFace[] = [];
+    const pushHorizonFace = (face: [number, number, number], direction: 'up' | 'down' | 'out', kind: SurfaceFace) => { const [a, b, c] = face.map((index) => new Vector3(...points[index]!)) as [Vector3, Vector3, Vector3], normal = b.clone().sub(a).cross(c.clone().sub(a)), centroid = a.clone().add(b).add(c).multiplyScalar(1 / 3), facing = direction === 'up' ? normal.y : direction === 'down' ? -normal.y : normal.x * (centroid.x - island.x) + normal.z * (centroid.z - island.z); if (facing < 0) [face[1], face[2]] = [face[2], face[1]]; faces.push(face); faceKinds.push(kind); };
+    for (let step = 0; step < ringSize; step += 1) { const next = (step + 1) % ringSize; pushHorizonFace([topCenter, next, step], 'up', 'top'); pushHorizonFace([bottomCenter, ringSize * 5 + step, ringSize * 5 + next], 'down', 'underside'); for (let tier = 0; tier < tiers.length - 1; tier += 1) { const upper = tier * ringSize + step, upperNext = tier * ringSize + next, lower = upper + ringSize, lowerNext = upperNext + ringSize, shelf = tier === 0 || tier === 2, kind: SurfaceFace = shelf ? 'shelf' : cutStations.includes(step) || cutStations.includes(next) ? 'return' : 'wall', direction = shelf ? 'up' : 'out'; pushHorizonFace([upper, upperNext, lowerNext], direction, kind); pushHorizonFace([upper, lowerNext, lower], direction, kind); } }
+    const added = appendFacets(points, faces, island.band === 'near' ? .84 : island.band === 'mid' ? .96 : 1.06, true, island.band, faceKinds);
     const axes = [0, 1, 2] as const, min = axes.map((axis) => Math.min(...points.map((point) => point[axis]))) as [number, number, number], max = axes.map((axis) => Math.max(...points.map((point) => point[axis]))) as [number, number, number];
     horizonFragments.push({ band: island.band, seed: island.seed, ringSize, topHeightRange: Math.max(...rings[0]!.map((point) => point[1])) - Math.min(...rings[0]!.map((point) => point[1])), ...added, bounds: { min, max } });
   }
@@ -152,6 +225,9 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   geometry.name = `${layer.objectName}-geometry`;
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
   geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+  geometry.setAttribute('surfaceBandStrength', new Float32BufferAttribute(surfaceBands, 1));
+  geometry.setAttribute('surfaceBandFloor', new Float32BufferAttribute(surfaceFloors, 1));
+  geometry.setAttribute('surfaceFaceLift', new Float32BufferAttribute(surfaceFaceLifts, 1));
   geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2)); geometry.setIndex(indices);
   geometry.computeVertexNormals();
   geometry.computeBoundingBox();
@@ -222,10 +298,10 @@ export class TideScarWorld {
     abyss.name = 'tide-scar-faceted-abyss-bed';
     abyss.receiveShadow = true;
     this.shelfLayers = SHELF_LAYERS.map((layer) => {
+      const treatment = SURFACE_TREATMENTS[layer.name];
       const mesh = new Mesh(
         createLayerGeometry(layer),
-        new MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: layer.name === 'near' ? .82 : .88, metalness: 0, flatShading: true,
-          emissive: layer.name === 'near' ? 0x526d78 : 0, emissiveIntensity: layer.name === 'near' ? .32 : 0 }),
+        createSurfaceMaterial(treatment),
       );
       mesh.name = layer.objectName;
       mesh.castShadow = layer.name === 'near';
@@ -242,9 +318,9 @@ export class TideScarWorld {
   setPanorama(texture: Texture | null): void {
     void texture;
   }
-  /** Non-owning clean-room basalt map for the nearest shelf only. */
+  /** Non-owning clean-room basalt map shared by every canyon depth layer. */
   setSurfaceMap(texture: Texture | null): void {
-    for (const mesh of this.shelfLayers.slice(0, 1)) {
+    for (const mesh of this.shelfLayers) {
       const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       for (const material of materials) {
         if (!(material instanceof MeshStandardMaterial)) continue;
