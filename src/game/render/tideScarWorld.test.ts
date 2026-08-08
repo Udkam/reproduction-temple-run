@@ -314,7 +314,7 @@ describe('Tide Scar geometric canyon presentation', () => {
       expect(Array.from(index.array)).toEqual(Array.from(replay.getIndex()!.array));
       for (let vertex = 0; vertex < normal.count; vertex += 1) expect(new Vector3().fromBufferAttribute(normal, vertex).length()).toBeCloseTo(1, 5);
       const edgeUse = new Map<string, number>(), sideNormals: [number[], number[]] = [[], []], capFaces = [0, 0],
-        topFaces: { points: [Vector3, Vector3, Vector3]; keys: [string, string, string]; plane: string }[] = [], luminance = { top: [] as number[], worn: [] as number[], return: [] as number[] };
+        topFaces: { points: [Vector3, Vector3, Vector3]; keys: [string, string, string]; joints: [number, number, number]; plane: string }[] = [], luminance = { top: [] as number[], worn: [] as number[], return: [] as number[] };
       for (let offset = 0; offset < index.count; offset += 3) {
         const vertices = [index.getX(offset), index.getX(offset + 1), index.getX(offset + 2)];
         expect(vertices.every((vertex) => vertex >= 0 && vertex < position.count)).toBe(true);
@@ -334,7 +334,7 @@ describe('Tide Scar geometric canyon presentation', () => {
           centroidY = ys.reduce((sum, value) => sum + value, 0) / 3;
         if (normalY > .55 && centroidY > -.1) {
           const unit = worldFaceNormal.normalize(), plane = unit.dot(worldPoints[0]);
-          topFaces.push({ points, keys, plane: [unit.x, unit.y, unit.z, plane].map((value) => Math.round(value * 200)).join(':') }); luminance.top.push(value);
+          topFaces.push({ points, keys, joints: vertices.map((vertex) => joint.getX(vertex)) as [number, number, number], plane: [unit.x, unit.y, unit.z, plane].map((value) => Math.round(value * 200)).join(':') }); luminance.top.push(value);
         } else if (centroidY > -.65) luminance.worn.push(value); else luminance.return.push(value);
       }
       const openEdges = [...edgeUse.entries()].filter(([, count]) => count !== 2);
@@ -358,12 +358,13 @@ describe('Tide Scar geometric canyon presentation', () => {
         return Math.max(...xs) - Math.min(...xs) >= .14 && Math.max(...zs) - Math.min(...zs) >= .14;
       }).map((face) => face.plane));
       expect(planes.size).toBeGreaterThanOrEqual(6); signatureFingerprints.add([...planes].sort().join('|'));
-      const jointRows = new Map<string, number[]>();
-      for (let vertex = 0; vertex < position.count; vertex += 1) if (joint.getX(vertex) > .99) {
-        const z = position.getZ(vertex).toFixed(5); if (!jointRows.has(z)) jointRows.set(z, []); jointRows.get(z)!.push(position.getX(vertex));
+      const jointEdges = new Map<string, [Vector3, Vector3]>();
+      for (const face of topFaces) for (const [from, to] of [[0, 1], [1, 2], [2, 0]] as const) if (face.joints[from] > .99 && face.joints[to] > .99) {
+        const edge = [face.points[from], face.points[to]] as [Vector3, Vector3], absX = edge.map((point) => Math.abs(point.x)), dz = Math.abs(edge[0].z - edge[1].z);
+        if (Math.max(...absX) > .4 && Math.min(...absX) < .12 && dz > .01 && dz < .06) jointEdges.set(edge.map(keyOf).sort().join('|'), edge);
       }
-      expect(jointRows.size).toBe(3);
-      for (const xs of jointRows.values()) { expect(Math.max(...xs) - Math.min(...xs)).toBeLessThan(.56); expect(Math.max(...xs) < .09 || Math.min(...xs) > -.09).toBe(true); }
+      expect(jointEdges.size).toBe(3);
+      for (const edge of jointEdges.values()) expect(Math.abs(edge[0].x - edge[1].x)).toBeLessThan(.56);
       const profileFingerprint = (side: -1 | 1) => {
         const groups = new Map<string, Vector3[]>();
         for (let vertex = 0; vertex < position.count; vertex += 1) { const point = new Vector3().fromBufferAttribute(position, vertex); if (side * point.x <= .44 || Math.abs(Math.abs(point.z) - .5) < 1e-5) continue; const key = point.z.toFixed(5); if (!groups.has(key)) groups.set(key, []); groups.get(key)!.push(point); }

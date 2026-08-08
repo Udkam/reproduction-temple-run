@@ -206,15 +206,15 @@ export function presentationRoadStart(sectionIndex: number): number { return sec
 export function createDeckCapGeometry(profile: number): BufferGeometry {
   const signature = ((profile % 6) + 6) % 6;
   const edgeEvents = [
-    { name: 'collapsed-shoulder', offsets: [0, .024, .052, .015, .062, .029, .08, .05] },
-    { name: 'stepped-ledge', offsets: [0, .03, .068, .022, .085, .04, .11, .065] },
-    { name: 'deep-recess', offsets: [0, .027, .075, .01, .094, .028, .13, .07] },
-    { name: 'outer-buttress', offsets: [0, .034, .082, .024, .105, .047, .145, .085] },
-    { name: 'undercut', offsets: [0, .026, .07, .002, .08, .018, .12, .062] },
-    { name: 'outer-rubble', offsets: [0, .038, .094, .02, .12, .052, .17, .1] },
+    { name: 'collapsed-shoulder', offsets: [0, .045, .085, .03, .07, .036, .085, .05] },
+    { name: 'stepped-ledge', offsets: [0, .055, .105, .04, .09, .045, .105, .06] },
+    { name: 'deep-recess', offsets: [0, .05, .1, .025, .085, .035, .115, .065] },
+    { name: 'outer-buttress', offsets: [0, .07, .125, .045, .105, .055, .135, .075] },
+    { name: 'undercut', offsets: [0, .05, .095, .01, .065, .02, .105, .05] },
+    { name: 'outer-rubble', offsets: [0, .08, .145, .04, .12, .06, .155, .085] },
   ] as const;
-  const terminalOffsets = [0, .025, .055, .016, .07, .032, .09, .055] as const;
-  const terminalDepths = [0, -.14, -.3, -.52, -.8, -1.1, -1.5, -1] as const;
+  const terminalOffsets = [0, .018, .038, .012, .046, .022, .06, .03] as const;
+  const terminalDepths = [0, -.09, -.22, -.42, -.72, -1.05, -1.5, -1] as const;
   const sideEvents = [edgeEvents[signature]!, edgeEvents[(signature + 3) % 6]!] as const;
   const doubleBreaks = [-.24 + (seededUnit(signature, 691) - .5) * .09, .2 + (seededUnit(signature, 693) - .5) * .09] as const;
   const singleBreak = .01 + (seededUnit(signature, 697) - .5) * .14, doubleSide = signature % 2 === 0 ? -1 : 1, singleSide = -doubleSide;
@@ -232,9 +232,9 @@ export function createDeckCapGeometry(profile: number): BufferGeometry {
   const indices: number[] = [];
   type Point = readonly [number, number, number];
   type SurfaceColor = readonly [number, number, number];
-  const panelPalette: readonly SurfaceColor[] = [[.9, .84, .72], [.82, .8, .74], [.95, .89, .77], [.86, .76, .62], [.9, .84, .74]],
-    worn: SurfaceColor = [.58, .49, .39],
-    returned: SurfaceColor = [.4, .41, .41], underside: SurfaceColor = [.29, .32, .34];
+  const panelPalette: readonly SurfaceColor[] = [[.9, .84, .72], [.84, .81, .74], [.94, .88, .77], [.87, .78, .64], [.9, .84, .74]],
+    worn: SurfaceColor = [.6, .51, .4],
+    returned: SurfaceColor = [.46, .43, .39], underside: SurfaceColor = [.35, .36, .37];
   const addVertex = (point: Point, color: SurfaceColor, uv: readonly [number, number], joint = 0): number => {
     const index = positions.length / 3;
     positions.push(...point); colors.push(...color); uvs.push(...uv); joints.push(joint);
@@ -263,12 +263,16 @@ export function createDeckCapGeometry(profile: number): BufferGeometry {
     const top = xs.map((x, column) => {
       const baseY = terminal ? (column === 1 ? .025 : -.012) : .018,
         seamDrop = row.seam !== 0 && (row.seam < 0 ? column < 2 : column > 0) ? .034 : 0,
-        chip = terminal ? 0 : (seededUnit(signature * 53 + station * 11 + column, 729) - .5) * .009 * envelope;
-      return [x, baseY + rowLift + crossTilt * (column - 1) + chip - seamDrop, baseZ] as Point;
+        chip = terminal ? 0 : (seededUnit(signature * 53 + station * 11 + column, 729) - .5) * .009 * envelope,
+        seamSkew = terminal || column !== 1 ? 0 : row.seam * .032;
+      return [x, baseY + rowLift + crossTilt * (column - 1) + chip - seamDrop, baseZ + seamSkew] as Point;
     });
     const sideProfile = (sideIndex: 0 | 1): readonly Point[] => {
       const topPoint = top[sideIndex === 0 ? 0 : 2]!, event = sideEvents[sideIndex], sign = sideIndex === 0 ? -1 : 1,
-        eventGain = terminal ? 0 : envelope * (.86 + seededUnit(signature * 61 + station * 3 + sideIndex, 733) * .18),
+        side = sideIndex === 0 ? -1 : 1, breaks = side === doubleSide ? doubleBreaks : [singleBreak],
+        eventCenter = breaks[(signature + sideIndex) % breaks.length]!,
+        eventWeight = MathUtils.smoothstep(1 - Math.abs(baseZ - eventCenter) / .44, 0, 1),
+        eventGain = terminal ? 0 : eventWeight * (.9 + seededUnit(signature * 61 + station * 3 + sideIndex, 733) * .16),
         structuralDepth = terminal ? 3.38 : 3.22 + signature * .075 + seededUnit(signature * 67 + station, 739 + sideIndex) * .32,
         depthRelief = terminal ? 0 : (seededUnit(signature * 71 + station, 743 + sideIndex) - .5) * .045 * envelope;
       return terminalDepths.map((depth, depthIndex) => {
@@ -379,7 +383,7 @@ export function createCausewayMaterial(): MeshStandardMaterial {
       '#include <map_fragment>',
       `float tideCausewayTop = 0.0;
        float tideCausewayGrain = 0.5;
-       float tideCausewayJointWear = pow(clamp(tideCausewayJoint, 0.0, 1.0), 12.0);
+       float tideCausewayJointWear = pow(clamp(tideCausewayJoint, 0.0, 1.0), 18.0);
        #ifdef USE_MAP
          vec3 tideDx = dFdx(tideWorldPosition);
          vec3 tideDy = dFdy(tideWorldPosition);
@@ -393,7 +397,7 @@ export function createCausewayMaterial(): MeshStandardMaterial {
          float tideDetailMix = 0.18 * (1.0 - smoothstep(0.08, 0.28, tideFootprint));
          vec4 sampledDiffuseColor = mix(tideMacro, tideDetail, tideDetailMix);
          tideCausewayTop = smoothstep(0.35, 0.82, tideFaceNormal.y);
-         sampledDiffuseColor.rgb *= mix(0.78, 1.0, tideCausewayTop) * mix(1.0, 0.72, tideCausewayJointWear);
+         sampledDiffuseColor.rgb *= mix(0.78, 1.0, tideCausewayTop) * mix(1.0, 0.79, tideCausewayJointWear);
          tideCausewayGrain = dot(sampledDiffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
          diffuseColor *= sampledDiffuseColor;
        #endif`,
