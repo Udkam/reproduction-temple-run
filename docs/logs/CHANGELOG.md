@@ -55,3 +55,10 @@
   guards for `E:\Proj\reproduction-temple-run`; historical evidence paths remain
   unchanged. The untracked material-socket probe remains uncommitted, with only
   its local repository-root and branch guards migrated.
+
+## 2026-08-08 — R1F causeway presentation accepted
+
+- Rebuilt the runtime causeway skin as six deterministic instanced sandstone signatures with five connected non-coplanar panels, staggered short joints, asymmetric broken lips, real downward returns, and grounded side mass while preserving canonical travel, collisions, gaps, camera, actors, hazards, and lifecycle.
+- Added a zero-emissive, world-anchored two-scale triplanar sandstone response with face-aware top, worn-edge, return, and underside treatment; the tracked texture remains non-owning and no render object or asset was added.
+- Preserved first candidate `ccee77c` as visual-`BLOCKED` history, then accepted correction candidate `6680489cf2e3ec035da44fc1dde9aa7606bdd9c7` after targeted `8/8`, final typecheck, final `17 files / 72 tests`, production build, seven hashed browser frames, and independent source, test/evidence, and visual QA.
+- Every accepted frame records one canvas, zero gameplay DOM/overflow/problems/context loss, `31` draw calls, and `24,484` triangles. R1F accepts only the causeway; courier, pursuer, hazards, character detail, animation, and the final high-fidelity game remain in progress.
