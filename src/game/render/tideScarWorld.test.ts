@@ -1,7 +1,7 @@
 import { Mesh, MeshStandardMaterial, PerspectiveCamera, Texture, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
 import { TideScarWorld } from './tideScarWorld';
-import { applyTR4RuntimeLensShift, createDeckCapGeometry, presentationRoadStart, shouldShowPursuer, TR4_RUNTIME_CAMERA } from './WorldRenderer';
+import { applyTR4RuntimeLensShift, createCausewayMaterial, createDeckCapGeometry, presentationRoadStart, shouldShowPursuer, TR4_RUNTIME_CAMERA, WorldRenderer } from './WorldRenderer';
 import { d4ProfileForViewport } from './d4Profile';
 import { WORLD_METRICS } from './theme';
 
@@ -102,7 +102,8 @@ describe('Tide Scar geometric canyon presentation', () => {
       const bounds = { min: new Vector3(...(['x', 'y', 'z'] as const).map((axis) => Math.min(...points.map((point) => point[axis]))) as [number, number, number]), max: new Vector3(...(['x', 'y', 'z'] as const).map((axis) => Math.max(...points.map((point) => point[axis]))) as [number, number, number]) };
       expect(points).toHaveLength(50); expect(componentTriangles).toHaveLength(96);
       for (const triangle of componentTriangles) { const [a, b, c] = triangle.points, normal = b.clone().sub(a).cross(c.clone().sub(a)); expect(normal.length()).toBeGreaterThan(1e-4); for (const [u, v] of [[0, 1], [1, 2], [2, 0]] as const) { const edge = [triangle.keys[u], triangle.keys[v]].sort().join('|'); edgeUse.set(edge, (edgeUse.get(edge) ?? 0) + 1); } }
-      expect([...edgeUse.values()].every((count) => count === 2)).toBe(true);
+      const openEdges = [...edgeUse.entries()].filter(([, count]) => count !== 2);
+      expect(openEdges, `canyon component non-manifold edges ${JSON.stringify(openEdges.slice(0, 12))}`).toEqual([]);
       const elevationBands: Vector3[][] = []; for (const point of [...points].sort((a, b) => a.y - b.y)) { const band = elevationBands.at(-1); if (!band || point.y - Math.max(...band.map((member) => member.y)) > .8) elevationBands.push([point]); else band.push(point); }
       expect(elevationBands.map((band) => band.length)).toEqual([9, 8, 16, 17]); for (let band = 1; band < elevationBands.length; band += 1) expect(Math.min(...elevationBands[band]!.map((point) => point.y)) - Math.max(...elevationBands[band - 1]!.map((point) => point.y))).toBeGreaterThan(.8);
       const capKeys = new Set([...component].filter((key) => adjacency.get(key)!.size === 8)); expect(capKeys.size).toBe(2); const capFaces = componentTriangles.filter((triangle) => triangle.keys.some((key) => capKeys.has(key))); expect(capFaces).toHaveLength(16); for (const triangle of capFaces) { const cap = triangle.keys.find((key) => capKeys.has(key))!, normal = triangle.points[1].clone().sub(triangle.points[0]).cross(triangle.points[2].clone().sub(triangle.points[0])); expect(normal.y * (welded.get(cap)!.y > center.y ? 1 : -1)).toBeGreaterThan(1e-4); }
@@ -287,35 +288,113 @@ describe('Tide Scar geometric canyon presentation', () => {
     expect(Math.max(...hemisphereWeightDeltas.returns)).toBeLessThanOrEqual(.1 + 1e-7); expect(Math.max(...hemisphereWeightDeltas.undersides)).toBeLessThanOrEqual(.15 + 1e-7);
     first.dispose(); second.dispose();
   });
-  it('uses six deterministic fractured causeway signatures with real side mass', () => {
-    const fingerprints = new Set<string>(), vertexCounts = new Set<number>(), edgeEvents = new Set<string>();
+  it('uses six closed deterministic causeway signatures with connected panels and real asymmetric returns', () => {
+    const signatureFingerprints = new Set<string>(); let terminalReference: string | null = null;
+    const keyOf = (point: Vector3) => point.toArray().map((value) => Math.round(value * 1e5)).join(':');
+    const containsXZ = (points: readonly [Vector3, Vector3, Vector3], x: number, z: number) => {
+      const [a, b, c] = points, denominator = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+      const u = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / denominator;
+      const v = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / denominator;
+      return u >= -1e-6 && v >= -1e-6 && u + v <= 1 + 1e-6;
+    };
     for (let signature = 0; signature < 6; signature += 1) {
-      const geometry = createDeckCapGeometry(signature);
+      const geometry = createDeckCapGeometry(signature), replay = createDeckCapGeometry(signature);
       geometry.computeBoundingBox();
       const bounds = geometry.boundingBox!;
       expect(bounds.min.y).toBeLessThan(-2.5);
       expect(bounds.max.x).toBeGreaterThan(0.44);
       expect([bounds.min.z, bounds.max.z]).toEqual([-0.5, 0.5]);
       expect(geometry.type).toBe('BufferGeometry');
-      expect(geometry.userData).toMatchObject({ signature, moduleLength: [6, 11], protectedHalfWidth: 0.44 });
-      const position = geometry.getAttribute('position'), index = geometry.getIndex()!, sideNormals: [number[], number[]] = [[], []], capFaces = [0, 0];
+      const position = geometry.getAttribute('position'), index = geometry.getIndex()!, normal = geometry.getAttribute('normal'), uv = geometry.getAttribute('uv'), color = geometry.getAttribute('color'), joint = geometry.getAttribute('causewayJoint');
+      expect([normal.count, uv.count, color.count, joint.count]).toEqual([position.count, position.count, position.count, position.count]);
+      for (const attributeName of ['position', 'normal', 'uv', 'color', 'causewayJoint']) {
+        const values = Array.from(geometry.getAttribute(attributeName).array), replayValues = Array.from(replay.getAttribute(attributeName).array);
+        expect(values.every(Number.isFinite)).toBe(true); expect(values).toEqual(replayValues);
+      }
+      expect(Array.from(index.array)).toEqual(Array.from(replay.getIndex()!.array));
+      for (let vertex = 0; vertex < normal.count; vertex += 1) expect(new Vector3().fromBufferAttribute(normal, vertex).length()).toBeCloseTo(1, 5);
+      const edgeUse = new Map<string, number>(), sideNormals: [number[], number[]] = [[], []], capFaces = [0, 0],
+        topFaces: { points: [Vector3, Vector3, Vector3]; keys: [string, string, string]; plane: string }[] = [], luminance = { top: [] as number[], worn: [] as number[], return: [] as number[] };
       for (let offset = 0; offset < index.count; offset += 3) {
         const vertices = [index.getX(offset), index.getX(offset + 1), index.getX(offset + 2)];
-        const xs = vertices.map((vertex) => position.getX(vertex)), ys = vertices.map((vertex) => position.getY(vertex)), zs = vertices.map((vertex) => position.getZ(vertex));
+        expect(vertices.every((vertex) => vertex >= 0 && vertex < position.count)).toBe(true);
+        const points = vertices.map((vertex) => new Vector3().fromBufferAttribute(position, vertex)) as [Vector3, Vector3, Vector3], keys = points.map(keyOf) as [string, string, string],
+          xs = points.map((point) => point.x), ys = points.map((point) => point.y), zs = points.map((point) => point.z), faceNormal = points[1].clone().sub(points[0]).cross(points[2].clone().sub(points[0])), faceLength = faceNormal.length(),
+          worldPoints = points.map((point) => new Vector3(point.x * WORLD_METRICS.roadWidth, point.y, point.z * 6)) as [Vector3, Vector3, Vector3],
+          worldFaceNormal = worldPoints[1].clone().sub(worldPoints[0]).cross(worldPoints[2].clone().sub(worldPoints[0])), worldNormalY = worldFaceNormal.y / worldFaceNormal.length();
+        expect(faceLength).toBeGreaterThan(1e-7);
+        const texture = vertices.map((vertex) => [uv.getX(vertex), uv.getY(vertex)] as const), uvArea = Math.abs((texture[1]![0] - texture[0]![0]) * (texture[2]![1] - texture[0]![1]) - (texture[1]![1] - texture[0]![1]) * (texture[2]![0] - texture[0]![0])) / 2;
+        expect(uvArea).toBeGreaterThan(1e-8);
+        for (const [from, to] of [[0, 1], [1, 2], [2, 0]] as const) { const edge = [keys[from], keys[to]].sort().join('|'); edgeUse.set(edge, (edgeUse.get(edge) ?? 0) + 1); }
         if (zs.every((z) => z === -.5)) capFaces[0]! += 1; if (zs.every((z) => z === .5)) capFaces[1]! += 1;
+        if (zs.every((z) => z === -.5)) expect(faceNormal.z).toBeLessThan(-1e-7); if (zs.every((z) => z === .5)) expect(faceNormal.z).toBeGreaterThan(1e-7);
         const side = xs.every((x) => x < -.44) ? 0 : xs.every((x) => x > .44) ? 1 : -1;
-        const normalX = (ys[1]! - ys[0]!) * (zs[2]! - zs[0]!) - (zs[1]! - zs[0]!) * (ys[2]! - ys[0]!);
-        if (side >= 0 && Math.max(...zs) > Math.min(...zs) && Math.abs(normalX) > 1e-7) sideNormals[side as 0 | 1].push(normalX);
+        if (side >= 0 && Math.max(...zs) > Math.min(...zs) && Math.abs(faceNormal.x) > 1e-7) sideNormals[side as 0 | 1].push(faceNormal.x);
+        const normalY = worldNormalY, value = vertices.map((vertex) => color.getX(vertex) * .2126 + color.getY(vertex) * .7152 + color.getZ(vertex) * .0722).reduce((sum, entry) => sum + entry, 0) / 3,
+          centroidY = ys.reduce((sum, value) => sum + value, 0) / 3;
+        if (normalY > .55 && centroidY > -.1) {
+          const unit = worldFaceNormal.normalize(), plane = unit.dot(worldPoints[0]);
+          topFaces.push({ points, keys, plane: [unit.x, unit.y, unit.z, plane].map((value) => Math.round(value * 200)).join(':') }); luminance.top.push(value);
+        } else if (centroidY > -.65) luminance.worn.push(value); else luminance.return.push(value);
       }
+      const openEdges = [...edgeUse.entries()].filter(([, count]) => count !== 2);
+      expect(openEdges, `signature ${signature} non-manifold edges ${JSON.stringify(openEdges.slice(0, 12))}`).toEqual([]);
       expect(Math.max(...sideNormals[0])).toBeLessThan(0); expect(Math.min(...sideNormals[1])).toBeGreaterThan(0);
-      expect(capFaces.every((count) => count > 2)).toBe(true); expect(capFaces[0]! + capFaces[1]!).toBe(geometry.userData.capTriangleCount);
-      fingerprints.add(Array.from(geometry.getAttribute('position').array).join(',')); vertexCounts.add(position.count); edgeEvents.add(`${geometry.userData.edgeEvent}/${geometry.userData.oppositeEdgeEvent}`);
+      expect(capFaces.every((count) => count > 4)).toBe(true);
+      const terminalSection = (z: number) => [...new Set(Array.from({ length: position.count }, (_, vertex) => Math.abs(position.getZ(vertex) - z) < 1e-6 ? `${position.getX(vertex).toFixed(5)}:${position.getY(vertex).toFixed(5)}` : '').filter(Boolean))].sort();
+      expect(terminalSection(-.5)).toEqual(terminalSection(.5)); const terminal = terminalSection(-.5).join('|'); if (terminalReference === null) terminalReference = terminal; else expect(terminal).toBe(terminalReference);
       expect(Array.from({ length: 4 }, (_, vertex) => [position.getX(vertex), position.getY(vertex), position.getZ(vertex)].map((value) => Number(value.toFixed(3))))).toEqual([[-.462, -.012, -.5], [.462, -.012, -.5], [-.462, -.012, .5], [.462, -.012, .5]]);
-      geometry.dispose();
+      const topKeys = new Set(topFaces.flatMap((face) => face.keys)), adjacency = new Map<string, Set<string>>();
+      for (const key of topKeys) adjacency.set(key, new Set());
+      for (const face of topFaces) for (const [from, to] of [[0, 1], [1, 2], [2, 0]] as const) { adjacency.get(face.keys[from])!.add(face.keys[to]); adjacency.get(face.keys[to])!.add(face.keys[from]); }
+      const pending = new Set(topKeys); let components = 0; while (pending.size > 0) { components += 1; const queue = [pending.values().next().value as string]; while (queue.length > 0) { const key = queue.pop()!; if (!pending.delete(key)) continue; queue.push(...adjacency.get(key)!); } }
+      expect(components).toBe(1);
+      for (let zStep = 0; zStep <= 24; zStep += 1) for (let xStep = 0; xStep <= 16; xStep += 1) {
+        const x = -.43 + xStep * .86 / 16, z = -.49 + zStep * .98 / 24;
+        expect(topFaces.some((face) => containsXZ(face.points, x, z)), `signature ${signature} protected point ${x},${z}`).toBe(true);
+      }
+      const planes = new Set(topFaces.filter((face) => {
+        const xs = face.points.map((point) => point.x), zs = face.points.map((point) => point.z);
+        return Math.max(...xs) - Math.min(...xs) >= .14 && Math.max(...zs) - Math.min(...zs) >= .14;
+      }).map((face) => face.plane));
+      expect(planes.size).toBeGreaterThanOrEqual(6); signatureFingerprints.add([...planes].sort().join('|'));
+      const jointRows = new Map<string, number[]>();
+      for (let vertex = 0; vertex < position.count; vertex += 1) if (joint.getX(vertex) > .99) {
+        const z = position.getZ(vertex).toFixed(5); if (!jointRows.has(z)) jointRows.set(z, []); jointRows.get(z)!.push(position.getX(vertex));
+      }
+      expect(jointRows.size).toBe(3);
+      for (const xs of jointRows.values()) { expect(Math.max(...xs) - Math.min(...xs)).toBeLessThan(.56); expect(Math.max(...xs) < .09 || Math.min(...xs) > -.09).toBe(true); }
+      const profileFingerprint = (side: -1 | 1) => {
+        const groups = new Map<string, Vector3[]>();
+        for (let vertex = 0; vertex < position.count; vertex += 1) { const point = new Vector3().fromBufferAttribute(position, vertex); if (side * point.x <= .44 || Math.abs(Math.abs(point.z) - .5) < 1e-5) continue; const key = point.z.toFixed(5); if (!groups.has(key)) groups.set(key, []); groups.get(key)!.push(point); }
+        const profiles = [...groups.values()].map((points) => [...new Map(points.map((point) => [`${point.x.toFixed(5)}:${point.y.toFixed(5)}`, point])).values()].sort((a, b) => b.y - a.y)).filter((points) => points.length >= 8);
+        expect(profiles.length).toBeGreaterThan(0); const profile = profiles[Math.floor(profiles.length / 2)]!, topX = profile[0]!.x, outward = profile.map((point) => side * (point.x - topX)), maximum = Math.max(...outward), maximumIndex = outward.indexOf(maximum);
+        expect(maximumIndex).toBeLessThan(outward.length - 1); expect(maximum - Math.min(...outward.slice(maximumIndex + 1))).toBeGreaterThan(.025);
+        return outward.map((value) => value.toFixed(4)).join(':');
+      };
+      expect(profileFingerprint(-1)).not.toBe(profileFingerprint(1));
+      const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length;
+      expect(Math.min(luminance.top.length, luminance.worn.length, luminance.return.length)).toBeGreaterThan(0);
+      expect(mean(luminance.top) - mean(luminance.worn)).toBeGreaterThan(.035); expect(mean(luminance.worn) - mean(luminance.return)).toBeGreaterThan(.035);
+      geometry.dispose(); replay.dispose();
     }
-    expect(fingerprints.size).toBe(6); expect(vertexCounts.size).toBeGreaterThanOrEqual(3);
-    expect(edgeEvents).toEqual(new Set(['collapsed-shoulder/outer-buttress', 'stepped-ledge/undercut', 'deep-recess/outer-rubble', 'outer-buttress/collapsed-shoulder', 'undercut/stepped-ledge', 'outer-rubble/deep-recess']));
+    expect(signatureFingerprints.size).toBeGreaterThanOrEqual(3);
     expect([presentationRoadStart(0), presentationRoadStart(1)]).toEqual([-18, 0]);
+  });
+  it('uses a zero-emissive world-anchored two-scale causeway material without owning its sandstone map', () => {
+    const material = createCausewayMaterial(), shader: { vertexShader: string; fragmentShader: string } = {
+      vertexShader: '#include <worldpos_vertex>', fragmentShader: '#include <map_fragment>\n#include <roughnessmap_fragment>',
+    };
+    material.onBeforeCompile(shader as never, {} as never);
+    expect({ color: material.color.getHex(), emissive: material.emissive.getHex(), emissiveIntensity: material.emissiveIntensity, vertexColors: material.vertexColors })
+      .toEqual({ color: 0xffffff, emissive: 0, emissiveIntensity: 0, vertexColors: true });
+    expect(material.customProgramCacheKey()).toContain('causeway-triplanar'); expect(shader.vertexShader).toContain('tideWorldPosition = worldPosition.xyz');
+    for (const token of ['tideCausewaySample', 'worldPoint.zy', 'worldPoint.xz', 'worldPoint.xy', '3.200', '0.850', 'tideCausewayTop', 'tideCausewayJointWear', 'roughnessFactor = clamp']) expect(shader.fragmentShader).toContain(token);
+    expect(shader.vertexShader).toContain('tideCausewayJoint = causewayJoint');
+    expect(shader.fragmentShader).not.toContain('#include <map_fragment>');
+    const texture = new Texture(); let textureDisposals = 0; texture.addEventListener('dispose', () => { textureDisposals += 1; }); material.map = texture; material.map = null; material.dispose(); expect(textureDisposals).toBe(0);
+    const renderer = new WorldRenderer() as unknown as { causewayMaterial: MeshStandardMaterial; destroy(): void };
+    renderer.causewayMaterial.map = texture; renderer.destroy(); expect(renderer.causewayMaterial.map).toBeNull(); expect(textureDisposals).toBe(0); texture.dispose();
   });
   it('shows the pursuer only for ready, the bounded opening, and every game-over state', () => {
     expect([shouldShowPursuer('ready', 999, 999), shouldShowPursuer('running', 53, 5.99), shouldShowPursuer('game-over', 999, 999)]).toEqual([true, true, true]);

@@ -206,76 +206,116 @@ export function presentationRoadStart(sectionIndex: number): number { return sec
 export function createDeckCapGeometry(profile: number): BufferGeometry {
   const signature = ((profile % 6) + 6) % 6;
   const edgeEvents = [
-    { name: 'collapsed-shoulder', points: [[0, 0], [.06, -.28], [.14, -.38], [.06, -1.2], [.19, -1]] },
-    { name: 'stepped-ledge', points: [[0, 0], [.05, -.22], [.16, -.22], [.16, -.56], [.3, -.56], [.22, -1]] },
-    { name: 'deep-recess', points: [[0, 0], [.05, -.24], [.24, -.44], [.1, -.8], [.38, -1.12], [.16, -1.75], [.24, -1]] },
-    { name: 'outer-buttress', points: [[0, 0], [.06, -.22], [.14, -.43], [.32, -.55], [.45, -.9], [.32, -1.25], [.52, -1.65], [.36, -1]] },
-    { name: 'undercut', points: [[0, 0], [.04, -.23], [.2, -.3], [.08, -.55], [-.006, -.82], [.18, -1.08], [.38, -1.45], [.26, -1.9], [.34, -1]] },
-    { name: 'outer-rubble', points: [[0, 0], [.08, -.2], [.18, -.42], [.33, -.62], [.26, -.85], [.55, -1.05], [.43, -1.35], [.72, -1.7], [.5, -2.05], [.62, -1]] },
+    { name: 'collapsed-shoulder', offsets: [0, .024, .052, .015, .062, .029, .08, .05] },
+    { name: 'stepped-ledge', offsets: [0, .03, .068, .022, .085, .04, .11, .065] },
+    { name: 'deep-recess', offsets: [0, .027, .075, .01, .094, .028, .13, .07] },
+    { name: 'outer-buttress', offsets: [0, .034, .082, .024, .105, .047, .145, .085] },
+    { name: 'undercut', offsets: [0, .026, .07, .002, .08, .018, .12, .062] },
+    { name: 'outer-rubble', offsets: [0, .038, .094, .02, .12, .052, .17, .1] },
   ] as const;
+  const terminalOffsets = [0, .025, .055, .016, .07, .032, .09, .055] as const;
+  const terminalDepths = [0, -.14, -.3, -.52, -.8, -1.1, -1.5, -1] as const;
   const sideEvents = [edgeEvents[signature]!, edgeEvents[(signature + 3) % 6]!] as const;
-  const stationCount = 5 + signature % 3;
+  const doubleBreaks = [-.24 + (seededUnit(signature, 691) - .5) * .09, .2 + (seededUnit(signature, 693) - .5) * .09] as const;
+  const singleBreak = .01 + (seededUnit(signature, 697) - .5) * .14, doubleSide = signature % 2 === 0 ? -1 : 1, singleSide = -doubleSide;
+  const rows = [
+    { z: -.5, seam: 0 },
+    { z: doubleBreaks[0], seam: doubleSide },
+    { z: singleBreak, seam: singleSide },
+    { z: doubleBreaks[1], seam: doubleSide },
+    { z: .5, seam: 0 },
+  ].sort((a, b) => a.z - b.z);
   const positions: number[] = [];
   const colors: number[] = [];
+  const uvs: number[] = [];
+  const joints: number[] = [];
   const indices: number[] = [];
-  const stations = Array.from({ length: stationCount }, (_, station) => {
-    const z = -0.5 + station / (stationCount - 1);
-    const terminal = station === 0 || station === stationCount - 1, left = terminal ? -.462 : -.475 + seededUnit(signature * 19 + station, 701) * .028;
-    const right = terminal ? .462 : .475 - seededUnit(signature * 23 + station, 703) * .028, crown = terminal ? 0 : (seededUnit(signature * 29 + station, 709) - .5) * .045;
-    return { z, left, right, crown, xs: [left, -0.17 + crown * 0.3, 0.17 - crown * 0.2, right] };
-  });
-  const topRows = stations.map(() => [-1, -1, -1, -1]);
-  const addTop = (station: number, column: number) => {
-    const point = stations[station]!;
-    topRows[station]![column] = positions.length / 3;
-    positions.push(point.xs[column]!, point.crown + (column === 1 || column === 2 ? .025 : -.012), point.z);
-    colors.push(1, 1, 1);
+  type Point = readonly [number, number, number];
+  type SurfaceColor = readonly [number, number, number];
+  const panelPalette: readonly SurfaceColor[] = [[.9, .84, .72], [.82, .8, .74], [.95, .89, .77], [.86, .76, .62], [.9, .84, .74]],
+    worn: SurfaceColor = [.58, .49, .39],
+    returned: SurfaceColor = [.4, .41, .41], underside: SurfaceColor = [.29, .32, .34];
+  const addVertex = (point: Point, color: SurfaceColor, uv: readonly [number, number], joint = 0): number => {
+    const index = positions.length / 3;
+    positions.push(...point); colors.push(...color); uvs.push(...uv); joints.push(joint);
+    return index;
   };
-  for (const [station, column] of [[0, 0], [0, 3], [stationCount - 1, 0], [stationCount - 1, 3]] as const) addTop(station, column);
-  for (let station = 0; station < stationCount; station += 1) {
-    for (let column = 0; column < 4; column += 1) if (topRows[station]![column] === -1) addTop(station, column);
-  }
-  const sideRows: [number[][], number[][]] = [[], []];
-  for (const [station, point] of stations.entries()) {
-    for (const [sideIndex, edge] of [point.left, point.right].entries()) {
-      const sign = sideIndex === 0 ? -1 : 1;
-      const sideEvent = sideEvents[sideIndex as 0 | 1], structuralDepth = 3.2 + signature * .46 + seededUnit(station, 719 + signature) * .38;
-      const sideRow: number[] = [];
-      for (const [depthIndex, [outward, depth]] of sideEvent.points.entries()) {
-        sideRow.push(positions.length / 3);
-        positions.push(edge + sign * outward, depth === 0 ? point.crown - .012 : depth === -1 ? -structuralDepth : depth, point.z);
-        const shade = 0.82 - depthIndex * 0.075;
-        colors.push(shade, shade * 0.94, shade * 0.86);
+  const addTriangle = (points: readonly [Point, Point, Point], color: SurfaceColor, projection: (point: Point) => readonly [number, number], jointWeights: readonly [number, number, number] = [0, 0, 0]): void => {
+    const start = positions.length / 3;
+    points.forEach((point, index) => addVertex(point, color, projection(point), jointWeights[index]));
+    indices.push(start, start + 1, start + 2);
+  };
+  const terminalCorners = [
+    addVertex([-.462, -.012, -.5], worn, [-.462, -.012]),
+    addVertex([.462, -.012, -.5], worn, [.462, -.012]),
+    addVertex([-.462, -.012, .5], worn, [-.462, -.012]),
+    addVertex([.462, -.012, .5], worn, [.462, -.012]),
+  ] as const;
+  const stations = rows.map((row, station) => {
+    const progress = row.z + .5, baseZ = row.z, terminal = station === 0 || station === rows.length - 1,
+      envelope = Math.sin(Math.PI * progress), left = terminal ? -.462 : -.462 + (seededUnit(signature * 19 + station, 701) - .5) * .026,
+      right = terminal ? .462 : .462 + (seededUnit(signature * 23 + station, 703) - .5) * .026,
+      center = terminal ? .008 : (seededUnit(signature * 17 + station, 705) - .5) * .075,
+      rowLift = terminal ? 0 : (.052 + Math.sin((progress + signature * .17) * Math.PI * 2) * .021
+        + Math.sin((progress * 2.1 + signature * .11) * Math.PI * 2) * .009) * envelope,
+      crossTilt = terminal ? 0 : Math.sin((progress * 1.3 + signature * .23) * Math.PI * 2) * .07 * envelope;
+    const xs = [left, center, right] as const;
+    const top = xs.map((x, column) => {
+      const baseY = terminal ? (column === 1 ? .025 : -.012) : .018,
+        seamDrop = row.seam !== 0 && (row.seam < 0 ? column < 2 : column > 0) ? .034 : 0,
+        chip = terminal ? 0 : (seededUnit(signature * 53 + station * 11 + column, 729) - .5) * .009 * envelope;
+      return [x, baseY + rowLift + crossTilt * (column - 1) + chip - seamDrop, baseZ] as Point;
+    });
+    const sideProfile = (sideIndex: 0 | 1): readonly Point[] => {
+      const topPoint = top[sideIndex === 0 ? 0 : 2]!, event = sideEvents[sideIndex], sign = sideIndex === 0 ? -1 : 1,
+        eventGain = terminal ? 0 : envelope * (.86 + seededUnit(signature * 61 + station * 3 + sideIndex, 733) * .18),
+        structuralDepth = terminal ? 3.38 : 3.22 + signature * .075 + seededUnit(signature * 67 + station, 739 + sideIndex) * .32,
+        depthRelief = terminal ? 0 : (seededUnit(signature * 71 + station, 743 + sideIndex) - .5) * .045 * envelope;
+      return terminalDepths.map((depth, depthIndex) => {
+        const outward = terminalOffsets[depthIndex]! + (event.offsets[depthIndex]! - terminalOffsets[depthIndex]!) * eventGain;
+        const y = depthIndex === 0 ? topPoint[1] : depth === -1 ? -structuralDepth : depth + depthRelief * (1 - depthIndex / 8);
+        return [topPoint[0] + sign * outward, y, topPoint[2]] as Point;
+      });
+    };
+    const sides = [sideProfile(0), sideProfile(1)] as const;
+    return { top, sides };
+  });
+  for (let station = 0; station < rows.length - 1; station += 1) {
+    for (let column = 0; column < 2; column += 1) {
+      const a = stations[station]!.top[column]!, b = stations[station]!.top[column + 1]!,
+        c = stations[station + 1]!.top[column]!, d = stations[station + 1]!.top[column + 1]!,
+        midpoint = (rows[station]!.z + rows[station + 1]!.z) / 2,
+        doublePanel = midpoint < doubleBreaks[0] ? 0 : midpoint < doubleBreaks[1] ? 1 : 2, singlePanel = midpoint < singleBreak ? 3 : 4,
+        side = column === 0 ? -1 : 1, panel = side === doubleSide ? doublePanel : singlePanel,
+        panelColor = panelPalette[(panel + signature * 2) % panelPalette.length]!, nearJoint = rows[station]!.seam === side ? 1 : 0,
+        farJoint = rows[station + 1]!.seam === side ? 1 : 0;
+      addTriangle([a, c, d], panelColor, (point) => [point[0], point[2]], [nearJoint, farJoint, farJoint]);
+      addTriangle([a, d, b], panelColor, (point) => [point[0], point[2]], [nearJoint, farJoint, nearJoint]);
+    }
+    for (const sideIndex of [0, 1] as const) {
+      for (let depth = 0; depth < terminalOffsets.length - 1; depth += 1) {
+        const a = stations[station]!.sides[sideIndex][depth]!, b = stations[station]!.sides[sideIndex][depth + 1]!,
+          c = stations[station + 1]!.sides[sideIndex][depth]!, d = stations[station + 1]!.sides[sideIndex][depth + 1]!,
+          faceColor = depth < 2 ? worn : returned, project = (point: Point): readonly [number, number] => [point[2] + .5, -point[1]];
+        if (sideIndex === 0) {
+          addTriangle([a, b, d], faceColor, project); addTriangle([a, d, c], faceColor, project);
+        } else {
+          addTriangle([a, d, b], faceColor, project); addTriangle([a, c, d], faceColor, project);
+        }
       }
-      sideRows[sideIndex as 0 | 1].push(sideRow);
     }
-  }
-  for (let station = 0; station < stationCount - 1; station += 1) {
-    for (let column = 0; column < 3; column += 1) {
-      const a = topRows[station]![column]!;
-      const b = topRows[station]![column + 1]!;
-      const c = topRows[station + 1]![column]!;
-      const d = topRows[station + 1]![column + 1]!;
-      indices.push(a, c, d, a, d, b);
-    }
-    for (const [sideIndex, rows] of sideRows.entries()) {
-      for (let depth = 0; depth < sideEvents[sideIndex as 0 | 1].points.length - 1; depth += 1) {
-        const a = rows[station]![depth]!;
-        const b = rows[station]![depth + 1]!;
-        const c = rows[station + 1]![depth]!;
-        const d = rows[station + 1]![depth + 1]!;
-        if (sideIndex === 0) indices.push(a, b, d, a, d, c);
-        else indices.push(a, d, b, a, c, d);
-      }
-    }
-    const leftBottom = sideEvents[0].points.length - 1, rightBottom = sideEvents[1].points.length - 1;
-    const leftBase = sideRows[0][station]![leftBottom]!, rightBase = sideRows[1][station]![rightBottom]!;
-    const nextLeftBase = sideRows[0][station + 1]![leftBottom]!, nextRightBase = sideRows[1][station + 1]![rightBottom]!;
-    indices.push(leftBase, nextRightBase, nextLeftBase, leftBase, rightBase, nextRightBase);
+    const bottom = terminalOffsets.length - 1, left = stations[station]!.sides[0][bottom]!, right = stations[station]!.sides[1][bottom]!,
+      nextLeft = stations[station + 1]!.sides[0][bottom]!, nextRight = stations[station + 1]!.sides[1][bottom]!;
+    addTriangle([left, nextRight, nextLeft], underside, (point) => [point[0], point[2]]);
+    addTriangle([left, right, nextRight], underside, (point) => [point[0], point[2]]);
   }
   let capTriangleCount = 0;
-  for (const [station, targetNormalZ] of [[0, -1], [stationCount - 1, 1]] as const) {
-    const perimeter = [...topRows[station]!, ...sideRows[1][station]!.slice(1), ...sideRows[0][station]!.slice(1).reverse()];
+  for (const [station, targetNormalZ] of [[0, -1], [rows.length - 1, 1]] as const) {
+    const top = stations[station]!.top, edgeCorners = station === 0 ? terminalCorners.slice(0, 2) : terminalCorners.slice(2, 4),
+      capTop = [edgeCorners[0]!, addVertex(top[1]!, panelPalette[signature % panelPalette.length]!, [top[1]![0], top[1]![1]]), edgeCorners[1]!] as const,
+      addCapSide = (point: Point, depth: number) => addVertex(point, depth < 3 ? worn : returned, [point[0], point[1]]),
+      rightSide = stations[station]!.sides[1].slice(1).map(addCapSide), leftSide = stations[station]!.sides[0].slice(1).map(addCapSide),
+      perimeter = [...capTop, ...rightSide, ...leftSide.reverse()];
     const faces = ShapeUtils.triangulateShape(perimeter.map((vertex) => new Vector2(positions[vertex * 3]!, positions[vertex * 3 + 1]!)), []);
     for (const face of faces) {
       const triangle = face.map((index) => perimeter[index]!) as [number, number, number],
@@ -289,10 +329,13 @@ export function createDeckCapGeometry(profile: number): BufferGeometry {
   geometry.name = `tide-scar-causeway-module-${signature}`;
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
   geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+  geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2));
+  geometry.setAttribute('causewayJoint', new Float32BufferAttribute(joints, 1));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
-  geometry.userData = { signature, edgeEvent: sideEvents[0].name, oppositeEdgeEvent: sideEvents[1].name, profilePointCounts: sideEvents.map((event) => event.points.length), capTriangleCount,
-    sideWinding: 'outward-x', moduleLength: [6, 11], protectedHalfWidth: .44, structure: 'fractured-top-authored-edge-event-side-mass' };
+  geometry.userData = { signature, edgeEvent: sideEvents[0].name, oppositeEdgeEvent: sideEvents[1].name, profilePointCounts: [terminalOffsets.length, terminalOffsets.length], capTriangleCount,
+    panelCount: 5, sideWinding: 'outward-x', moduleLength: [6, 11], protectedHalfWidth: .44,
+    structure: 'five-staggered-noncoplanar-panels-canonical-terminal-broken-lip-return-mass' };
   return geometry;
 }
 
@@ -316,6 +359,50 @@ function worldMappedMaterial(
     );
   };
   material.customProgramCacheKey = () => `tide-world-map-${texelMeters}`;
+  return material;
+}
+
+export function createCausewayMaterial(): MeshStandardMaterial {
+  const material = new MeshStandardMaterial({ color: 0xffffff, roughness: .9, metalness: .01, vertexColors: true, emissive: 0, emissiveIntensity: 0 });
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = `attribute float causewayJoint; varying float tideCausewayJoint; varying vec3 tideWorldPosition;\n${shader.vertexShader}`.replace(
+      '#include <worldpos_vertex>',
+      '#include <worldpos_vertex>\n  tideWorldPosition = worldPosition.xyz; tideCausewayJoint = causewayJoint;',
+    );
+    shader.fragmentShader = `varying float tideCausewayJoint; varying vec3 tideWorldPosition;
+      vec4 tideCausewaySample(sampler2D source, vec3 worldPoint, vec3 weights, float scale) {
+        vec4 xPlane = texture2D(source, fract(worldPoint.zy / scale));
+        vec4 yPlane = texture2D(source, fract(worldPoint.xz / scale));
+        vec4 zPlane = texture2D(source, fract(worldPoint.xy / scale));
+        return xPlane * weights.x + yPlane * weights.y + zPlane * weights.z;
+      }\n${shader.fragmentShader}`.replace(
+      '#include <map_fragment>',
+      `float tideCausewayTop = 0.0;
+       float tideCausewayGrain = 0.5;
+       float tideCausewayJointWear = pow(clamp(tideCausewayJoint, 0.0, 1.0), 12.0);
+       #ifdef USE_MAP
+         vec3 tideDx = dFdx(tideWorldPosition);
+         vec3 tideDy = dFdy(tideWorldPosition);
+         vec3 tideFaceNormal = normalize(cross(tideDx, tideDy));
+         if (!gl_FrontFacing) tideFaceNormal = -tideFaceNormal;
+         vec3 tideWeights = pow(abs(tideFaceNormal), vec3(4.0));
+         tideWeights /= max(dot(tideWeights, vec3(1.0)), 0.0001);
+         vec4 tideMacro = tideCausewaySample(map, tideWorldPosition, tideWeights, 3.200);
+         vec4 tideDetail = tideCausewaySample(map, tideWorldPosition, tideWeights, 0.850);
+         float tideFootprint = max(length(tideDx), length(tideDy));
+         float tideDetailMix = 0.18 * (1.0 - smoothstep(0.08, 0.28, tideFootprint));
+         vec4 sampledDiffuseColor = mix(tideMacro, tideDetail, tideDetailMix);
+         tideCausewayTop = smoothstep(0.35, 0.82, tideFaceNormal.y);
+         sampledDiffuseColor.rgb *= mix(0.78, 1.0, tideCausewayTop) * mix(1.0, 0.72, tideCausewayJointWear);
+         tideCausewayGrain = dot(sampledDiffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+         diffuseColor *= sampledDiffuseColor;
+       #endif`,
+    ).replace(
+      '#include <roughnessmap_fragment>',
+      '#include <roughnessmap_fragment>\n  roughnessFactor = clamp(mix(0.96, 0.82, tideCausewayTop) + (0.5 - tideCausewayGrain) * 0.08 + tideCausewayJointWear * 0.035, 0.78, 0.98);',
+    );
+  };
+  material.customProgramCacheKey = () => 'tide-causeway-triplanar-3.200-0.850-v1';
   return material;
 }
 
@@ -635,6 +722,7 @@ export class WorldRenderer {
   private readonly dummy = new Object3D();
   private readonly cameraLook = new Vector3();
   private readonly floorMaterial = worldMappedMaterial({ color: PALETTE.sandstone, roughness: 0.9, metalness: 0.01, vertexColors: true }, 2.7);
+  private readonly causewayMaterial = createCausewayMaterial();
   private readonly railMaterial = worldMappedMaterial({ color: PALETTE.basaltEdge, roughness: 0.9, metalness: 0.02 }, 1.8);
   private readonly seamMaterial = new MeshStandardMaterial({ color: PALETTE.tideScar, roughness: 0.92, metalness: 0 });
   private readonly guideMaterial = new MeshStandardMaterial({ color: PALETTE.brass, roughness: 0.76, metalness: 0.12 });
@@ -648,7 +736,7 @@ export class WorldRenderer {
   private readonly shardMaterial = new MeshStandardMaterial({ color: PALETTE.tideScar, emissive: PALETTE.tideScar, emissiveIntensity: 0.48, roughness: 0.4, metalness: 0.02 });
   private readonly shieldMaterial = new MeshBasicMaterial({ color: PALETTE.tideScar, transparent: true, opacity: 0.52, wireframe: true });
   private readonly floors = this.instances(new BoxGeometry(1, 1, 1), this.floorMaterial, MAX_SECTIONS);
-  private readonly deckCaps = [0, 1, 2, 3, 4, 5].map((profile) => this.instances(createDeckCapGeometry(profile), this.floorMaterial, MAX_ROAD_MODULES_PER_SIGNATURE));
+  private readonly deckCaps = [0, 1, 2, 3, 4, 5].map((profile) => this.instances(createDeckCapGeometry(profile), this.causewayMaterial, MAX_ROAD_MODULES_PER_SIGNATURE));
   private readonly rails = this.instances(new BoxGeometry(1, 1, 1), this.railMaterial, MAX_RAILS);
   private readonly seams = this.instances(new BoxGeometry(1, 1, 1), this.seamMaterial, MAX_SECTIONS * 3);
   private readonly laneGuides = this.instances(new BoxGeometry(1, 1, 1), this.guideMaterial, MAX_SECTIONS * 2);
@@ -991,6 +1079,7 @@ export class WorldRenderer {
         assets.textures.sandstone.anisotropy = anisotropy;
         assets.textures.basalt.anisotropy = anisotropy;
         this.floorMaterial.map = assets.textures.sandstone;
+        this.causewayMaterial.map = assets.textures.sandstone;
         this.railMaterial.map = assets.textures.basalt;
         this.rockMaterial.map = assets.textures.basalt;
         this.canyon.setSurfaceMap(assets.textures.basalt);
@@ -1000,6 +1089,7 @@ export class WorldRenderer {
         this.clearD4MaterialMaps();
       }
       this.floorMaterial.needsUpdate = true;
+      this.causewayMaterial.needsUpdate = true;
       this.railMaterial.needsUpdate = true;
       this.rockMaterial.needsUpdate = true;
       this.coralMaterial.needsUpdate = true;
@@ -1013,12 +1103,14 @@ export class WorldRenderer {
 
   private clearD4MaterialMaps(): void {
     this.floorMaterial.map = null;
+    this.causewayMaterial.map = null;
     this.railMaterial.map = null;
     this.rockMaterial.map = null;
     this.canyon.setSurfaceMap(null);
     this.coralMaterial.alphaMap = null;
     this.coralMaterial.transparent = false;
     this.floorMaterial.needsUpdate = true;
+    this.causewayMaterial.needsUpdate = true;
     this.railMaterial.needsUpdate = true;
     this.rockMaterial.needsUpdate = true;
     this.coralMaterial.needsUpdate = true;
