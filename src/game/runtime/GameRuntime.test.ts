@@ -14,6 +14,8 @@ import {
 class ManualClock implements RuntimeClock {
   private nextId = 1;
   private callbacks = new Map<number, FrameRequestCallback>();
+  readonly cancelledHandles: number[] = [];
+  requestCount = 0;
   time = 0;
 
   now(): number {
@@ -21,13 +23,24 @@ class ManualClock implements RuntimeClock {
   }
 
   requestFrame(callback: FrameRequestCallback): number {
+    this.requestCount += 1;
     const id = this.nextId++;
     this.callbacks.set(id, callback);
     return id;
   }
 
   cancelFrame(handle: number): void {
+    this.cancelledHandles.push(handle);
     this.callbacks.delete(handle);
+  }
+
+  selectNext(): FrameRequestCallback {
+    const selected = this.callbacks.entries().next().value as
+      | [number, FrameRequestCallback]
+      | undefined;
+    if (!selected) throw new Error("No frame callback is pending");
+    this.callbacks.delete(selected[0]);
+    return selected[1];
   }
 
   step(time: number): void {
@@ -314,6 +327,103 @@ describe("GameRuntime", () => {
     expect(harness.runtime.getSnapshot().state.status).toBe("paused");
     harness.suspend();
     expect(harness.audio.suspendCount).toBe(1);
+    harness.runtime.destroy();
+  });
+
+  it("holds a pending presentation frame once without changing simulation or camera", async () => {
+    const harness = createHarness();
+    const listener = vi.fn();
+    await harness.runtime.init({} as HTMLElement);
+    const unsubscribe = harness.runtime.subscribe(listener);
+    const qa = harness.windowTarget.__TIDE_RELAY_QA__;
+    const simulationBefore = qa?.getSimulationSnapshot();
+    const cameraBefore = qa?.getRenderSnapshot()?.camera;
+    const renderCount = harness.renderer.renders.length;
+    const notifyCount = listener.mock.calls.length;
+    const requestCount = harness.clock.requestCount;
+
+    const first = qa?.holdPresentation();
+    expect(first).toMatchObject({
+      presentationHeld: true,
+      frameHandleExisted: true,
+      cancellationRequested: true,
+    });
+    expect(first?.simulation).toEqual(simulationBefore);
+    expect(first?.render?.camera).toEqual(cameraBefore);
+    expect(harness.clock.cancelledHandles).toHaveLength(1);
+    expect(harness.clock.pending).toBe(0);
+
+    harness.clock.step(16);
+    expect(harness.renderer.renders).toHaveLength(renderCount);
+    expect(listener).toHaveBeenCalledTimes(notifyCount);
+    expect(harness.clock.requestCount).toBe(requestCount);
+
+    const second = qa?.holdPresentation();
+    expect(second).toMatchObject({
+      presentationHeld: true,
+      frameHandleExisted: false,
+      cancellationRequested: false,
+    });
+    expect(harness.clock.cancelledHandles).toHaveLength(1);
+    harness.runtime.start();
+    harness.runtime.pause();
+    harness.runtime.resume();
+    qa?.setSeed(0x5678);
+    qa?.loadScenario("jump-apex");
+    qa?.freeze(false);
+    qa?.advanceTicks(1);
+    harness.runtime.pause();
+    harness.runtime.restart();
+    expect(harness.clock.requestCount).toBe(requestCount);
+
+    unsubscribe();
+    harness.runtime.destroy();
+    harness.runtime.destroy();
+    expect(harness.clock.cancelledHandles).toHaveLength(1);
+  });
+
+  it("suppresses an already-selected presentation callback after hold", async () => {
+    const harness = createHarness();
+    const listener = vi.fn();
+    await harness.runtime.init({} as HTMLElement);
+    const unsubscribe = harness.runtime.subscribe(listener);
+    const qa = harness.windowTarget.__TIDE_RELAY_QA__;
+    const selected = harness.clock.selectNext();
+    const simulationBefore = qa?.getSimulationSnapshot();
+    const cameraBefore = qa?.getRenderSnapshot()?.camera;
+    const requestCount = harness.clock.requestCount;
+
+    const proof = qa?.holdPresentation();
+    expect(proof).toMatchObject({
+      presentationHeld: true,
+      frameHandleExisted: true,
+      cancellationRequested: true,
+    });
+    expect(proof?.simulation).toEqual(simulationBefore);
+    expect(proof?.render?.camera).toEqual(cameraBefore);
+    expect(harness.clock.cancelledHandles).toHaveLength(1);
+    harness.runtime.start();
+    harness.runtime.pause();
+    harness.runtime.resume();
+    harness.runtime.pause();
+    harness.runtime.restart();
+    qa?.setSeed(0x9abc);
+    qa?.loadScenario("slide-mid");
+    qa?.freeze(false);
+    qa?.advanceTicks(1);
+    const simulationAfterHelpers = qa?.getSimulationSnapshot();
+    const cameraAfterHelpers = qa?.getRenderSnapshot()?.camera;
+    const renderCountAfterHelpers = harness.renderer.renders.length;
+    const notifyCountAfterHelpers = listener.mock.calls.length;
+    selected(32);
+
+    expect(harness.renderer.renders).toHaveLength(renderCountAfterHelpers);
+    expect(listener).toHaveBeenCalledTimes(notifyCountAfterHelpers);
+    expect(harness.clock.requestCount).toBe(requestCount);
+    expect(harness.clock.pending).toBe(0);
+    expect(qa?.getSimulationSnapshot()).toEqual(simulationAfterHelpers);
+    expect(qa?.getRenderSnapshot()?.camera).toEqual(cameraAfterHelpers);
+    unsubscribe();
     harness.runtime.destroy();
   });
 });

@@ -62,6 +62,14 @@ export interface FrameBenchmark {
   readonly maxMs: number;
 }
 
+export interface PresentationHoldProof {
+  readonly presentationHeld: true;
+  readonly frameHandleExisted: boolean;
+  readonly cancellationRequested: boolean;
+  readonly simulation: SimulationQaSnapshot;
+  readonly render: RenderSnapshot | null;
+}
+
 export interface RuntimeRenderer {
   readonly canvas: HTMLCanvasElement | null;
   init(host: HTMLElement): Promise<void>;
@@ -123,6 +131,7 @@ export interface TideRelayQaApi {
   getSimulationSnapshot(): SimulationQaSnapshot;
   getRenderSnapshot(): RenderSnapshot | null;
   benchmarkFrames(iterations?: number): FrameBenchmark | null;
+  holdPresentation(): PresentationHoldProof;
 }
 
 declare global {
@@ -189,6 +198,7 @@ export class GameRuntime {
   private qaApi: TideRelayQaApi | null = null;
   private qaScenario: QaScenario | null = null;
   private resourcesDestroyed = false;
+  private presentationHeld = false;
 
   constructor(
     options: Partial<RuntimeOptions> = {},
@@ -377,7 +387,7 @@ export class GameRuntime {
 
   private readonly onFrame = (timestamp: number): void => {
     this.frameHandle = null;
-    if (this.destroyed || !this.initialized) return;
+    if (this.presentationHeld || this.destroyed || !this.initialized) return;
     const rawDelta = timestamp - this.lastFrameTime;
     const deltaMs = Number.isFinite(rawDelta)
       ? Math.min(MAX_FRAME_DELTA_MS, Math.max(0, rawDelta))
@@ -418,7 +428,12 @@ export class GameRuntime {
   };
 
   private scheduleFrame(): void {
-    if (this.destroyed || !this.initialized || this.frameHandle !== null) return;
+    if (
+      this.presentationHeld ||
+      this.destroyed ||
+      !this.initialized ||
+      this.frameHandle !== null
+    ) return;
     this.frameHandle = this.adapters.clock.requestFrame(this.onFrame);
   }
 
@@ -567,6 +582,24 @@ export class GameRuntime {
           throw new RangeError("benchmark iterations must be an integer between 1 and 600");
         }
         return this.adapters.renderer.benchmark(this.state, iterations);
+      },
+      holdPresentation: () => {
+        const frameHandleExisted = this.frameHandle !== null;
+        this.presentationHeld = true;
+        let cancellationRequested = false;
+        if (this.frameHandle !== null) {
+          const handle = this.frameHandle;
+          this.frameHandle = null;
+          this.adapters.clock.cancelFrame(handle);
+          cancellationRequested = true;
+        }
+        return {
+          presentationHeld: true,
+          frameHandleExisted,
+          cancellationRequested,
+          simulation: this.simulationQaSnapshot(),
+          render: this.initialized ? this.adapters.renderer.getSnapshot() : null,
+        };
       },
     };
     this.qaApi = api;
