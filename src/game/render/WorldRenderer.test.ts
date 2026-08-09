@@ -5,6 +5,7 @@ import { RUNNER_RIG_BOUNDS } from './runnerRig';
 import {
   groundAnchoredBounds,
   applyD4LensShift,
+  createPursuerScreenSnapshot,
   createDeckCapGeometry,
   projectTideScarSegment,
   pursuerPresentation,
@@ -70,6 +71,17 @@ function representativePursuit(width: number, height: number, chaseGap: number) 
 }
 
 describe('renderer pursuit screen evidence', () => {
+  it('serializes pursuer snapshots as null-position hidden records or visible CSS coordinates', () => {
+    expect(createPursuerScreenSnapshot(null, 1440, 900, null)).toEqual({
+      x: null, y: null, visible: false, bounds: null,
+    });
+
+    const visibleBounds = bounds(510, 610);
+    expect(createPursuerScreenSnapshot(new Vector3(0, 0, 0), 1440, 900, visibleBounds)).toEqual({
+      x: 720, y: 450, visible: true, bounds: visibleBounds,
+    });
+  });
+
   it('keeps deck cap start/end cross-sections continuous and projects real scar quads through clip space', () => {
     const geometry = createDeckCapGeometry(2);
     const positions = geometry.getAttribute('position');

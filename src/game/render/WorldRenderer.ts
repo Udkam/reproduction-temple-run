@@ -86,6 +86,28 @@ export interface TideScarScreenSegment {
   visibleAreaPx: number;
 }
 
+export interface PursuerScreenSnapshot {
+  x: number | null;
+  y: number | null;
+  visible: boolean;
+  bounds: ClippedScreenBounds | null;
+}
+
+export function createPursuerScreenSnapshot(
+  projected: Vector3 | null,
+  width: number,
+  height: number,
+  bounds: ClippedScreenBounds | null,
+): PursuerScreenSnapshot {
+  if (!projected || !bounds) return { x: null, y: null, visible: false, bounds: null };
+  return {
+    x: (projected.x * .5 + .5) * width,
+    y: (-projected.y * .5 + .5) * height,
+    visible: true,
+    bounds,
+  };
+}
+
 export interface RenderSnapshot {
   canvas: { width: number; height: number; resolution: number };
   options: RenderOptions;
@@ -94,7 +116,7 @@ export interface RenderSnapshot {
   presentedLanePosition: number;
   runnerWorld: { x: number; y: number; z: number; yaw: number };
   runnerScreen: { x: number; y: number; visible: boolean; bounds?: ClippedScreenBounds | null };
-  pursuerScreen: { x: number; y: number; visible: boolean; bounds: ClippedScreenBounds | null };
+  pursuerScreen: PursuerScreenSnapshot;
   /** Positive vertical separation between courier and pursuer in non-capture frames. */
   pursuerGapPx?: number | null;
   /** Clipped CSS-pixel geometry for every visible unresolved hazard. */
@@ -781,7 +803,7 @@ export class WorldRenderer {
     presentedLanePosition: 0,
     runnerWorld: { x: 0, y: 0, z: 0, yaw: 0 },
     runnerScreen: { x: 0, y: 0, visible: false },
-    pursuerScreen: { x: 0, y: 0, visible: false, bounds: null },
+    pursuerScreen: { x: null, y: null, visible: false, bounds: null },
     pursuerGapPx: null,
     hazardScreens: [],
     tideScarSegments: [],
@@ -1517,12 +1539,7 @@ export class WorldRenderer {
         visible: screen.z >= -1 && screen.z <= 1,
         bounds: runnerBounds,
       },
-      pursuerScreen: {
-        x: pursuer ? (pursuer.x * .5 + .5) * width : -1,
-        y: pursuer ? (-pursuer.y * .5 + .5) * height : -1,
-        visible: pursuerBounds !== null,
-        bounds: pursuerBounds,
-      },
+      pursuerScreen: createPursuerScreenSnapshot(pursuer, width, height, pursuerBounds),
       pursuerGapPx,
       hazardScreens,
       tideScarSegments,
