@@ -38,10 +38,8 @@ export interface RunnerRig {
   core: Mesh;
   shield: Mesh;
   shadow: Mesh;
-  /** One real animated material batch is the rig's key-light shadow caster. */
   shadowCaster: BatchedMesh;
   batches: readonly RigBatch[];
-  /** Actual hidden source meshes used to rebuild every visible batched triangle in tests. */
   modelMeshes: readonly Mesh[];
 }
 
@@ -358,7 +356,7 @@ export function createRunnerRig(): RunnerRig {
     if (child instanceof Mesh) modelMeshes.push(child);
   });
   const batches = batchRigMeshes(root, modelMeshes);
-  const shadowCaster = batches.find((batch) => batch.sources.includes(hip))?.batch ?? batches[0]!.batch;
+  const shadowCaster = batches.find((batch) => batch.sources.includes(hip))?.batch ?? batches[0]!.batch; shadowCaster.castShadow = true;
   return {
     root,
     body,
@@ -584,12 +582,12 @@ export function updateRunnerRig(rig: RunnerRig, pose: RunnerPose): void {
     rig.rightFoot.rotation.x = -0.36;
   }
 
-  if (!pose.reducedMotion) {
-    const speedLift = (motion.strideAmplitude - 0.46) * 0.32;
-    const coatWave = running ? -0.15 - Math.sin(cycle * Math.PI * 2) * 0.025 - speedLift
-      : pose.posture === 'jump' ? -0.34
-        : pose.posture === 'slide' ? -0.06
-          : 0.08;
+  if (pose.dead) {
+    rig.coatLeft.rotation.set(0.1, -0.12, COAT_LEFT_Z); rig.coatRight.rotation.set(0.12, 0.16, COAT_RIGHT_Z);
+  } else if (pose.posture !== 'run') {
+    const coatAngle = pose.posture === 'jump' ? -0.34 : -0.06; rig.coatLeft.rotation.x = coatAngle; rig.coatRight.rotation.x = coatAngle * 1.06;
+  } else if (!pose.reducedMotion) {
+    const coatWave = -0.15 - Math.sin(cycle * Math.PI * 2) * 0.025 - (motion.strideAmplitude - 0.46) * 0.32;
     rig.coatLeft.rotation.x = coatWave;
     rig.coatRight.rotation.x = coatWave * 1.06;
   }
