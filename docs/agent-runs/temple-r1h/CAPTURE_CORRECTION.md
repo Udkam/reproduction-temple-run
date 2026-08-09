@@ -2,7 +2,7 @@
 
 Updated: 2026-08-09 Asia/Shanghai
 
-Status: **R1H source candidate `de636bc` is independently source-READY; its first C1 browser pass is evidence-BLOCKED; one evidence-harness-only C2 correction is authorized; R1H and the complete game remain in progress**
+Status: **C2 is evidence-BLOCKED and immutable; no C2 retry is authorized; R1H source candidate `de636bc`, R1H, and the complete game remain unaccepted and in progress**
 
 ## Immutable candidate and failure history
 
@@ -57,3 +57,15 @@ Each successful record adds the baseline camera, actual held camera, clock epoch
 7. Only coordinator acceptance may update the changelog, archive the evidence/QA disposition, push the linear stack, and report branch plus exact SHAs.
 
 No typecheck, full Vitest suite, production build, product source edit, Blender process, probe process, cleanup, reset, deletion, force push, or evidence replacement is authorized by C2.
+
+## C2 disposition
+
+The sole C2 browser pass exited `1` on its first record before any screenshot. The preserved directory is `C:\Users\Alex Chen\AppData\Local\Temp\tide-relay-r1h-c2-candidate-de636bc-20260809T235226399\`. It contains only:
+
+- `capture_candidate.mjs`, SHA-256 `5C25EFE9E71AD1DEF1710A51EA1B374E748A27A3901D80E203523ECB804BE428`;
+- `capture.stdout.log`, zero bytes, SHA-256 `E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855`;
+- `capture.stderr.log`, SHA-256 `C517D6AF8C497170E4ADE766ABED750C6365A71128B486F517222A8CDE104C64`.
+
+There are zero PNGs and no evidence manifest. At the 2,992 controlled-millisecond limit, canonical state remained frozen at hash `fa4e69d7`, tick `60`, status `running`, and elapsed tick `60`. The actual camera was `{x:0,y:6.059999999999997,z:4.5822771649787155,fov:43,yaw:0}` while the immutable R1G baseline was `{x:0,y:6.059903550433091,z:7.308502044360709,fov:43,yaw:0}`. The 16 ms RAF lattice skipped the narrow `.05m` z window; it did not expose a camera, simulation, geometry, or visual regression. Port `4210` closed and no helper remains.
+
+C2 is closed `BLOCKED`. Its files, logs, hashes, and contract remain immutable. A later C3 contract may replace only the temporary evidence-harness mechanism; it may not retry C2, loosen the same-view tolerance, edit product source, or relabel this result.

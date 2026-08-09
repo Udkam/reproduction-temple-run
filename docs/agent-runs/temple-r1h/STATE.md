@@ -4,7 +4,7 @@ Updated: 2026-08-09 Asia/Shanghai
 
 Project root: `E:\Proj\reproduction-temple-run`
 
-Branch: `main`. Pushed baseline: `056b68701d71bb2c618e131d24039f53d646caff`. Local contract checkpoint: `0186e81b39d4643dd398e535a218550e1fc7e3e4`. Current unpushed source candidate: `de636bc0d036f6d8916d5a19517387987bd40bc5`.
+Branch: `main`. Pushed baseline: `056b68701d71bb2c618e131d24039f53d646caff`. Local C2 contract checkpoint: `7b4b268034b005ad07f240ad208c0ea74756db97`. Current unpushed source candidate: `de636bc0d036f6d8916d5a19517387987bd40bc5`.
 
 ## Objective and disposition
 
@@ -17,6 +17,8 @@ Candidate `8112156` completed bounded source review as `READY`, but R1H remains 
 Candidate `de636bc` completes the bounded C1 source correction in exactly `tideScarWorld.ts` and its direct test. Targeted `8/8`, independent source QA, and cumulative churn `286/500` are green. The final full suite is `17 files / 75 tests`; the valid no-delete build produced 31 files in `C:\Users\Alex Chen\AppData\Local\Temp\tide-relay-r1h-c1-build-de636bc-20260809T232247032\`. A preceding Windows argument-quoting attempt failed before resolving the project entry and created no build directory; both failed and corrected logs are preserved. The typecheck process completed with zero diagnostics/stderr, although its outer one-second observer ended before returning the child exit code; it was not rerun.
 
 The first C1 browser pass is evidence-`BLOCKED`, not a product or visual acceptance result. Directory `C:\Users\Alex Chen\AppData\Local\Temp\tide-relay-r1h-c1-candidate-de636bc-20260809T232247032\` preserves script SHA-256 `597E6E4ACA286025DC7BD7737CF5B1E75A3FCACE712ADFA2530B77BE051A7BBD`, all gate logs, and one first-frame PNG SHA-256 `4A2E005D504DB64BCAB36672D7DB5A9951E1902D8199A2EEB8745AB25736326F`. The pre-screenshot camera matched R1G, but unpaused presentation RAF advanced during screenshot and post-screenshot `z` differed by `2.7262248793828983m`. Exit was `1`, no manifest was written, and port `4210` closed. Nothing in this directory may be overwritten or relabelled.
+
+The C2 Playwright Clock pass is also evidence-`BLOCKED`. Directory `C:\Users\Alex Chen\AppData\Local\Temp\tide-relay-r1h-c2-candidate-de636bc-20260809T235226399\` preserves only script SHA-256 `5C25EFE9E71AD1DEF1710A51EA1B374E748A27A3901D80E203523ECB804BE428`, empty stdout, and stderr SHA-256 `C517D6AF8C497170E4ADE766ABED750C6365A71128B486F517222A8CDE104C64`; there are zero PNGs and no manifest. Canonical state stayed frozen at hash `fa4e69d7` / tick `60`, but the `16ms` lattice skipped the camera tolerance and finished its 2,992 ms bound at `z=4.5822771649787155` versus baseline `7.308502044360709`. Exit was `1`; port `4210` closed. C2 cannot be retried or rewritten.
 
 ## Exact source authority
 
@@ -45,7 +47,7 @@ Development runs only:
 
 `npm.cmd run test -- src/game/render/tideScarWorld.test.ts`
 
-The completed source gate set is not rerun because C2 changes no repo source. The corrected browser pass alone reuses the complete 14-record matrix and exact calls/triangles constants. It verifies the R1G manifest bytes, installs Playwright Clock before navigation, enters a verified paused state while the application is still `ready`, then loads the candidate scenario and advances the actual GameRuntime `requestAnimationFrame` loop in bounded `16ms` steps until each baseline camera is reached within `.05m` per axis with exact FOV/yaw. The clock stays paused through the viewport screenshot. Pre/post page clock and camera coordinates must be identical, as must canonical hash/tick/status/elapsedTicks; direct camera/renderer mutation is forbidden.
+The completed source gate set is not rerun because C3 changes no repo source. The corrected browser pass alone reuses the complete 14-record matrix and exact calls/triangles constants. It verifies the R1G manifest bytes and installs a transparent RAF handle tracker before page creation. The product camera converges through its unchanged real-time RAF. The Playwright main-world predicate checks canonical anchor and baseline camera, then calls `hold()` synchronously in the same predicate stack. The waiter may use the same wrapper, but its executing callback has already removed its own handle and a successful predicate schedules no next waiter callback; `hold()` therefore cancels every other pending main-world handle without canceling the executing waiter. Counters cover all wrapped main-world RAF. Pre/post wrapper proof, camera, and canonical hash/tick/status/elapsedTicks must be exact. Any wrapper replacement, extra post-hold request/callback, remaining handle, timeout, or camera/state drift fails closed; direct camera/renderer mutation remains forbidden.
 
 Independent source and visual QA starts only after a candidate SHA. Numeric green gates cannot override unchanged block massing, repeated roofs/walls, flat/clipped skyline, structureless side void, filled genuine gaps, occlusion, floating/intersecting rock, or a change visible only through materials/lighting. A failed visual result is preserved as `BLOCKED`; it is not rewritten into acceptance.
 
@@ -55,4 +57,4 @@ No file may be deleted, reverted, cleaned, overwritten, or lost. The inherited d
 
 Historical next action (completed before candidate `8112156`): commit and push the three-path projection-gate correction, then return the sole geometry writer to the two authorized source paths.
 
-Current next action: independently review and commit the four-path R1H-C2 documentation checkpoint locally without pushing the blocked stack. Then copy the failed capture script into one new unique evidence directory, apply only the authorized Playwright-clock correction, obtain independent static script QA, and run exactly one corrected browser pass. If its manifest and all 14 frames pass independent evidence and visual QA, the coordinator archives acceptance and pushes the full linear stack. Full C2 scope is in `docs/agent-runs/temple-r1h/CAPTURE_CORRECTION.md`.
+Current next action: independently review and commit the five-path R1H-C3 documentation checkpoint locally without pushing the blocked stack. Then copy the real-time C1 capture script into one new unique evidence directory, apply only the authorized RAF tracker/atomic hold correction, obtain independent static script QA, and run exactly one C3 browser pass. If its manifest and all 14 frames pass independent evidence and visual QA, the coordinator archives acceptance and pushes the full linear stack. Full C3 scope is in `docs/agent-runs/temple-r1h/RAF_HOLD_CORRECTION.md`.
