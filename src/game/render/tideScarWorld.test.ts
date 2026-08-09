@@ -1,4 +1,4 @@
-import { Mesh, MeshStandardMaterial, PerspectiveCamera, Texture, Vector3 } from 'three';
+import { Matrix4, Mesh, MeshStandardMaterial, PerspectiveCamera, Texture, Vector3, Vector4 } from 'three';
 import { describe, expect, it } from 'vitest';
 import { TideScarWorld } from './tideScarWorld';
 import { applyTR4RuntimeLensShift, createCausewayMaterial, createDeckCapGeometry, presentationRoadStart, shouldShowPursuer, TR4_RUNTIME_CAMERA, WorldRenderer } from './WorldRenderer';
@@ -24,13 +24,88 @@ async function rawArrayFingerprint(array: { readonly buffer: ArrayBufferLike; re
   return Array.from(digest, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 const HORIZON_GEOMETRY_CASES = [
-  { x: -52, z: -54, radiusX: 13, radiusZ: 18, seed: 401, band: 'near' }, { x: -15, z: -62, radiusX: 8, radiusZ: 16, seed: 409, band: 'near' },
+  { x: -52, z: -54, radiusX: 13, radiusZ: 18, seed: 401, band: 'near' }, { x: -14, z: -62, radiusX: 8, radiusZ: 16, seed: 409, band: 'near' },
   { x: 15, z: -55, radiusX: 8, radiusZ: 17, seed: 419, band: 'near' }, { x: 52, z: -61, radiusX: 13, radiusZ: 20, seed: 421, band: 'near' },
   { x: -42, z: -84, radiusX: 12, radiusZ: 18, seed: 431, band: 'mid' }, { x: -16, z: -91, radiusX: 7, radiusZ: 15, seed: 433, band: 'mid' },
   { x: 16, z: -86, radiusX: 7, radiusZ: 16, seed: 439, band: 'mid' }, { x: 42, z: -94, radiusX: 12, radiusZ: 18, seed: 443, band: 'mid' },
   { x: -34, z: -122, radiusX: 11, radiusZ: 17, seed: 449, band: 'far' }, { x: -12, z: -130, radiusX: 5, radiusZ: 14, seed: 457, band: 'far' },
   { x: 12, z: -124, radiusX: 5, radiusZ: 15, seed: 461, band: 'far' }, { x: 34, z: -132, radiusX: 11, radiusZ: 17, seed: 463, band: 'far' },
 ] as const;
+const SHELF_RUN_CASES = [
+  { side: -1, stations: 5 }, { side: 1, stations: 4 }, { side: -1, stations: 4 },
+  { side: -1, stations: 4 }, { side: 1, stations: 4 }, { side: -1, stations: 4 }, { side: 1, stations: 4 },
+  { side: -1, stations: 4 }, { side: 1, stations: 4 }, { side: -1, stations: 4 }, { side: 1, stations: 4 },
+] as const;
+type ActualTriangle = [Vector3, Vector3, Vector3];
+type NdcPoint = { x: number; y: number };
+function actualTriangles(mesh: Mesh, start = 0, end = mesh.geometry.getIndex()!.count): ActualTriangle[] {
+  const position = mesh.geometry.getAttribute('position'), index = mesh.geometry.getIndex()!;
+  mesh.updateWorldMatrix(true, false);
+  const triangles: ActualTriangle[] = [];
+  for (let offset = start; offset < end; offset += 3) triangles.push([0, 1, 2].map((step) => new Vector3().fromBufferAttribute(position, index.getX(offset + step)).applyMatrix4(mesh.matrixWorld)) as ActualTriangle);
+  return triangles;
+}
+function clipTriangleToNdc(triangle: ActualTriangle, viewProjection: Matrix4): NdcPoint[] {
+  let polygon = triangle.map((point) => new Vector4(point.x, point.y, point.z, 1).applyMatrix4(viewProjection));
+  const planes = [(point: Vector4) => point.x + point.w, (point: Vector4) => point.w - point.x, (point: Vector4) => point.y + point.w,
+    (point: Vector4) => point.w - point.y, (point: Vector4) => point.z + point.w, (point: Vector4) => point.w - point.z];
+  for (const distance of planes) {
+    const clipped: Vector4[] = [];
+    for (let index = 0; index < polygon.length; index += 1) {
+      const from = polygon[(index + polygon.length - 1) % polygon.length]!, to = polygon[index]!, fromDistance = distance(from), toDistance = distance(to), fromInside = fromDistance >= 0, toInside = toDistance >= 0;
+      if (fromInside !== toInside) clipped.push(from.clone().lerp(to, fromDistance / (fromDistance - toDistance)));
+      if (toInside) clipped.push(to);
+    }
+    polygon = clipped;
+    if (polygon.length === 0) break;
+  }
+  return polygon.filter((point) => point.w > 1e-7).map((point) => ({ x: point.x / point.w, y: point.y / point.w }));
+}
+function bandTriangles(world: TideScarWorld, bandIndex: number): ActualTriangle[] {
+  world.root.updateMatrixWorld(true);
+  const primary = world.root.getObjectByName(LAYERS[bandIndex]![0]) as Mesh, far = world.root.getObjectByName(LAYERS[2][0]) as Mesh, farIndex = far.geometry.getIndex()!, horizonStart = farIndex.count - 12 * 96 * 3;
+  const triangles = actualTriangles(primary, 0, bandIndex === 2 ? horizonStart : primary.geometry.getIndex()!.count), islandStart = horizonStart + bandIndex * 4 * 96 * 3;
+  triangles.push(...actualTriangles(far, islandStart, islandStart + 4 * 96 * 3));
+  return triangles;
+}
+function clipSegmentToNdc(start: Vector3, end: Vector3, viewProjection: Matrix4): [NdcPoint, NdcPoint] | null {
+  let from = new Vector4(start.x, start.y, start.z, 1).applyMatrix4(viewProjection), to = new Vector4(end.x, end.y, end.z, 1).applyMatrix4(viewProjection);
+  const planes = [(point: Vector4) => point.x + point.w, (point: Vector4) => point.w - point.x, (point: Vector4) => point.y + point.w,
+    (point: Vector4) => point.w - point.y, (point: Vector4) => point.z + point.w, (point: Vector4) => point.w - point.z];
+  for (const distance of planes) {
+    const fromDistance = distance(from), toDistance = distance(to);
+    if (fromDistance < 0 && toDistance < 0) return null;
+    if (fromDistance < 0 || toDistance < 0) { const intersection = from.clone().lerp(to, fromDistance / (fromDistance - toDistance)); if (fromDistance < 0) from = intersection; else to = intersection; }
+  }
+  if (from.w <= 1e-7 || to.w <= 1e-7) return null;
+  return [{ x: from.x / from.w, y: from.y / from.w }, { x: to.x / to.w, y: to.y / to.w }];
+}
+function mergeIntervals(intervals: [number, number][]): [number, number][] {
+  const sorted = intervals.filter(([start, end]) => end > start).sort((a, b) => a[0] - b[0]), merged: [number, number][] = [];
+  for (const interval of sorted) { const previous = merged.at(-1); if (previous && interval[0] <= previous[1] + 1e-7) previous[1] = Math.max(previous[1], interval[1]); else merged.push([...interval]); }
+  return merged;
+}
+function scanlineSilhouette(triangles: ActualTriangle[], camera: PerspectiveCamera): readonly { height: number; maxGap: number; maxGapY: number }[] {
+  camera.updateMatrixWorld();
+  const viewProjection = new Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse), polygons = triangles.map((triangle) => ({ side: triangle.reduce((sum, point) => sum + point.x, 0) < 0 ? 0 as const : 1 as const, points: clipTriangleToNdc(triangle, viewProjection) })).filter((entry) => entry.points.length >= 3);
+  const roadLines = ([-1, 1] as const).map((side) => clipSegmentToNdc(new Vector3(side * (WORLD_METRICS.roadWidth / 2 + .4), 0, presentationRoadStart(0)), new Vector3(side * (WORLD_METRICS.roadWidth / 2 + .4), 0, -240), viewProjection));
+  if (roadLines.some((line) => line === null)) throw new Error('protected route edge did not survive homogeneous clipping');
+  const cells = 2048, step = 2 / cells;
+  return ([0, 1] as const).map((side) => {
+    const line = roadLines[side]!, routeMinY = Math.max(-1, Math.min(line[0].y, line[1].y)), routeMaxY = Math.min(1, Math.max(line[0].y, line[1].y)), roadX = (y: number) => line[0].x + (line[1].x - line[0].x) * (y - line[0].y) / (line[1].y - line[0].y); let occupied = 0, maxGap = -Infinity, maxGapY = Number.NaN;
+    for (let scan = 0; scan < cells; scan += 1) {
+      const y = -1 + (scan + .5) * step; if (y < routeMinY || y > routeMaxY) continue; const road = roadX(y), intervals: [number, number][] = [];
+      for (const polygon of polygons) {
+        if (polygon.side !== side) continue; const crossings: number[] = [];
+        for (let edge = 0; edge < polygon.points.length; edge += 1) { const a = polygon.points[edge]!, b = polygon.points[(edge + 1) % polygon.points.length]!; if ((a.y <= y && b.y > y) || (b.y <= y && a.y > y)) crossings.push(a.x + (b.x - a.x) * (y - a.y) / (b.y - a.y)); }
+        if (crossings.length < 2) continue; const low = Math.max(-1, Math.min(...crossings)), high = Math.min(1, Math.max(...crossings)), interval: [number, number] = side === 0 ? [low, Math.min(high, road)] : [Math.max(low, road), high]; if (interval[1] > interval[0]) intervals.push(interval);
+      }
+      const substantial = mergeIntervals(intervals).filter(([start, end]) => (end - start) * camera.aspect >= .02); if (substantial.length === 0) continue; occupied += 1;
+      const rawGap = side === 0 ? road - substantial.at(-1)![1] : substantial[0]![0] - road, gap = Math.max(0, rawGap) * camera.aspect; if (gap > maxGap) { maxGap = gap; maxGapY = y; }
+    }
+    return { height: occupied * step, maxGap, maxGapY };
+  });
+}
 function testSeededUnit(index: number, salt: number): number {
   let value = Math.imul(index + 1, 0x45d9f3b) ^ Math.imul(salt + 17, 0x27d4eb2d);
   value ^= value >>> 16; value = Math.imul(value, 0x45d9f3b); value ^= value >>> 16;
@@ -83,13 +158,31 @@ describe('Tide Scar geometric canyon presentation', () => {
       topologySizes.push(mesh.geometry.getAttribute('position').count);
     }
     expect(new Set(topologySizes).size).toBe(3);
+    let runCase = 0;
+    for (const [name, layer, runCount, profilePointCount] of LAYERS) {
+      const mesh = world.root.getObjectByName(name) as Mesh, position = mesh.geometry.getAttribute('position'), index = mesh.geometry.getIndex()!, fingerprints = new Set<string>(); let indexCursor = 0;
+      for (let run = 0; run < runCount; run += 1) {
+        const spec = SHELF_RUN_CASES[runCase++]!, stations: Vector3[] = [];
+        for (let pair = 0; pair < spec.stations - 1; pair += 1) {
+          const pairStart = indexCursor + pair * profilePointCount * 6;
+          if (pair === 0) stations.push(new Vector3().fromBufferAttribute(position, index.getX(pairStart)));
+          stations.push(new Vector3().fromBufferAttribute(position, index.getX(pairStart + (spec.side < 0 ? 1 : 2))));
+        }
+        expect(stations).toHaveLength(spec.stations); expect(stations.every((point) => point.toArray().every(Number.isFinite))).toBe(true);
+        const breaks = stations.slice(1).map((point, station) => ({ lateral: Math.abs(point.x - stations[station]!.x), elevation: Math.abs(point.y - stations[station]!.y) }));
+        expect(breaks.filter((entry) => entry.lateral >= .35 || entry.elevation >= .28)).toHaveLength(spec.stations - 1); expect(breaks.some((entry) => entry.lateral >= .35 && entry.elevation >= .28)).toBe(true);
+        fingerprints.add(stations.map((point) => `${(Math.abs(point.x) - Math.abs(stations[0]!.x)).toFixed(3)}:${(point.y - stations[0]!.y).toFixed(3)}`).join('|'));
+        indexCursor += (spec.stations - 1) * profilePointCount * 6 + (profilePointCount - 2) * 6;
+      }
+      expect(fingerprints.size).toBe(runCount);
+    }
     const farMesh = world.root.getObjectByName(LAYERS[2][0]) as Mesh, farBounds = farMesh.geometry.boundingBox!;
     expect(farBounds.max.z).toBeLessThan(-25);
     expect(farBounds.min.z).toBeGreaterThan(-230);
     const position = farMesh.geometry.getAttribute('position'), index = farMesh.geometry.getIndex()!, horizonStart = farMesh.geometry.userData.horizonIndexStart as number;
     const welded = new Map<string, Vector3>(), adjacency = new Map<string, Set<string>>();
-    type ActualTriangle = { keys: [string, string, string]; points: [Vector3, Vector3, Vector3] };
-    const triangles: ActualTriangle[] = [], keyOf = (point: Vector3) => point.toArray().map((value) => Math.round(value * 1e5)).join(':');
+    type HorizonTriangle = { keys: [string, string, string]; points: [Vector3, Vector3, Vector3] };
+    const triangles: HorizonTriangle[] = [], keyOf = (point: Vector3) => point.toArray().map((value) => Math.round(value * 1e5)).join(':');
     for (let offset = horizonStart; offset < index.count; offset += 3) {
       const points = [0, 1, 2].map((step) => new Vector3().fromBufferAttribute(position, index.getX(offset + step))) as [Vector3, Vector3, Vector3], keys = points.map(keyOf) as [string, string, string]; triangles.push({ keys, points });
       for (let step = 0; step < 3; step += 1) { const a = keys[step]!, b = keys[(step + 1) % 3]!; welded.set(a, points[step]!); welded.set(b, points[(step + 1) % 3]!); if (!adjacency.has(a)) adjacency.set(a, new Set()); if (!adjacency.has(b)) adjacency.set(b, new Set()); adjacency.get(a)!.add(b); adjacency.get(b)!.add(a); }
@@ -106,18 +199,18 @@ describe('Tide Scar geometric canyon presentation', () => {
       expect(openEdges, `canyon component non-manifold edges ${JSON.stringify(openEdges.slice(0, 12))}`).toEqual([]);
       const elevationBands: Vector3[][] = []; for (const point of [...points].sort((a, b) => a.y - b.y)) { const band = elevationBands.at(-1); if (!band || point.y - Math.max(...band.map((member) => member.y)) > .8) elevationBands.push([point]); else band.push(point); }
       expect(elevationBands.map((band) => band.length)).toEqual([9, 8, 16, 17]); for (let band = 1; band < elevationBands.length; band += 1) expect(Math.min(...elevationBands[band]!.map((point) => point.y)) - Math.max(...elevationBands[band - 1]!.map((point) => point.y))).toBeGreaterThan(.8);
-      const capKeys = new Set([...component].filter((key) => adjacency.get(key)!.size === 8)); expect(capKeys.size).toBe(2); const capFaces = componentTriangles.filter((triangle) => triangle.keys.some((key) => capKeys.has(key))); expect(capFaces).toHaveLength(16); for (const triangle of capFaces) { const cap = triangle.keys.find((key) => capKeys.has(key))!, normal = triangle.points[1].clone().sub(triangle.points[0]).cross(triangle.points[2].clone().sub(triangle.points[0])); expect(normal.y * (welded.get(cap)!.y > center.y ? 1 : -1)).toBeGreaterThan(1e-4); }
+      const capKeys = new Set([...component].filter((key) => adjacency.get(key)!.size === 8)); expect(capKeys.size).toBe(2); const topCapKey = [...capKeys].sort((a, b) => welded.get(b)!.y - welded.get(a)!.y)[0]!, crownRing = [...adjacency.get(topCapKey)!].map((key) => welded.get(key)!), crownCenter = crownRing.reduce((sum, point) => sum.add(new Vector3(point.x, 0, point.z)), new Vector3()).multiplyScalar(1 / crownRing.length), orderedCrown = crownRing.sort((a, b) => Math.atan2(a.z - crownCenter.z, a.x - crownCenter.x) - Math.atan2(b.z - crownCenter.z, b.x - crownCenter.x)); const capFaces = componentTriangles.filter((triangle) => triangle.keys.some((key) => capKeys.has(key))); expect(capFaces).toHaveLength(16); for (const triangle of capFaces) { const cap = triangle.keys.find((key) => capKeys.has(key))!, normal = triangle.points[1].clone().sub(triangle.points[0]).cross(triangle.points[2].clone().sub(triangle.points[0])); expect(normal.y * (welded.get(cap)!.y > center.y ? 1 : -1)).toBeGreaterThan(1e-4); }
       type RingPlan = { keys: Set<string>; boundary: Vector3[]; center: Vector3; extentX: number; extentZ: number; area: number; meanY: number; radialBreak: number; notchBin: number };
       const ringPlan = (keys: Set<string>): RingPlan => { const boundary = [...keys].map((key) => welded.get(key)!), planCenter = boundary.reduce((sum, point) => sum.add(new Vector3(point.x, 0, point.z)), new Vector3()).multiplyScalar(1 / boundary.length), ordered = boundary.sort((a, b) => Math.atan2(a.z - planCenter.z, a.x - planCenter.x) - Math.atan2(b.z - planCenter.z, b.x - planCenter.x)), extentX = Math.max(...ordered.map((point) => point.x)) - Math.min(...ordered.map((point) => point.x)), extentZ = Math.max(...ordered.map((point) => point.z)) - Math.min(...ordered.map((point) => point.z)), radii = ordered.map((point) => Math.hypot((point.x - planCenter.x) / extentX, (point.z - planCenter.z) / extentZ)), notchStep = radii.indexOf(Math.min(...radii)), notchAngle = Math.atan2(ordered[notchStep]!.z - planCenter.z, ordered[notchStep]!.x - planCenter.x), area = Math.abs(ordered.reduce((sum, point, step) => sum + point.x * ordered[(step + 1) % ordered.length]!.z - ordered[(step + 1) % ordered.length]!.x * point.z, 0)) / 2; expect(ordered).toHaveLength(8); for (const [step, point] of ordered.entries()) { const linked = [...adjacency.get(keyOf(point))!].filter((key) => keys.has(key)).sort(), expected = [keyOf(ordered[(step + 7) % 8]!), keyOf(ordered[(step + 1) % 8]!)].sort(); expect(linked).toEqual(expected); } return { keys, boundary: ordered, center: planCenter, extentX, extentZ, area, meanY: ordered.reduce((sum, point) => sum + point.y, 0) / ordered.length, radialBreak: Math.max(...radii) - Math.min(...radii), notchBin: (Math.round((notchAngle + Math.PI) / (Math.PI / 4)) + 8) % 8 }; };
       const shelfTriangles = componentTriangles.filter((triangle) => !triangle.keys.some((key) => capKeys.has(key)) && Math.max(...triangle.points.map((point) => point.y)) - Math.min(...triangle.points.map((point) => point.y)) < .65).sort((a, b) => a.points.reduce((sum, point) => sum + point.y, 0) - b.points.reduce((sum, point) => sum + point.y, 0)); expect(shelfTriangles).toHaveLength(32);
-      const shelfGroups: ActualTriangle[][] = []; for (const triangle of shelfTriangles) { const y = triangle.points.reduce((sum, point) => sum + point.y, 0) / 3, group = shelfGroups.at(-1), groupY = group?.[0]!.points.reduce((sum, point) => sum + point.y, 0)! / 3; if (!group || y - groupY > .8) shelfGroups.push([triangle]); else group.push(triangle); } expect(shelfGroups.map((group) => group.length)).toEqual([16, 16]);
+      const shelfGroups: HorizonTriangle[][] = []; for (const triangle of shelfTriangles) { const y = triangle.points.reduce((sum, point) => sum + point.y, 0) / 3, group = shelfGroups.at(-1), groupY = group?.[0]!.points.reduce((sum, point) => sum + point.y, 0)! / 3; if (!group || y - groupY > .8) shelfGroups.push([triangle]); else group.push(triangle); } expect(shelfGroups.map((group) => group.length)).toEqual([16, 16]);
       const shelves = shelfGroups.map((group, shelfIndex) => { const upward = group.map((triangle) => triangle.points[1].clone().sub(triangle.points[0]).cross(triangle.points[2].clone().sub(triangle.points[0])).normalize().y); expect(Math.min(...upward)).toBeGreaterThan(.55); const uses = new Map<string, { count: number; ends: [string, string] }>(); for (const triangle of group) for (const [u, v] of [[0, 1], [1, 2], [2, 0]] as const) { const ends = [triangle.keys[u], triangle.keys[v]].sort() as [string, string], edge = ends.join('|'), previous = uses.get(edge); uses.set(edge, { count: (previous?.count ?? 0) + 1, ends }); } const boundaryAdjacency = new Map<string, Set<string>>(); for (const { count, ends } of uses.values()) if (count === 1) { for (const [from, to] of [ends, [ends[1], ends[0]]] as [string, string][]) { if (!boundaryAdjacency.has(from)) boundaryAdjacency.set(from, new Set()); boundaryAdjacency.get(from)!.add(to); } } expect([...boundaryAdjacency.values()].every((links) => links.size === 2)).toBe(true); const ringKeys: Set<string>[] = [], pending = new Set(boundaryAdjacency.keys()); while (pending.size > 0) { const keys = new Set<string>(), queue = [pending.values().next().value as string]; while (queue.length > 0) { const key = queue.pop()!; if (!pending.delete(key)) continue; keys.add(key); queue.push(...boundaryAdjacency.get(key)!); } ringKeys.push(keys); } expect(ringKeys.map((keys) => keys.size)).toEqual([8, 8]); const plans = ringKeys.map(ringPlan).sort((a, b) => a.area - b.area), [inner, outer] = plans; expect(outer!.area / inner!.area, `component ${center.x.toFixed(2)},${center.z.toFixed(2)} shelf ${shelfIndex}`).toBeGreaterThan(1.23); expect(Math.abs(outer!.meanY - inner!.meanY)).toBeLessThan(.05); expect(outer!.center.distanceTo(inner!.center)).toBeGreaterThan(.03); expect(outer!.radialBreak).toBeGreaterThan(.1); return { inner: inner!, outer: outer! }; }).sort((a, b) => b.outer.meanY - a.outer.meanY);
       const deepBand = elevationBands.find((band) => band.length === 8)!, deepRing = ringPlan(new Set(deepBand.map(keyOf))), bottomRing = ringPlan(new Set(elevationBands[0]!.map(keyOf).filter((key) => !capKeys.has(key))));
       const xzRadius = (point: Vector3, plan: RingPlan) => Math.hypot(point.x - plan.center.x, point.z - plan.center.z);
       const spec = [...HORIZON_GEOMETRY_CASES].sort((a, b) => Math.hypot(center.x - a.x, center.z - a.z) - Math.hypot(center.x - b.x, center.z - b.z))[0]!;
       const proveRiser = (upper: RingPlan, lower: RingPlan, requireNearPlan = true) => { const ringKeys = new Set([...upper.keys, ...lower.keys]), faces = componentTriangles.filter((triangle) => triangle.keys.every((key) => ringKeys.has(key))), verticality = faces.map((triangle) => Math.abs(triangle.points[1].clone().sub(triangle.points[0]).cross(triangle.points[2].clone().sub(triangle.points[0])).normalize().y)).sort((a, b) => a - b), matches = Array.from({ length: 8 }, (_, offset) => ({ offset, changes: upper.boundary.map((point, step) => Math.hypot(point.x - lower.boundary[(step + offset) % 8]!.x, point.z - lower.boundary[(step + offset) % 8]!.z)).sort((a, b) => a - b) })).sort((a, b) => a.changes[3]! - b.changes[3]!), match = matches[0]!, meanRadius = upper.boundary.reduce((sum, point) => sum + xzRadius(point, upper), 0) / upper.boundary.length, riserCenter = upper.center.clone().add(lower.center).multiplyScalar(.5); expect(faces).toHaveLength(16); for (const triangle of faces) { const normal = triangle.points[1].clone().sub(triangle.points[0]).cross(triangle.points[2].clone().sub(triangle.points[0])), centroid = triangle.points[0].clone().add(triangle.points[1]).add(triangle.points[2]).multiplyScalar(1 / 3); expect(normal.x * (centroid.x - riserCenter.x) + normal.z * (centroid.z - riserCenter.z)).toBeGreaterThan(0); } expect(verticality[7]).toBeLessThan(.45); expect(upper.meanY - lower.meanY).toBeGreaterThan(1.2); if (requireNearPlan) expect(match.changes[3]! / meanRadius).toBeLessThan(.12); return upper.boundary.map((point, step) => xzRadius(point, upper) - xzRadius(lower.boundary[(step + match.offset) % 8]!, lower)); };
       const upperOverhang = proveRiser(shelves[0]!.outer, shelves[1]!.inner); proveRiser(shelves[1]!.outer, deepRing); proveRiser(deepRing, bottomRing, false); const minOverhang = Math.min(...upperOverhang), maxOverhang = Math.max(...upperOverhang), localMeanRadius = [...shelves[0]!.outer.boundary.map((point) => xzRadius(point, shelves[0]!.outer)), ...shelves[1]!.inner.boundary.map((point) => xzRadius(point, shelves[1]!.inner))].reduce((sum, radius) => sum + radius, 0) / 16; if (spec.band === 'far') { expect(maxOverhang).toBeGreaterThan(.35); expect(maxOverhang).toBeLessThan(8); expect(maxOverhang / localMeanRadius).toBeLessThan(.65); } else { expect(minOverhang, `seed ${spec.seed} bridge radial minimum`).toBeGreaterThan(-1); expect(maxOverhang, `seed ${spec.seed} bridge radial maximum`).toBeLessThan(-.2); } const notchDistance = (shelves[1]!.outer.notchBin - shelves[0]!.outer.notchBin + 8) % 8; expect(notchDistance).toBeGreaterThanOrEqual(2); expect(notchDistance).toBeLessThanOrEqual(6);
-      expect(Math.max(...elevationBands[3]!.map((point) => point.y)) - Math.min(...elevationBands[3]!.map((point) => point.y))).toBeGreaterThan(.05);
+      const crownRange = Math.max(...orderedCrown.map((point) => point.y)) - Math.min(...orderedCrown.map((point) => point.y)), requiredCrownRange = spec.band === 'near' ? .55 : spec.band === 'mid' ? .40 : .26; expect(crownRange).toBeGreaterThanOrEqual(requiredCrownRange); expect(crownRange).toBeLessThan(1.35);
       const width = bounds.max.x - bounds.min.x, depth = bounds.max.z - bounds.min.z, height = bounds.max.y - bounds.min.y; expect(height).toBeGreaterThan(7); expect(height / Math.max(width, depth)).toBeLessThan(.55); expect(width / depth).toBeGreaterThan(.24); expect(width / depth).toBeLessThan(1.6);
       const profile = [(shelves[0]!.outer.meanY - shelves[1]!.inner.meanY).toFixed(1), (shelves[1]!.outer.meanY - deepRing.meanY).toFixed(1), (shelves[0]!.outer.area / shelves[0]!.inner.area).toFixed(2), (shelves[1]!.outer.area / shelves[1]!.inner.area).toFixed(2), shelves[0]!.outer.notchBin, shelves[1]!.outer.notchBin].join(':');
       expect(shelves[0]!.outer.area / shelves[0]!.inner.area, `seed ${spec.seed} upper shelf`).toBeGreaterThan(1.25);
@@ -148,20 +241,22 @@ describe('Tide Scar geometric canyon presentation', () => {
         for (let step = 0; step < ringSize; step += 1) expect(bridgeScales[step]! - upperScales[step]!, `seed ${spec.seed} bridge step ${step}`).toBeCloseTo(.04, 5);
         for (const triangle of upperRiserFaces) { const normalY = triangle.points[1].clone().sub(triangle.points[0]).cross(triangle.points[2].clone().sub(triangle.points[0])).normalize().y; expect(normalY).toBeGreaterThanOrEqual(.045); expect(normalY).toBeLessThan(.55); }
       }
-      return { points, center, bounds, profile, seed: spec.seed, band: spec.band, upperRiserCount: spec.band === 'far' ? 0 : upperRiserFaces.length };
+      const crownMean = orderedCrown.reduce((sum, point) => sum + point.y, 0) / orderedCrown.length, crownProfile = orderedCrown.map((point) => (point.y - crownMean).toFixed(3)).join(':');
+      return { points, center, bounds, profile, crownProfile, seed: spec.seed, band: spec.band, upperRiserCount: spec.band === 'far' ? 0 : upperRiserFaces.length };
     }).sort((a, b) => b.center.z - a.center.z || a.center.x - b.center.x);
     expect(new Set(actual.map((island) => island.profile)).size).toBe(12); expect(new Set(actual.map((island) => island.seed)).size).toBe(HORIZON_GEOMETRY_CASES.length); expect(actual.reduce((sum, island) => sum + island.upperRiserCount, 0)).toBe(128); for (let island = 1; island < actual.length; island += 1) expect(actual[island]!.profile).not.toBe(actual[island - 1]!.profile);
     expect(farMesh.geometry.userData.horizonIslandCount).toBe(actual.length); expect(farMesh.geometry.userData.horizonTriangleCount).toBe(triangles.length);
     expect(Math.min(...actual.map((island) => island.bounds.min.x))).toBeLessThan(-60); expect(Math.max(...actual.map((island) => island.bounds.max.x))).toBeGreaterThan(60);
     const depthGroups = [actual.slice(0, 4), actual.slice(4, 8), actual.slice(8, 12)]; expect(depthGroups.every((group) => group.length === 4)).toBe(true); expect(Math.min(...depthGroups[0]!.map((island) => island.center.z))).toBeGreaterThan(Math.max(...depthGroups[1]!.map((island) => island.center.z))); expect(Math.min(...depthGroups[1]!.map((island) => island.center.z))).toBeGreaterThan(Math.max(...depthGroups[2]!.map((island) => island.center.z)));
     for (const group of depthGroups) { const intervals = group.map((island) => [island.bounds.min.x, island.bounds.max.x] as const).sort((a, b) => a[0] - b[0]), gaps = intervals.slice(1).map((interval, offset) => interval[0] - intervals[offset]![1]); expect(gaps.filter((gap) => gap > 0).length).toBeGreaterThanOrEqual(2); }
-    const farBandPositions = new Float32Array(actual.filter((island) => island.band === 'far').sort((a, b) => a.seed - b.seed).flatMap((island) => [...island.points].sort((a, b) => a.x - b.x || a.y - b.y || a.z - b.z).flatMap((point) => point.toArray())));
-    expect(await rawArrayFingerprint(farBandPositions)).toBe('37524d8171b4c51d5e3cc4c9e42497f8a635605457f5de33366b1d6f38c3ec0d');
-    const viewports = [[1440, 900], [390, 844], [844, 390]] as const, safeRoadHalfWidth = WORLD_METRICS.roadWidth / 2 + .4;
+    const viewports = [[1440, 900], [390, 844], [844, 390]] as const, safeRoadHalfWidth = WORLD_METRICS.roadWidth / 2 + .4, trianglesByBand = [0, 1, 2].map((band) => bandTriangles(world, band));
+    for (const [band, bandGeometry] of trianglesByBand.entries()) for (const [triangleIndex, triangle] of bandGeometry.entries()) { const side = triangle.reduce((sum, point) => sum + point.x, 0) < 0 ? -1 : 1, inward = side < 0 ? Math.max(...triangle.map((point) => point.x)) : Math.min(...triangle.map((point) => point.x)); expect(side < 0 ? inward < -safeRoadHalfWidth : inward > safeRoadHalfWidth, `band ${band} triangle ${triangleIndex} crosses protected route`).toBe(true); }
     for (const [width, height] of viewports) { const profile = d4ProfileForViewport(width, height), record = TR4_RUNTIME_CAMERA[profile.name], camera = new PerspectiveCamera(record.fov, width / height, .08, 520); camera.position.set(0, record.height, record.back); camera.lookAt(0, record.targetY, -record.targetAhead); camera.updateProjectionMatrix(); applyTR4RuntimeLensShift(camera, profile); camera.updateMatrixWorld();
-      for (const island of actual) { const projected = island.points.map((point) => point.clone().project(camera)).filter((point) => point.z >= -1 && point.z <= 1), roadEdge = new Vector3(island.center.x < 0 ? -safeRoadHalfWidth : safeRoadHalfWidth, 0, island.center.z).project(camera).x, closest = island.center.x < 0 ? Math.max(...projected.map((point) => point.x)) : Math.min(...projected.map((point) => point.x)); expect(island.center.x < 0 ? closest < roadEdge - .015 : closest > roadEdge + .015).toBe(true); }
-      for (const group of depthGroups) { const measures = group.map((island) => { const projected = island.points.map((point) => point.clone().project(camera)).filter((point) => point.z >= -1 && point.z <= 1); if (projected.length === 0) return { width: 0, height: 0, area: 0 }; const left = Math.max(-.6, Math.min(...projected.map((point) => point.x))), right = Math.min(.6, Math.max(...projected.map((point) => point.x))), bottom = Math.max(-1, Math.min(...projected.map((point) => point.y))), top = Math.min(1, Math.max(...projected.map((point) => point.y))), clippedWidth = Math.max(0, right - left), clippedHeight = Math.max(0, top - bottom); return { width: clippedWidth, height: clippedHeight, area: clippedWidth * clippedHeight }; }); expect(Math.max(...measures.map((measure) => measure.width))).toBeGreaterThan(.03); expect(Math.max(...measures.map((measure) => measure.height))).toBeGreaterThan(.03); expect(Math.max(...measures.map((measure) => measure.area))).toBeGreaterThan(.002); }
+      for (const island of actual) { const projected = island.points.map((point) => point.clone().project(camera)).filter((point) => point.z >= -1 && point.z <= 1), roadEdge = new Vector3(island.center.x < 0 ? -safeRoadHalfWidth : safeRoadHalfWidth, 0, island.center.z).project(camera).x, closest = island.center.x < 0 ? Math.max(...projected.map((point) => point.x)) : Math.min(...projected.map((point) => point.x)); expect(island.center.x < 0 ? closest < roadEdge - .015 : closest > roadEdge + .015, `${profile.name} island ${island.seed} route clearance`).toBe(true); }
+      const measurements = trianglesByBand.map((triangles) => scanlineSilhouette(triangles, camera));
+      for (const [band, minimum] of [.16, .10, .055].entries()) for (const side of [0, 1] as const) { const measure = measurements[band]![side]!, label = `${profile.name} band ${band} ${side === 0 ? 'left' : 'right'}`; expect(measure.height, `${label} occupied union height`).toBeGreaterThanOrEqual(minimum); expect(Number.isFinite(measure.maxGap), `${label} must not be empty`).toBe(true); expect(measure.maxGap, `${label} route-edge gap at y=${measure.maxGapY}`).toBeLessThanOrEqual(.32); }
     }
+    for (const band of depthGroups) expect(new Set(band.map((island) => island.crownProfile)).size).toBeGreaterThanOrEqual(3);
     world.root.traverse((object) => {
       if (!(object instanceof Mesh)) return;
       expect(object.geometry.type).not.toBe('PlaneGeometry');
@@ -172,25 +267,18 @@ describe('Tide Scar geometric canyon presentation', () => {
       'tide-scar-far-middle-near-mist-bands']) expect(world.root.getObjectByName(forbidden)).toBeUndefined();
     world.dispose();
   });
-  it('preserves R1D massing while actual R1E faces carry deterministic depth-scaled basalt treatment', async () => {
+  it('preserves frozen topology and material treatment while R1H positions replay independently', async () => {
     const first = new TideScarWorld(), second = new TideScarWorld();
     const collectMeshes = (world: TideScarWorld) => { const meshes: Mesh[] = []; world.root.traverse((object) => { if (object instanceof Mesh) meshes.push(object); }); return meshes; };
     const firstMeshes = collectMeshes(first), secondMeshes = collectMeshes(second);
     expect(firstMeshes).toHaveLength(4); expect(secondMeshes).toHaveLength(4);
     const fingerprints = await Promise.all(firstMeshes.map(async (mesh) => { mesh.geometry.computeBoundingBox(); return [mesh.name, await geometryFingerprint(mesh), mesh.geometry.getAttribute('position').count, mesh.geometry.getIndex()!.count, mesh.geometry.boundingBox!.min.toArray(), mesh.geometry.boundingBox!.max.toArray()]; }));
-    expect(fingerprints).toEqual([
-      ['tide-scar-faceted-abyss-bed', '4f4032aa4676afa4d2b6f92367b309c7e952500b7743df3d0e82db1e7f8c4b52', 90, 432, [-120, -33.034568786621094, -240], [120, -22.416658401489258, 30]],
-      ['tide-scar-near-fractured-inner-lips', 'b80bb17b7a162c86e04928d1f919bd6e9857a2323d23ad2d39ae3f43d57e6e68', 862, 1122, [-20.217283248901367, -15.600470542907715, -93], [17.62417221069336, 4.526494979858398, -5]],
-      ['tide-scar-mid-interrupted-buttress-recesses', '3013352e2ba6fb5ef670fcaa8e0d724799713011eb054c67557e848966225906', 1152, 1488, [-35.438621520996094, -18.989492416381836, -121], [41.28934860229492, 6.292722225189209, -24]],
-      ['tide-scar-far-low-ridge-mesa-chains', '45a7a2684af0a7a70976a3c10dffa6527173a214776410dc17601f10348be4a9', 4392, 4656, [-63.92366027832031, -17.7822322845459, -192], [63.154701232910156, 6.28000020980835, -37.97065734863281]],
-    ]);
-    const rawPositionFingerprints = await Promise.all(firstMeshes.map((mesh) => rawArrayFingerprint(mesh.geometry.getAttribute('position').array))), farIndexFingerprint = await rawArrayFingerprint(firstMeshes[3]!.geometry.getIndex()!.array);
-    expect({ farCombined: fingerprints[3]![1], farBounds: [fingerprints[3]![4], fingerprints[3]![5]], rawPositionFingerprints, farIndexFingerprint }).toEqual({
-      farCombined: '45a7a2684af0a7a70976a3c10dffa6527173a214776410dc17601f10348be4a9',
-      farBounds: [[-63.92366027832031, -17.7822322845459, -192], [63.154701232910156, 6.28000020980835, -37.97065734863281]],
-      rawPositionFingerprints: ['7bcce39ce56b41f6a43673cae1aff35e062bacfc0449adeca09a17a2db60b914', '4f4a56e16b9f0b98b836efdc14153d2872577c54a8bde224500f08635d8a3dae', '0af2a8a06c59ffcd3e166a1641a26ba6ed0cadc9d7a55c025410e9719aac6778', 'dbe115aabfa5bfe8a1f0dbe357e786a747fc49db41b5ca6944a27ba275e3bb7c'],
-      farIndexFingerprint: '15c61b15613bc21f5aba67e4b5ba4b6c22ebe80f80c40e640b5c480ebb12c402',
-    });
+    expect(fingerprints[0]).toEqual(['tide-scar-faceted-abyss-bed', '4f4032aa4676afa4d2b6f92367b309c7e952500b7743df3d0e82db1e7f8c4b52', 90, 432, [-120, -33.034568786621094, -240], [120, -22.416658401489258, 30]]);
+    expect(fingerprints.map((entry) => entry.slice(2, 4))).toEqual([[90, 432], [862, 1122], [1152, 1488], [4392, 4656]]);
+    expect(fingerprints.slice(1).every((entry) => (entry[4] as number[]).every(Number.isFinite) && (entry[5] as number[]).every(Number.isFinite))).toBe(true);
+    const rawPositionFingerprints = await Promise.all(firstMeshes.map((mesh) => rawArrayFingerprint(mesh.geometry.getAttribute('position').array))), indexFingerprints = await Promise.all(firstMeshes.map((mesh) => rawArrayFingerprint(mesh.geometry.getIndex()!.array)));
+    expect(rawPositionFingerprints[0]).toBe('7bcce39ce56b41f6a43673cae1aff35e062bacfc0449adeca09a17a2db60b914');
+    expect(indexFingerprints).toEqual(['6ab6aabd412f420db9a53fab4659ee2903423794a4e196b21ec8501d362bd0f5', 'e5f9d9a95e17d5bacc311b27824c985da14b83818b0f5feeb31e8dfefd18baf3', 'be62178d76ac81d82175dbee2a715e179701d3f383563f808d02192386e75e2a', '15c61b15613bc21f5aba67e4b5ba4b6c22ebe80f80c40e640b5c480ebb12c402']);
     const hemisphereShifts = { unchanged: new Set<string>(), returns: new Set<string>(), undersides: new Set<string>() }, hemisphereWeightDeltas = { unchanged: [] as number[], returns: [] as number[], undersides: [] as number[] };
     const recordHemisphereShift = (normalY: number, faceLift: number, faceShift: number) => {
       const baseWeight = Math.min(1, Math.max(0, .5 * normalY + .5)), cappedShift = Math.min(.15, faceShift), effectiveWeight = Math.min(1, baseWeight + cappedShift), lift = faceLift.toFixed(5), shift = faceShift.toFixed(5);

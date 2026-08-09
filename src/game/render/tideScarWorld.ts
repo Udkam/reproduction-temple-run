@@ -32,7 +32,7 @@ const SURFACE_HEMISPHERE_SHIFT: Readonly<Record<SurfaceFace, number>> = { top: 0
 const TALUS_FACES = [[0, 2, 4], [0, 4, 3], [0, 3, 5], [0, 5, 2], [1, 4, 2], [1, 3, 4], [1, 5, 3], [1, 2, 5]] as const;
 const STRATA_FACES = [[0, 2, 1], [3, 4, 5], [0, 1, 4], [0, 4, 3], [1, 2, 5], [1, 5, 4], [2, 0, 3], [2, 3, 5]] as const;
 const HORIZON_ISLANDS: readonly HorizonIsland[] = [
-  { x: -52, z: -54, radiusX: 13, radiusZ: 18, top: 5.1, skirt: -5.4, seed: 401, band: 'near' }, { x: -15, z: -62, radiusX: 8, radiusZ: 16, top: 4.3, skirt: -5.1, seed: 409, band: 'near' },
+  { x: -52, z: -54, radiusX: 13, radiusZ: 18, top: 5.1, skirt: -5.4, seed: 401, band: 'near' }, { x: -14, z: -62, radiusX: 8, radiusZ: 16, top: 4.3, skirt: -5.1, seed: 409, band: 'near' },
   { x: 15, z: -55, radiusX: 8, radiusZ: 17, top: 5, skirt: -5.6, seed: 419, band: 'near' }, { x: 52, z: -61, radiusX: 13, radiusZ: 20, top: 4.6, skirt: -5.8, seed: 421, band: 'near' },
   { x: -42, z: -84, radiusX: 12, radiusZ: 18, top: 5.8, skirt: -6.2, seed: 431, band: 'mid' }, { x: -16, z: -91, radiusX: 7, radiusZ: 15, top: 4.8, skirt: -5.9, seed: 433, band: 'mid' },
   { x: 16, z: -86, radiusX: 7, radiusZ: 16, top: 5.4, skirt: -6.1, seed: 439, band: 'mid' }, { x: 42, z: -94, radiusX: 12, radiusZ: 18, top: 5.1, skirt: -6.5, seed: 443, band: 'mid' },
@@ -50,7 +50,7 @@ const SHELF_LAYERS: readonly ShelfLayer[] = [
     profile: [[0, 1], [.2, 1], [.22, .68], [.48, .66], [.6, .84], [.9, .82], [1, .35], [.74, 0], [.08, 0], [.08, .24], [.22, .24], [.16, .48], [.04, .48], [.04, .74]],
     runs: [
       { side: -1, z: [-24, -33, -42, -51], inner: 14, width: 8, top: 5.4, foot: -17, seed: 41 }, { side: 1, z: [-44, -53, -62, -71], inner: 18, width: 10, top: 6, foot: -18, seed: 47 },
-      { side: -1, z: [-66, -76, -86, -96], inner: 22, width: 12, top: 6.5, foot: -19, seed: 53 }, { side: 1, z: [-91, -101, -111, -121], inner: 26, width: 14, top: 5.6, foot: -18, seed: 59 },
+      { side: -1, z: [-66, -76, -86, -96], inner: 20.5, width: 12, top: 6.5, foot: -19, seed: 53 }, { side: 1, z: [-91, -101, -111, -121], inner: 26, width: 14, top: 5.6, foot: -18, seed: 59 },
     ] },
   { name: 'far', objectName: 'tide-scar-far-low-ridge-mesa-chains',
     profile: [[0, 1], [.32, 1], [.45, .72], [.72, .7], [1, .38], [.86, 0], [.1, 0], [.1, .28], [.24, .28], [.08, .55], [.04, .76]],
@@ -59,6 +59,17 @@ const SHELF_LAYERS: readonly ShelfLayer[] = [
       { side: -1, z: [-126, -139, -152, -165], inner: 22, width: 18, top: 6, foot: -17, seed: 101 }, { side: 1, z: [-150, -164, -178, -192], inner: 28, width: 20, top: 5.2, foot: -16, seed: 103 },
     ] },
 ] as const;
+
+const RUN_MACRO_PROFILES = [
+  [[0, 0], [.62, .04], [.58, .42], [.04, .08], [.36, .46]],
+  [[.18, .22], [-.38, .18], [-.33, -.24], [.22, .14], [-.12, -.20]],
+  [[-.12, -.18], [.36, .14], [.40, -.24], [-.18, .12], [.20, -.16]],
+  [[.30, -.10], [-.16, -.06], [-.12, .30], [.42, -.04], [.02, .24]],
+] as const;
+const LAYER_MACRO_SCALE: Readonly<Record<CanyonLayerName, number>> = { near: 1, mid: 1.18, far: 1.35 };
+const LAYER_ROUTE_INSET: Readonly<Record<CanyonLayerName, number>> = { near: .9, mid: .45, far: 0 };
+const CROWN_RELIEF_RANGE: Readonly<Record<HorizonBand, number>> = { near: .82, mid: .64, far: .46 };
+const INNER_CROWN_LIFT: Readonly<Record<HorizonBand, number>> = { near: .35, mid: .62, far: .16 };
 
 function seededUnit(index: number, salt: number): number {
   let value = Math.imul(index + 1, 0x45d9f3b) ^ Math.imul(salt + 17, 0x27d4eb2d);
@@ -154,11 +165,12 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   const appendDetail = (spec: DetailSpec) => { const added = appendFacets(spec.points, spec.faces, spec.tone); detailFragments.push({ kind: spec.kind, anchor: spec.anchor, side: spec.side, runSeed: spec.runSeed, hostDepth: spec.hostDepth, vertexStart: added.vertexStart, vertexCount: added.vertexCount }); };
   const footStep = layer.profile.reduce((best, point, index) => point[1] < layer.profile[best]![1] || point[1] === layer.profile[best]![1] && point[0] < layer.profile[best]![0] ? index : best, 0);
   const detailScale = layer.name === 'near' ? [1, 1, 3.4] : layer.name === 'mid' ? [1.35, 1.05, 5.2] : [2, .75, 8];
-  for (const run of layer.runs) {
+  for (const [runIndex, run] of layer.runs.entries()) {
+    const macroProfile = RUN_MACRO_PROFILES[(runIndex + (layer.name === 'mid' ? 1 : layer.name === 'far' ? 2 : 0)) % RUN_MACRO_PROFILES.length]!, macroScale = LAYER_MACRO_SCALE[layer.name];
     const stations = run.z.map((z, station) => {
-      const terminal = station === 0 || station === run.z.length - 1, innerUnit = seededUnit(run.seed + station * 17, 211), widthUnit = seededUnit(run.seed + station * 19, 223);
-      const span = run.top - run.foot, inner = run.inner + (terminal ? run.width * .32 : (innerUnit - .5) * 2.4), width = run.width * (terminal ? .3 + widthUnit * .08 : .82 + widthUnit * .3);
-      const top = terminal ? run.top - span * .22 : run.top + (seededUnit(run.seed + station * 23, 227) - .5) * 2.4, foot = terminal ? run.foot + span * .38 : run.foot + (seededUnit(run.seed + station * 29, 229) - .5) * 1.6;
+      const terminal = station === 0 || station === run.z.length - 1, widthUnit = seededUnit(run.seed + station * 19, 223), macro = macroProfile[station]!;
+      const span = run.top - run.foot, inner = run.inner - LAYER_ROUTE_INSET[layer.name] + (terminal ? run.width * .32 : 0) + macro[0] * macroScale, width = run.width * (terminal ? .3 + widthUnit * .08 : .82 + widthUnit * .3);
+      const elevation = macro[1] * macroScale, top = (terminal ? run.top - span * .22 : run.top) + elevation, foot = (terminal ? run.foot + span * .38 : run.foot) + elevation;
       return layer.profile.map(([outward, height], step) => { const o = outward + (seededUnit(run.seed + station * 31, step + 239) - .5) * .16 * Math.sin(Math.PI * outward), h = height + (seededUnit(run.seed + station * 37, step + 251) - .5) * .07 * Math.sin(Math.PI * height); return [run.side * (inner + o * width), foot + (top - foot) * h, z] as const; });
     });
     const areas = stations.map((station) => Math.abs(ShapeUtils.area(station.map(([x, y]) => new Vector2(x, y)))));
@@ -203,7 +215,7 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
   const detailIndexStart = indices.length;
   for (const spec of detailSpecs) appendDetail(spec);
   const horizonIndexStart = indices.length;
-  if (layer.name === 'far') for (const island of HORIZON_ISLANDS) {
+  if (layer.name === 'far') for (const [islandIndex, island] of HORIZON_ISLANDS.entries()) {
     const ringSize = 8, upperNotch = Math.floor(seededUnit(island.seed, 399) * ringSize), lowerNotch = (upperNotch + 2 + Math.floor(seededUnit(island.seed, 397) * 5)) % ringSize, ringDistance = (a: number, b: number) => Math.min((a - b + ringSize) % ringSize, (b - a + ringSize) % ringSize);
     const angles = Array.from({ length: ringSize }, (_, step) => Math.PI * 2 * step / ringSize + (seededUnit(island.seed, step + 401) - .5) * .13);
     const baseRadius = angles.map((_, step) => .86 + seededUnit(island.seed, step + 419) * .2);
@@ -214,6 +226,7 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
         : { cut: .38, cutVariation: .10, shoulder: .74, shoulderVariation: .10 };
     const upperCutDirection = seededUnit(island.seed, 547) > .5 ? 1 : -1, lowerCutDirection = seededUnit(island.seed + 13, 547) > .5 ? 1 : -1, upperCut = notchRange.cut + seededUnit(island.seed, 557) * notchRange.cutVariation, lowerCut = notchRange.cut + seededUnit(island.seed + 17, 557) * notchRange.cutVariation, upperShoulder = notchRange.shoulder + seededUnit(island.seed, 563) * notchRange.shoulderVariation, lowerShoulder = notchRange.shoulder + seededUnit(island.seed + 19, 563) * notchRange.shoulderVariation;
     const cutStations = [upperNotch, (upperNotch + upperCutDirection + ringSize) % ringSize, lowerNotch, (lowerNotch + lowerCutDirection + ringSize) % ringSize], overhang = Array.from({ length: ringSize }, (_, step) => step).filter((step) => !cutStations.includes(step)).sort((a, b) => Math.min(...cutStations.map((cut) => ringDistance(b, cut))) - Math.min(...cutStations.map((cut) => ringDistance(a, cut))) || seededUnit(island.seed, b + 571) - seededUnit(island.seed, a + 571))[0]!;
+    const innerCrown = Math.abs(island.x) < 20, crownPhase = innerCrown && island.x > 0 ? 4 : islandIndex % 4, crownRelief = angles.map((_, step) => CROWN_RELIEF_RANGE[island.band] * .5 * Math.cos((step - crownPhase) * Math.PI / 4)), crownLift = innerCrown ? INNER_CROWN_LIFT[island.band] : 0;
     const heights = [island.top, island.top - upperDrop, island.top - upperDrop - lowerDrop, island.skirt].map((height, band) => angles.map((_, step) => height + (Math.floor(seededUnit(island.seed + band * 29, step + 541) * 3) - 1) * (band === 0 ? .08 : band === 1 ? .06 : .08)));
     const tiers = [
       { scale: topInner, band: 0, cuts: 0, x: upperX - direction * island.radiusX * (.012 + seededUnit(island.seed, 527) * .013), z: upperZ + direction * island.radiusZ * (.009 + seededUnit(island.seed, 529) * .009) },
@@ -227,7 +240,7 @@ function createLayerGeometry(layer: ShelfLayer): BufferGeometry {
       const upperFactor = step === upperNotch ? upperCut : step === (upperNotch + upperCutDirection + ringSize) % ringSize ? upperShoulder : 1, lowerFactor = step === lowerNotch ? lowerCut : step === (lowerNotch + lowerCutDirection + ringSize) % ringSize ? lowerShoulder : 1;
       const upperLedgeScale = step === overhang ? 1.14 : 1, ledgeScale = step === overhang ? tierIndex === 1 ? 1.14 : tierIndex === 2 ? .92 : 1 : 1;
       const notchScale = tier.cuts === 0 ? upperFactor : tier.cuts === 2 ? lowerFactor : island.band === 'far' ? Math.min(upperFactor, Math.max(.8, lowerFactor)) : (upperOuter * upperFactor * upperLedgeScale + .04) / (tier.scale * ledgeScale), radius = tier.scale * baseRadius[step]! * notchScale * ledgeScale;
-      return [island.x + tier.x + Math.cos(angle) * island.radiusX * radius, heights[tier.band]![step]!, island.z + tier.z + Math.sin(angle) * island.radiusZ * radius] as Point3;
+      return [island.x + tier.x + Math.cos(angle) * island.radiusX * radius, heights[tier.band]![step]! + crownLift + (tierIndex === 0 ? crownRelief[step]! : 0), island.z + tier.z + Math.sin(angle) * island.radiusZ * radius] as Point3;
     }));
     const points = rings.flat(), topCenter = points.length, bottomCenter = points.length + 1;
     points.push([rings[0]!.reduce((sum, point) => sum + point[0], 0) / ringSize, rings[0]!.reduce((sum, point) => sum + point[1], 0) / ringSize, rings[0]!.reduce((sum, point) => sum + point[2], 0) / ringSize], [rings[5]!.reduce((sum, point) => sum + point[0], 0) / ringSize, rings[5]!.reduce((sum, point) => sum + point[1], 0) / ringSize, rings[5]!.reduce((sum, point) => sum + point[2], 0) / ringSize]);
