@@ -2,7 +2,7 @@
 
 Updated: 2026-08-10 Asia/Shanghai
 
-Status: **R1H source candidate `de636bc` is independently source-READY; C1 and C2 evidence mechanisms are BLOCKED; one evidence-harness-only C3 correction is authorized; R1H and the complete game remain in progress**
+Status: **C3 is evidence-BLOCKED and closed with no retry authorized; R1H geometry source candidate `de636bc`, R1H, and the complete game remain unaccepted and in progress**
 
 ## Immutable history and cause
 
@@ -77,3 +77,15 @@ Any timeout, wrapper change, missing pending handle, duplicate hold, incomplete 
 7. Only coordinator acceptance may update the changelog/archive, push the full linear stack, and report branch plus exact SHAs.
 
 No product edit, typecheck, Vitest, build, Blender/probe process, evidence overwrite, cleanup, reset, deletion, force push, or C1/C2 retry is authorized by C3.
+
+## C3 disposition
+
+The sole C3 browser pass exited `1` on its first record before any screenshot. The immutable directory is `C:\Users\Alex Chen\AppData\Local\Temp\tide-relay-r1h-c3-candidate-de636bc-20260810T002256684\`. It contains only:
+
+- `capture_candidate.mjs`, SHA-256 `38EE8EA5E82DE4A1367FF86735F6467B1BC4EC5E8673DA3B0403A4A2614D72FE`;
+- `capture.stdout.log`, zero bytes, SHA-256 `E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855`;
+- `capture.stderr.log`, SHA-256 `C87EC9E8842D988E340D7F4EEBF022E2B442DA20BB724F50AB0D33B87D7F5048`.
+
+There are zero PNGs and no evidence manifest. At the 3,000 ms timeout, canonical state remained frozen at hash `fa4e69d7`, tick `60`, status `running`, elapsed tick `60`. Tracker identity was intact with `held=false`, `holdCalls=0`, `requests=62`, `callbacksStarted=60`, and `pending=2`; no deadlock or hold occurred. Camera had converged to `{x:0,y:6.06,z:4.582277164981484,fov:43,yaw:0}` instead of producing the transient baseline `{x:0,y:6.059903550433091,z:7.308502044360709,fov:43,yaw:0}` within `.05m`. The wrapper-covered product loop plus Playwright RAF waiter changed the discrete real-frame cadence, and the narrow window never appeared. Port `4210` closed and no helper remains.
+
+C3 is closed evidence-`BLOCKED`. Its directory and every byte remain immutable; no C3 retry is authorized. A later R1H-C4 contract may add only a bounded DEV-only runtime presentation-hold QA seam and restore the unwrapped C1 waiter. It cannot relabel C3, mutate camera/canonical state, weaken the same-view gate, or authorize another wrapper/timer capture mechanism.
