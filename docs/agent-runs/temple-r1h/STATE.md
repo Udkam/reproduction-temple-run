@@ -4,7 +4,7 @@ Updated: 2026-08-09 Asia/Shanghai
 
 Project root: `E:\Proj\reproduction-temple-run`
 
-Branch and pushed baseline: `main` at `8e04f7a6b4558558bd06348fdced99c18dfa4336`.
+Branch and pushed source baseline: `main` at R1H contract commit `b0be63f1af2be01b556834ce123c8bd24eeddc19`.
 
 ## Objective and disposition
 
@@ -29,6 +29,8 @@ R1H preserves four existing meshes (abyss plus near/mid/far), one existing mater
 
 Near/mid/far position, normal, UV, colour, bounding, raw-position, and combined geometry fingerprints are deliberately reopened only because deterministic position movement recomputes them, including far raw-position SHA. Their old R1E values remain the historical baseline; tests must replace hash-only position freezing with stronger reconstruction of actual stations, closed topology, crown profiles, actual-triangle screen projection, and independent-world determinism. No index, topology, V7 radial/normal, shelf, overhang, or gap gate may be loosened.
 
+Two independent read-only audits found that the first uncommitted scanline helper did not implement the contract: it projected from camera-behind `z=30m`, let one bank hide the other's void, and compared raw x-NDC to a height-relative limit. The corrected contract clips the real protected route edges from `-18m` to `-240m`, evaluates left/right independently, normalizes horizontal gaps by camera aspect, rejects needle contacts below `.02` height-normalized NDC, and requires each bank's own occupied-union height. Uncovered rows reduce that union but are not recast as an infinite horizontal interval, preserving genuine negative space. The read-only geometry diagnosis then identifies only the middle left shelf run with seed `53` as the true gap owner; the failed `±13m` inner-island experiment does not affect that gap and violates island clearance.
+
 ## Verification and evidence
 
 Development runs only:
@@ -43,4 +45,4 @@ Independent source and visual QA starts only after a candidate SHA. Numeric gree
 
 No file may be deleted, reverted, cleaned, overwritten, or lost. The inherited dirty backlog, every old candidate/evidence directory, failed diagnostic, and both material-socket probe scripts remain preserved and unstaged.
 
-Next action: independently review this contract checkpoint, commit and push its exact four documentation paths, then assign one geometry writer using the source authority above. No product source may change before the contract is on `origin/main`.
+Next action: commit and push this exact three-path gate correction, then return the sole geometry writer to the two authorized source paths. The writer must first repair the projection helper, restore the inner middle islands' safe centres, move only the diagnosed seed-`53` shelf run enough to satisfy the corrected gate, and run only the targeted Tide Scar test. No final typecheck, full suite, build, browser capture, candidate commit, or push starts until that targeted result is green and independently reviewed.
