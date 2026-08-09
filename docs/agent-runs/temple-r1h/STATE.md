@@ -1,0 +1,46 @@
+# Temple R1H coordinator state
+
+Updated: 2026-08-09 Asia/Shanghai
+
+Project root: `E:\Proj\reproduction-temple-run`
+
+Branch and pushed baseline: `main` at `8e04f7a6b4558558bd06348fdced99c18dfa4336`.
+
+## Objective and disposition
+
+The full objective remains a real high-fidelity 3D TIDE//RELAY game. R1G/R1G-E1 is accepted and pushed only for the volumetric courier and hidden-pursuer snapshot schema. Its 14-frame evidence at `C:\Users\Alex Chen\AppData\Local\Temp\tide-relay-r1g-e1-candidate-8de73c1-20260809T201927156\` remains the visual baseline, not evidence that the complete game is finished.
+
+An independent visual-director pass inspected all 14 original-resolution frames and selected canyon macro silhouette as the next P0. Repeated giant shelf blocks, straight/equal roofs, empty gray skyline, weak near/mid/far occlusion, and unstructured black side void persist in every viewport and action state and occupy more screen area than the still-primitive hazards or opening/game-over pursuer. R1H therefore changes real environment geometry first; it may not substitute lighting, texture, fog, exposure, or camera changes for modeling.
+
+## Exact source authority
+
+After this contract checkpoint is committed and pushed, one writer may edit exactly:
+
+- `src/game/render/tideScarWorld.ts`
+- `src/game/render/tideScarWorld.test.ts`
+
+The source checkpoint limit is 500 hand-authored added or modified lines. Only existing shelf-run station positions and the 12 existing horizon islands' ring/crown positions may change. All other source, tests, assets, scripts, packages, Blender/probe paths, evidence, and documentation are read-only for the writer.
+
+R1H supersedes and closes all earlier R1/R1E source authority for these two paths. Those older clauses are historical only; no parallel or follow-on writer may use them.
+
+## Frozen and reopened proof
+
+R1H preserves four existing meshes (abyss plus near/mid/far), one existing material per mesh, zero groups/instancing/new scene objects, all vertex/index counts and index bytes, object names, 12 horizon components with eight stations/six tiers/96 triangles each, cut/shoulder factors, the near/mid `.04` final radial bridge, the 128 near/mid upper-riser triangles within `.045 <= normalY < .55`, shelf ratios, far overhang, surface attributes and face treatment, zero emissive, map strengths/floors and non-ownership, hemisphere correction bounds, quantized world placement, real gaps, route clearance, render calls/triangles, and disposal. The abyss geometry and far index SHA remain byte-frozen.
+
+Near/mid/far position, normal, UV, colour, bounding, raw-position, and combined geometry fingerprints are deliberately reopened only because deterministic position movement recomputes them, including far raw-position SHA. Their old R1E values remain the historical baseline; tests must replace hash-only position freezing with stronger reconstruction of actual stations, closed topology, crown profiles, actual-triangle screen projection, and independent-world determinism. No index, topology, V7 radial/normal, shelf, overhang, or gap gate may be loosened.
+
+## Verification and evidence
+
+Development runs only:
+
+`npm.cmd run test -- src/game/render/tideScarWorld.test.ts`
+
+After the final source edit, run exactly one typecheck, one complete Vitest suite, one no-delete production build, and one candidate-bound browser pass. The complete 14-record matrix uses seed `1414087749`: desktop gait `60/64/68/72/76/80/84/88`, portrait/landscape/reduced-motion run `60`, portrait jump `21`, landscape slide `15`, and desktop game-over `336`. All 11 ordinary records remain `31/23,574` calls/triangles, jump `36/24,810`, slide `37/24,890`, and game-over `34/24,236`. Every frame binds candidate SHA, canonical/replay state and screenshot hashes, one canvas, and zero gameplay DOM, overflow, browser problems, or context loss.
+
+Independent source and visual QA starts only after a candidate SHA. Numeric green gates cannot override unchanged block massing, repeated roofs/walls, flat/clipped skyline, structureless side void, filled genuine gaps, occlusion, floating/intersecting rock, or a change visible only through materials/lighting. A failed visual result is preserved as `BLOCKED`; it is not rewritten into acceptance.
+
+## Preservation and next action
+
+No file may be deleted, reverted, cleaned, overwritten, or lost. The inherited dirty backlog, every old candidate/evidence directory, failed diagnostic, and both material-socket probe scripts remain preserved and unstaged.
+
+Next action: independently review this contract checkpoint, commit and push its exact four documentation paths, then assign one geometry writer using the source authority above. No product source may change before the contract is on `origin/main`.
