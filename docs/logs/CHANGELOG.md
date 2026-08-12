@@ -70,3 +70,11 @@
 - Corrected the hidden-pursuer presentation snapshot so both initial and live hidden records use null x/y coordinates through the same pure constructor, without changing lifecycle timing, visible placement, canonical chase state, geometry, calls, or triangles.
 - Accepted candidate `8de73c169d03ce32e15bce2145d64afff8973330` after targeted courier `8/8` and renderer `6/6`, the single final post-source typecheck, `17 files / 75 tests`, production build, and 14 fixed-seed hashed browser frames. Manifest SHA-256 is `9A5628675F7BF977225BBE354FB035EB9EDD10D47538B52D1F47555298D0C0EE`; all records replay deterministically with one canvas and zero gameplay DOM, overflow, browser problems, or context loss.
 - Independent source, evidence, and visual QA returned `READY` with no P0/P1/P2. The original `f08a170` failed manifest remains preserved historical evidence; R1G accepts only the courier and snapshot-schema claim, while pursuer reconstruction, hazards, broader animation, lighting/material completion, and the final high-fidelity game remain in progress.
+
+## 2026-08-13 — Project archived incomplete and prepared for remote synchronization
+
+- Closed Temple development by user direction without claiming product completion. R1G `8de73c169d03ce32e15bce2145d64afff8973330` remains the last accepted visual checkpoint for its bounded courier/snapshot claim; the complete high-fidelity game remains `MANUAL_BLOCKED / NOT_ACCEPTED`.
+- Preserved the R1H linear source history through R1H-C4 candidate `b64f09e4fd6ca687a40655cd4e5662a807139d5b`. C1/C2/C3 remain immutable evidence-`BLOCKED`; C4 source/static QA is `READY`, but its browser pass never started and produced zero PNG and no manifest.
+- Authorized and committed the five existing Blender executable path migrations at `021a717b63ebc492052477d72f576e2f47e8d091` without running Blender or changing product scope.
+- Preserved the two material-socket probe scripts verbatim at `cf12e4cbb6d35890813c9a76f5b043cb4d11836f` as `WIP_UNEXECUTED / NOT_ACCEPTED`; archival storage is not technical or visual acceptance.
+- Recorded the exact closeout boundary in `docs/agent-runs/temple-project-archive-20260813/STATE.md`. The annotated tag `archive-temple-incomplete-20260813` identifies the final coordinator closeout commit after remote verification.

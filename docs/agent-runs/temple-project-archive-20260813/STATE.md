@@ -6,7 +6,7 @@ Project root: `E:\Proj\reproduction-temple-run`
 
 Branch: `main`
 
-Status: **ARCHIVE_IN_PROGRESS — preservation and remote synchronization only.** This is not a product-completion claim.
+Status: **ARCHIVED_INCOMPLETE — development closed; preservation complete; remote synchronization is the only remaining closeout operation.** This is not a product-completion claim.
 
 ## Boundary
 
@@ -43,8 +43,11 @@ Authorized preservation checkpoint A contains only the five Blender executable p
 
 - Fetched remote baseline before archive: `origin/main` at `056b68701d71bb2c618e131d24039f53d646caff`.
 - Pre-archive local source head: `b64f09e4fd6ca687a40655cd4e5662a807139d5b`, seven commits ahead and zero behind after fetch.
-- The final archive record must append the preservation and coordinator commit SHAs, require clean index/worktree, push `main`, create and push annotated tag `archive-temple-incomplete-20260813`, and verify remote branch/tag identity.
+- Archive authorization commit: `9974291559c01f7db614163b314551b5bc23051c`.
+- Blender-path preservation commit: `021a717b63ebc492052477d72f576e2f47e8d091`.
+- WIP probe preservation commit: `cf12e4cbb6d35890813c9a76f5b043cb4d11836f`.
+- The coordinator closeout commit is the target of annotated tag `archive-temple-incomplete-20260813`. Live closeout must require a clean index/worktree, push `main` and the tag, then verify exact remote branch/tag identity.
 
-## Sole next action
+## Closed state
 
-Complete only the two exact preservation commits, seal this state and the coordinator status documents, obtain read-only archive QA, push and verify. Then archive the Codex task. Do not resume product development.
+The two exact preservation commits are complete. After this coordinator record receives read-only archive QA, only push/tag verification and Codex task archival remain. There is no active product next action. Do not resume development unless the user explicitly reopens the project.

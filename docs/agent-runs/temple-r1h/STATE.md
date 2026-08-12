@@ -1,14 +1,14 @@
 # Temple R1H coordinator state
 
-Updated: 2026-08-09 Asia/Shanghai
+Updated: 2026-08-13 Asia/Shanghai
 
 Project root: `E:\Proj\reproduction-temple-run`
 
-Branch: `main`. Pushed baseline: `056b68701d71bb2c618e131d24039f53d646caff`. Local C3 contract checkpoint: `a0aa433d13437daa678f1c40ee86c680365096a6`. Current unpushed geometry source candidate: `de636bc0d036f6d8916d5a19517387987bd40bc5`.
+Branch: `main`. Pre-archive fetched remote baseline: `056b68701d71bb2c618e131d24039f53d646caff`. R1H-C4 source candidate: `b64f09e4fd6ca687a40655cd4e5662a807139d5b`. Archive authority/preservation commits: `9974291559c01f7db614163b314551b5bc23051c`, `021a717b63ebc492052477d72f576e2f47e8d091`, and `cf12e4cbb6d35890813c9a76f5b043cb4d11836f`.
 
 ## Objective and disposition
 
-The full objective remains a real high-fidelity 3D TIDE//RELAY game. R1G/R1G-E1 is accepted and pushed only for the volumetric courier and hidden-pursuer snapshot schema. Its 14-frame evidence at `C:\Users\Alex Chen\AppData\Local\Temp\tide-relay-r1g-e1-candidate-8de73c1-20260809T201927156\` remains the visual baseline, not evidence that the complete game is finished.
+Disposition: **ARCHIVED_INCOMPLETE by user direction on 2026-08-13.** The objective was a real high-fidelity 3D TIDE//RELAY game, but that objective was not completed. R1G/R1G-E1 is accepted only for the volumetric courier and hidden-pursuer snapshot schema. Its 14-frame evidence at `C:\Users\Alex Chen\AppData\Local\Temp\tide-relay-r1g-e1-candidate-8de73c1-20260809T201927156\` remains the last accepted visual baseline, not evidence that the complete game is finished.
 
 An independent visual-director pass inspected all 14 original-resolution frames and selected canyon macro silhouette as the next P0. Repeated giant shelf blocks, straight/equal roofs, empty gray skyline, weak near/mid/far occlusion, and unstructured black side void persist in every viewport and action state and occupy more screen area than the still-primitive hazards or opening/game-over pursuer. R1H therefore changes real environment geometry first; it may not substitute lighting, texture, fog, exposure, or camera changes for modeling.
 
@@ -55,8 +55,8 @@ Independent source and visual QA starts only after a candidate SHA. Numeric gree
 
 ## Preservation and next action
 
-No file may be deleted, reverted, cleaned, overwritten, or lost. The inherited dirty backlog, every old candidate/evidence directory, failed diagnostic, and both material-socket probe scripts remain preserved and unstaged.
+No file was deleted, reverted, cleaned, overwritten, or lost during archive closeout. The inherited history, every old candidate/evidence directory, and every failed diagnostic remain preserved. The two material-socket probe scripts were committed byte-for-byte at `cf12e4cbb6d35890813c9a76f5b043cb4d11836f` solely to prevent loss; they remain `WIP_UNEXECUTED / NOT_ACCEPTED`.
 
 Historical next action (completed before candidate `8112156`): commit and push the three-path projection-gate correction, then return the sole geometry writer to the two authorized source paths.
 
-Current next action: independently review and commit the five-path R1H-C4 documentation checkpoint locally without pushing the blocked stack. Then one writer implements and focused-tests only `GameRuntime.ts` / `GameRuntime.test.ts`; the coordinator runs the single final source gate set, commits a source candidate, and obtains independent source QA before preparing the sole R1H-C4 capture script. If its manifest and all 14 frames pass independent evidence and visual QA, the coordinator archives acceptance and pushes the full linear stack. Full R1H-C4 scope is in `docs/agent-runs/temple-r1h/PRESENTATION_HOLD_CORRECTION.md`.
+There is no active next development action. R1H-C4 source and static capture-script QA were green, but its browser pass never started after the preflight recorded CPU `98.4%`; the C4 directory contains zero PNG and no manifest. Product development, capture, testing, rendering, and retries are frozen. A future task may resume only after explicit user reopening, then must begin from `docs/agent-runs/temple-project-archive-20260813/STATE.md` with fresh Git, resource, path, and listener verification.
