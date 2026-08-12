@@ -36,7 +36,7 @@ authorize diagnostic `008`, and cannot claim material, model, render, or visual 
   unknown fields. Their final committed SHA-256 values become launch inputs and are
   recorded in both evidence and status.
 - The Blender executable remains
-  `C:\Program Files\Blender Foundation\Blender 4.5\blender.exe`, version `4.5.5 LTS`,
+  `E:\Blender 4.5\blender.exe`, version `4.5.5 LTS`,
   SHA-256 `597f600e625f24e4f542906702b5a7dd33f6c6ff166e106b03ef4b1c3fb3921c`.
 
 ## Proposed writer scope

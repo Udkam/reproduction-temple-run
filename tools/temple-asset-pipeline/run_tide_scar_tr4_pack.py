@@ -33,7 +33,7 @@ REFERENCE_PATH = Path(
 REFERENCE_SHA256 = "8fc0c6a7f7fc8d7e5b65fd3d256dee33ccfeede0e4aba4a04657c66a93e33074"
 REFERENCE_SIZE = (941, 1672)
 BLENDER_EXECUTABLE = Path(
-    r"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe"
+    r"E:\Blender 4.5\blender.exe"
 )
 BLENDER_VERSION = "4.5.5 LTS"
 BLENDER_EXECUTABLE_SHA256 = "597f600e625f24e4f542906702b5a7dd33f6c6ff166e106b03ef4b1c3fb3921c"

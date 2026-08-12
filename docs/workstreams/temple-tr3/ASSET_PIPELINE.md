@@ -43,7 +43,7 @@ Authoritative generator:
 The generator accepts `--stage draft` or `--stage final`; it resets Blender to a new scene, creates every mesh/material/camera, writes a `.blend`, exports an unoptimized GLB, emits procedural PBR proof PNGs, and renders the requested compositions. It must be invoked headlessly:
 
 ```powershell
-& 'C:\Program Files\Blender Foundation\Blender 4.5\blender.exe' --background --python-exit-code 1 --python tools/temple-asset-pipeline/generate_tide_scar_hero.py -- --stage final --output docs/workstreams/temple-tr3/asset-proof
+& 'E:\Blender 4.5\blender.exe' --background --python-exit-code 1 --python tools/temple-asset-pipeline/generate_tide_scar_hero.py -- --stage final --output docs/workstreams/temple-tr3/asset-proof
 ```
 
 The required delivery commands after the final Blender run are recorded in `tools/temple-asset-pipeline/run_asset_proof.py`. It runs glTF Transform validation/inspection, meshopt optimization, KTX2 conversion/validation, computes SHA-256 values, and writes the proof manifest. The script rejects a missing source output and never reads or writes production paths.

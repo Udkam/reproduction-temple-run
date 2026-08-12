@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-BLENDER = Path(r"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe")
+BLENDER = Path(r"E:\Blender 4.5\blender.exe")
 GENERATOR = ROOT / "tools" / "temple-asset-pipeline" / "generate_tide_scar_hero.py"
 EVALUATOR = ROOT / "tools" / "temple-asset-pipeline" / "evaluate_asset_proof.py"
 

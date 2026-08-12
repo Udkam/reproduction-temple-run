@@ -208,7 +208,7 @@ def validate_input(preflight_path: Path, output_root: Path) -> dict[str, Any]:
     reference_path=Path(expected_reference["path"]).resolve(strict=True)
     if not reference_path.is_file() or sha256_file(reference_path)!=expected_reference["sha256"]:
         raise RuntimeError("reference file/hash mismatch")
-    expected_tools={"blenderExecutable":r"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe","blenderVersion":"4.5.5 LTS","pythonVersion":"3.12.0","gltfTransformVersion":"not-invoked-diagnostic","ktxVersion":"not-invoked-diagnostic"}
+    expected_tools={"blenderExecutable":r"E:\Blender 4.5\blender.exe","blenderVersion":"4.5.5 LTS","pythonVersion":"3.12.0","gltfTransformVersion":"not-invoked-diagnostic","ktxVersion":"not-invoked-diagnostic"}
     if canonical_bytes(preflight.get("tools")) != canonical_bytes(expected_tools):
         raise RuntimeError("tool record mismatch")
     scripts=preflight.get("scripts")
@@ -357,7 +357,7 @@ def validate_matrix_probe_input(plan_path: Path, output_root: Path) -> dict[str,
     if repo_root != Path(r"E:\Proj\reproduction-temple-run").resolve(strict=True):
         raise RuntimeError("matrix probe repository root mismatch")
     blender_path = Path(plan["blenderExecutable"]).resolve(strict=True)
-    if blender_path != Path(r"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe").resolve(strict=True):
+    if blender_path != Path(r"E:\Blender 4.5\blender.exe").resolve(strict=True):
         raise RuntimeError("matrix probe Blender path mismatch")
     if plan["blenderExecutableSha256"] != sha256_file(blender_path):
         raise RuntimeError("matrix probe Blender executable hash mismatch")
