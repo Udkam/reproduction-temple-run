@@ -39,6 +39,17 @@ The pre-archive worktree contained five real tracked path migrations (six additi
 
 Authorized preservation checkpoint A contains only the five Blender executable path migrations listed in `docs/CURRENT_TASK.md`. Authorized checkpoint B contains only the two probe scripts with the hashes recorded there. Checkpoint B is explicitly `WIP_UNEXECUTED / NOT_ACCEPTED`; it is stored so local work is not lost, not because it passed any gate.
 
+Remote synchronization means the Git-tracked `main` history and archive tag only. A final `git ls-files --others --ignored --exclude-standard` inventory found 4,022 ignored local files / 346,391,295 bytes, all still present in place and deliberately excluded from Git:
+
+- `node_modules/**`: 3,924 files / 134,335,487 bytes; dependency install output ignored by `.gitignore`.
+- `dist/**`: 25 files / 1,132,637 bytes; generated build output ignored by `.gitignore`.
+- `.codex/**`: 16 files / 188,490,547 bytes; local-only reference material ignored by `.git/info/exclude`. This includes `.codex/reference-29000m.mp4` at 182,923,552 bytes; it is an external reference and must not enter the clean-room repository or remote.
+- `docs/screenshots/temple/**`: 52 files / 19,813,807 bytes; local screenshot/evidence outputs ignored by `.git/info/exclude`.
+- `docs/workstreams/temple-tr3/asset-proof/tide-scar-hero.blend1`: 1 file / 2,496,123 bytes; Blender backup ignored by `*.blend[0-9]*`.
+- `tools/**/__pycache__/*.pyc`: 4 files / 122,694 bytes; generated Python cache ignored by `__pycache__/`.
+
+The last four categories total 73 local reference/evidence/backup/cache files / 210,923,171 bytes; `node_modules` plus `dist` total 3,949 regenerable files / 135,468,124 bytes. None was deleted, moved, edited, staged, or uploaded during closeout. They are intentionally local-only because of clean-room provenance, generated-output, cache, backup, repository-size, and existing ignore-policy boundaries; their exclusion is not data loss.
+
 ## Synchronization baseline and target
 
 - Fetched remote baseline before archive: `origin/main` at `056b68701d71bb2c618e131d24039f53d646caff`.
