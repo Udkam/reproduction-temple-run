@@ -1,15 +1,25 @@
 # Current Task
 
-## In-progress slice: TEMPLE-TR4 — high-fidelity canyon reconstruction
+## Archived project: TEMPLE-TR4 — incomplete high-fidelity canyon reconstruction
 
 Branch: `main`
 Required checkpoint baseline: `ecd5de640362a6e30c5d0157ecd1590be7673318`
 Frozen inherited-backlog anchor: `52ae9ae631fa3761f8f8737978af1840ba2df8a4`
-Status: **in progress — R1G/R1G-E1 is accepted for its bounded courier-geometry and hidden-pursuer snapshot-schema claim; R1H geometry source candidate `de636bc` is independently source-READY, C1/C2/C3 browser mechanisms are evidence-BLOCKED, and one bounded R1H-C4 DEV-only presentation-hold source correction is authorized below.** R1A `566bb49`, R1B `3b6dabb`, R1C contract/source `fa93344`/`e3ac1c3`, and R1D `ec00e44` are green only for their bounded claims; coordinator housekeeping H1 is separately committed at `0198c7a`. R1E candidates `cf5be8b`, `2569c77`, `a1aae16`, and `6fe107f` remain preserved visual-`BLOCKED` history, while R1E-V7 candidate `2fb2d91acbbd17dc21a9655839584e9ffd4fdf95` is independently code and visual `READY` for the bounded canyon-readability claim. Commit `9c83047` remains historical evidence of a premature disposition; the authoritative R1E acceptance is the fresh V7 candidate and evidence recorded below. R1F candidate `6680489cf2e3ec035da44fc1dde9aa7606bdd9c7` is independently source, test/evidence, and visual `READY`; its first candidate `ccee77c` remains preserved visual-`BLOCKED` history. Overall high-fidelity acceptance remains `MANUAL_BLOCKED`; the accepted R1G frames expose repeated giant canyon blocks, long straight rooflines, empty gray skyline, and unstructured side void across every viewport, while the pursuer, hazards, broader animation, lighting/material polish, and final art program also remain unfinished. Material-socket-probe-001 remains separate WIP_UNCOMMITTED: its two untracked scripts are preserved, unstaged, and blocked from Blender/process execution. Diagnostic `007` remains immutable at `3937ef6`; diagnostic `008` is not authorized.
+Status: **ARCHIVED_INCOMPLETE as of 2026-08-13 — development is closed by user direction.** R1G/R1G-E1 remains the last accepted visual checkpoint for its bounded courier-geometry and hidden-pursuer snapshot-schema claim. R1H geometry source candidate `de636bc` and R1H-C4 source candidate `b64f09e` are independently source-`READY`, but C1/C2/C3 browser mechanisms are evidence-`BLOCKED` and the C4 browser pass never started; no R1H PNG set, manifest, or visual acceptance exists. Overall high-fidelity acceptance remains `MANUAL_BLOCKED`: pursuer, hazards, broader animation, lighting/material polish, final art, and the complete game are unfinished. Every later authorization or “next action” in this document is historical and inactive until the user explicitly reopens the project.
 
 C7 task authorization token: `TEMPLE-TR4-C7-TASK-SOURCE-CHAIN-AUTHORIZED`.
 
-Deferred sub-slice: **material-socket-probe-001 atomic runner exception review.** Its two untracked scripts remain paused and must not be staged, executed, or folded into R1. Any future work still requires the recorded independent exception verdict and separate coordinator reauthorization.
+Deferred sub-slice: **material-socket-probe-001 is frozen WIP_UNEXECUTED.** Its two local scripts are preserved verbatim by the archival checkpoint below; committing them records their bytes and does not accept, authorize, or execute the probe.
+
+## Archive and synchronization directive — 2026-08-13
+
+The user closed development and requested local/remote synchronization without deleting any file. The coordinator may perform only these one-time preservation checkpoints before sealing and pushing `main`:
+
+1. Preserve the already-existing Blender executable path migration in exactly `docs/workstreams/temple-tr3/ASSET_PIPELINE.md`, `docs/workstreams/temple-tr4-material-probe/MATERIAL_SOCKET_PROBE_001_CONTRACT.md`, `tools/temple-asset-pipeline/generate_tide_scar_tr4_pack.py`, `tools/temple-asset-pipeline/run_asset_proof.py`, and `tools/temple-asset-pipeline/run_tide_scar_tr4_pack.py`. The only content change is the recorded executable path from `C:\Program Files\Blender Foundation\Blender 4.5\blender.exe` to `E:\Blender 4.5\blender.exe`.
+2. Preserve, without execution or acceptance, exactly `tools/temple-asset-pipeline/generate_tide_scar_material_socket_probe.py` (SHA-256 `1D0C8BEAB83761B24A39AF836F04E2D76510BC8E302690234821EF7FBBD9872B`) and `tools/temple-asset-pipeline/run_tide_scar_material_socket_probe.py` (SHA-256 `65D4F99BFEEE2FBB97EB6975D723072C33D807CA6961C4891E8A6E28A8108B20`). Their archival status is `WIP_UNEXECUTED / NOT_ACCEPTED`.
+3. Update only coordinator status/evidence documents, create an annotated incomplete-archive tag, push the linear `main` history and tag, and verify exact local/remote identity.
+
+No product modeling, rendering, capture, test, build, retry, cleanup, revert, overwrite, or deletion is authorized by this directive. The authoritative closeout record is `docs/agent-runs/temple-project-archive-20260813/STATE.md`.
 
 TR4 rebuilds the original TIDE//RELAY presentation from the user-approved visual north star and the high-level action grammar of public endless-runner footage. It must remain clean-room: no commercial image, video frame, model, texture, UI, character, monster, logo, map, or source enters the repository or runtime.
 
